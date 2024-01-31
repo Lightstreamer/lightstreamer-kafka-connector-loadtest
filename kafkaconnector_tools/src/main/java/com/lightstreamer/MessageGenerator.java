@@ -102,7 +102,7 @@ public class MessageGenerator {
         logger.info("Start Kafka demo producer: " + args.length);
 
         if (args.length < 2) {
-            logger.error("Missing arguments bootstrap-servers topioc-name");
+            logger.error("Missing arguments bootstrap-servers topic-name");
             return;
         }
 

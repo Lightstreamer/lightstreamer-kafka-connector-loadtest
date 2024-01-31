@@ -40,12 +40,26 @@
         </plugins>
     </build>
 
+    <repositories>
+      <!-- confluent -->
+      <repository>
+          <id>confluent</id>
+          <url>https://packages.confluent.io/maven</url>
+      </repository>
+
+      <!-- Repository Maven di default (central) -->
+      <repository>
+          <id>central</id>
+          <url>https://repo.maven.apache.org/maven2</url>
+      </repository>
+    </repositories>
+
     <dependencies>
         <!-- https://mvnrepository.com/artifact/org.apache.kafka/kafka-clients -->
         <dependency>
             <groupId>org.apache.kafka</groupId>
             <artifactId>kafka-clients</artifactId>
-            <version>3.5.0</version>
+            <version>7.5.3-ccs</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/org.apache.logging.log4j/log4j-api -->
         <dependency>
