@@ -125,6 +125,8 @@ public class MessageGenerator {
         String input = System.console().readLine();
         while (!input.equalsIgnoreCase("stop")) {
             input = System.console().readLine();
+            if (input == null)
+                input = "";
         }
 
         go = false;
