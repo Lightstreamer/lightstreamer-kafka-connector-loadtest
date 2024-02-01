@@ -50,17 +50,17 @@ public class BaseConsumer extends Thread {
             while (goconsume) {
                 ConsumerRecords<String, String> records = consumer.poll(Duration.ofMillis(7000));
                 for (ConsumerRecord<String, String> record : records) {
-                    logger.info(
-                            "offset = " + record.offset() + ", message = " + record.value());
+                    System.out.println("Group id " + kafkaconsumergroupid + " offset = " + record.offset()
+                            + ", message = " + record.value());
 
                     // To do.....
 
                 }
-                logger.info("wait for new messages");
+                System.out.println("wait for new messages");
             }
             logger.info("End consumer loop");
         } catch (Exception e) {
-            logger.error("Error during consumer loop: " + e.getMessage());
+            System.out.println("Error during consumer loop: " + e.getMessage());
         }
 
     }

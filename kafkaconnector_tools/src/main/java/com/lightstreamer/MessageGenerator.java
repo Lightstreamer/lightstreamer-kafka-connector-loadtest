@@ -9,7 +9,6 @@ import java.util.Properties;
 import java.util.Random;
 import java.util.concurrent.Future;
 
-import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import org.apache.kafka.clients.producer.KafkaProducer;
@@ -34,7 +33,7 @@ public class MessageGenerator {
 
     private static final int MSG_LEN = 1024;
 
-    private static final int MSG_FREQ = 100;
+    private static final int MSG_FREQ = 5000;
 
     private static final Random random = new SecureRandom();
 
@@ -78,14 +77,14 @@ public class MessageGenerator {
             while (go) {
                 String message = generateRandomString(MSG_LEN);
 
-                logger.info("New Message : " + message);
+                System.out.println("New Message : " + message);
 
                 futurek = producer
                         .send(new ProducerRecord<String, String>(topicname, generateMillisTS() + "-" + message));
 
                 rmtdta = futurek.get();
 
-                logger.info("Sent message to" + rmtdta.partition());
+                System.out.println("Sent message to partition : " + rmtdta.partition());
 
                 Thread.sleep(MSG_FREQ);
             }
@@ -93,22 +92,17 @@ public class MessageGenerator {
             producer.close();
 
         } catch (Exception e) {
-            logger.error("Error during producer loop: " + e.getMessage());
+            System.out.println("Error during producer loop: " + e.getMessage());
         }
     }
 
     public static void main(String[] args) {
 
-        logger.info("Start Kafka demo producer: " + args.length);
+        System.out.println("Start Kafka demo producer: " + args.length);
 
         if (args.length < 2) {
-            logger.error("Missing arguments bootstrap-servers topic-name");
+            System.out.println("Missing arguments bootstrap-servers topic-name");
             return;
-        }
-
-        for (int i = 0; i < 100; i++) {
-            String randomString = generateRandomString(1024);
-            System.out.println(generateMillisTS() + "-" + randomString);
         }
 
         kconnstring = args[0];
@@ -137,6 +131,6 @@ public class MessageGenerator {
             // ...
         }
 
-        logger.info("End Kafka demo producer.");
+        System.out.println("End Kafka demo producer.");
     }
 }
