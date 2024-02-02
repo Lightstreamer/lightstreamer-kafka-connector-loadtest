@@ -1,21 +1,5 @@
 package com.lightstreamer;
 
-import java.security.SecureRandom;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Properties;
-import java.util.Random;
-import java.util.concurrent.Future;
-
-import java.util.Date;
-
-import org.apache.kafka.clients.producer.KafkaProducer;
-import org.apache.kafka.clients.producer.Producer;
-import org.apache.kafka.clients.producer.ProducerRecord;
-import org.apache.kafka.clients.producer.RecordMetadata;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -25,78 +9,10 @@ public class MessageGenerator {
 
     private static String kconnstring;
 
-    private static boolean go = true;
-
     private static String topicname;
 
-    private static final String CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-
-    private static final int MSG_LEN = 1024;
-
-    private static final int MSG_FREQ = 5000;
-
-    private static final Random random = new SecureRandom();
-
-    private static String generateRandomString(int length) {
-        StringBuilder sb = new StringBuilder(length);
-
-        for (int i = 0; i < length; i++) {
-            int randomIndex = random.nextInt(CHARACTERS.length());
-            char randomChar = CHARACTERS.charAt(randomIndex);
-            sb.append(randomChar);
-        }
-
-        return sb.toString();
-    }
-
-    private static String generateMillisTS() {
-        long milliseconds = System.currentTimeMillis();
-
-        Date date = new Date(milliseconds);
-
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
-
-        String formattedDate = sdf.format(date);
-
-        return formattedDate;
-    }
-
-    private static void kafkaproducerloop() {
-        Properties props = new Properties();
-        props.put("bootstrap.servers", kconnstring);
-        props.put("linger.ms", 1);
-        props.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer");
-        props.put("value.serializer", "org.apache.kafka.common.serialization.StringSerializer");
-
-        try {
-            Future<RecordMetadata> futurek;
-            RecordMetadata rmtdta;
-
-            Producer<String, String> producer = new KafkaProducer<>(props);
-
-            while (go) {
-                String message = generateRandomString(MSG_LEN);
-
-                System.out.println("New Message : " + message);
-
-                futurek = producer
-                        .send(new ProducerRecord<String, String>(topicname, generateMillisTS() + "-" + message));
-
-                rmtdta = futurek.get();
-
-                System.out.println("Sent message to partition : " + rmtdta.partition());
-
-                Thread.sleep(MSG_FREQ);
-            }
-
-            producer.close();
-
-        } catch (Exception e) {
-            System.out.println("Error during producer loop: " + e.getMessage());
-        }
-    }
-
     public static void main(String[] args) {
+        int num_producers = 1;
 
         System.out.println("Start Kafka demo producer: " + args.length);
 
@@ -108,13 +24,21 @@ public class MessageGenerator {
         kconnstring = args[0];
         topicname = args[1];
 
-        Thread t1 = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                kafkaproducerloop();
-            }
-        });
-        t1.start();
+        try {
+            num_producers = Integer.parseInt(args[2]);
+        } catch (NumberFormatException e) {
+            System.err.println("Impossibile convertire in int. Assicurati che l'argomento sia un numero valido.");
+        }
+        System.out.println("number of producers : " + num_producers);
+
+        BaseProducer[] producers = new BaseProducer[num_producers];
+
+        for (int k = 0; k < num_producers; k++) {
+            producers[k] = new BaseProducer(kconnstring, "pid-" + k, topicname);
+            producers[k].start();
+
+            System.out.println("Producer pid-" + k + " started.");
+        }
 
         String input = System.console().readLine();
         while (!input.equalsIgnoreCase("stop")) {
@@ -122,14 +46,8 @@ public class MessageGenerator {
             if (input == null)
                 input = "";
         }
-
-        go = false;
-
-        try {
-            Thread.sleep(2000);
-        } catch (Exception e) {
-            // ...
-        }
+        for (int j = 0; j < num_producers; j++)
+            producers[j].stopproducing();
 
         System.out.println("End Kafka demo producer.");
     }
