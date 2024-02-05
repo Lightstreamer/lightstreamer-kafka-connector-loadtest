@@ -26,7 +26,7 @@ public class BaseProducer extends Thread {
 
     private static final int MSG_LEN = 1024;
 
-    private static final int MSG_FREQ = 5000;
+    private static final int MSG_FREQ = 2000;
 
     private static final Random random = new SecureRandom();
 

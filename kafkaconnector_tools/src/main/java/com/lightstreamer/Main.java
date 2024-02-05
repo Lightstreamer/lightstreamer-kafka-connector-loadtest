@@ -32,7 +32,7 @@ public class Main {
         consumers = new BaseConsumer[num_consumers];
 
         for (int k = 0; k < num_consumers; k++) {
-            consumers[k] = new BaseConsumer(kconnstring, kconsumergroupid + k, ktopicname);
+            consumers[k] = new BaseConsumer(kconnstring, kconsumergroupid + k, ktopicname, k == 0);
             consumers[k].start();
 
             System.out.println("Group id " + kconsumergroupid + k + " started.");
