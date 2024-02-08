@@ -1,22 +1,29 @@
 package com.lightstreamer;
 
+import org.apache.kafka.common.config.ConfigException;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 public class Main {
 
     private static String kconnstring = "";
 
-    private static String kconsumergroupid = "kcg-";
+    private static String kconsumergroupid = "ktcg-";
 
     private static String ktopicname = "";
 
     private static int num_consumers = 2;
 
+    private static final Logger logger = LogManager.getLogger(Main.class);
+
     public static void main(String[] args) {
         BaseConsumer[] consumers;
 
-        System.out.println("Hello world!");
+        logger.info("Main consumer test started.");
 
         if (args.length < 3) {
-            System.out.println("Missing arguments bootstrap-servers topic-name number-of-consumer");
+            logger.error("Missing arguments bootstrap-servers topic-name number-of-consumer");
             return;
         }
 
@@ -25,9 +32,9 @@ public class Main {
         try {
             num_consumers = Integer.parseInt(args[2]);
         } catch (NumberFormatException e) {
-            System.err.println("Impossibile convertire in int. Assicurati che l'argomento sia un numero valido.");
+            logger.error("Impossibile convertire in int. Assicurati che l'argomento sia un numero valido.");
         }
-        System.out.println("number of consumers : " + num_consumers);
+        logger.info("number of consumers : " + num_consumers);
 
         consumers = new BaseConsumer[num_consumers];
 
@@ -35,7 +42,7 @@ public class Main {
             consumers[k] = new BaseConsumer(kconnstring, kconsumergroupid + k, ktopicname, k == 0);
             consumers[k].start();
 
-            System.out.println("Group id " + kconsumergroupid + k + " started.");
+            logger.info("Group id " + kconsumergroupid + k + " started.");
         }
 
         String input = System.console().readLine();

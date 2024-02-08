@@ -5,19 +5,17 @@ import org.apache.logging.log4j.Logger;
 
 public class MessageGenerator {
 
-    private static Logger logger = LogManager.getLogger("kafkademo-producer");
-
-    private static String kconnstring;
-
-    private static String topicname;
+    private static final Logger logger = LogManager.getLogger(Main.class);
 
     public static void main(String[] args) {
         int num_producers = 1;
+        String kconnstring;
+        String topicname;
 
-        System.out.println("Start Kafka demo producer: " + args.length);
+        logger.info("Start Kafka demo producer: " + args.length);
 
         if (args.length < 2) {
-            System.out.println("Missing arguments bootstrap-servers topic-name");
+            logger.error("Missing arguments bootstrap-servers topic-name");
             return;
         }
 
@@ -27,9 +25,9 @@ public class MessageGenerator {
         try {
             num_producers = Integer.parseInt(args[2]);
         } catch (NumberFormatException e) {
-            System.err.println("Impossibile convertire in int. Assicurati che l'argomento sia un numero valido.");
+            logger.error("Impossibile convertire in int. Assicurati che l'argomento sia un numero valido.");
         }
-        System.out.println("number of producers : " + num_producers);
+        logger.info("number of producers : " + num_producers);
 
         BaseProducer[] producers = new BaseProducer[num_producers];
 
@@ -37,7 +35,7 @@ public class MessageGenerator {
             producers[k] = new BaseProducer(kconnstring, "pid-" + k, topicname);
             producers[k].start();
 
-            System.out.println("Producer pid-" + k + " started.");
+            logger.info("Producer pid-" + k + " started.");
         }
 
         String input = System.console().readLine();
@@ -49,6 +47,6 @@ public class MessageGenerator {
         for (int j = 0; j < num_producers; j++)
             producers[j].stopproducing();
 
-        System.out.println("End Kafka demo producer.");
+        logger.info("End Kafka demo producer.");
     }
 }

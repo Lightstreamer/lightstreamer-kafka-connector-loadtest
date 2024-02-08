@@ -6,12 +6,12 @@ import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.Properties;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class BaseConsumer extends Thread {
 
@@ -25,9 +25,9 @@ public class BaseConsumer extends Thread {
 
     private boolean iamblackcanary;
 
-    private StatisticsCalculator stats;
+    private static final Logger logger = LogManager.getLogger(BaseConsumer.class);
 
-    private static Logger logger = LogManager.getLogger("kafkademo-adapters");
+    private StatisticsCalculator stats;
 
     private long timediff(String timestampString) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS");
@@ -50,6 +50,8 @@ public class BaseConsumer extends Thread {
         if (bc)
             lenstats = 10000;
         this.stats = new StatisticsCalculator(lenstats);
+
+        logger.info("Consumer " + kgroupid + " initialized, I am black canarin: " + bc);
     }
 
     public void stopconsuming() {
@@ -71,34 +73,33 @@ public class BaseConsumer extends Thread {
             consumer.subscribe(Arrays.asList(ktopicname));
             int k = 0;
             while (goconsume) {
-                ConsumerRecords<String, String> records = consumer.poll(Duration.ofMillis(7000));
+                ConsumerRecords<String, String> records = consumer.poll(Duration.ofMillis(60000));
                 for (ConsumerRecord<String, String> record : records) {
                     if (iamblackcanary) {
                         String message = record.value();
                         String tsmsg = message.substring(0, 23);
                         long diff = timediff(tsmsg);
                         stats.addValue(diff);
-                        System.out.println("------------------- " + diff);
+                        logger.debug("------------------- " + diff);
                         if (k == 0) {
-                            System.out.println("Group id " + kafkaconsumergroupid + " offset = " + record.offset()
+                            logger.info("Group id " + kafkaconsumergroupid + " offset = " + record.offset()
                                     + ", message = " + message);
 
-                            System.out
-                                    .println("Mean: " + stats.calculateMean() + ", Median = " + stats.calculateMedian()
+                            logger.info("Mean: " + stats.calculateMean() + ", Median = " + stats.calculateMedian()
                                             + ", confidence = " + stats.calculateConfidenceInterval(500));
                         }
-                        if (++k == 10)
+                        if (++k == 100)
                             k = 0;
                     }
 
                     // To do.....
 
                 }
-                // System.out.println("wait for new messages");
+                logger.debug("wait for new messages");
             }
             logger.info("End consumer loop");
         } catch (Exception e) {
-            System.out.println("Error during consumer loop: " + e.getMessage());
+            logger.error("Error during consumer loop: " + e.getMessage());
         }
 
     }

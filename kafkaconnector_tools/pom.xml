@@ -34,7 +34,7 @@
               </execution>
             </executions>
             <configuration>
-              <mainClass>com.lightstreamer.MessageGenerator</mainClass>
+              <mainClass>com.lightstreamer.LightstreamerConsumer</mainClass>
             </configuration>
           </plugin>
         </plugins>
@@ -61,23 +61,32 @@
             <artifactId>kafka-clients</artifactId>
             <version>7.5.3-ccs</version>
         </dependency>
-        <!-- https://mvnrepository.com/artifact/org.apache.logging.log4j/log4j-api -->
         <dependency>
-            <groupId>org.apache.logging.log4j</groupId>
-            <artifactId>log4j-api</artifactId>
-            <version>2.19.0</version>
-        </dependency>
-        <!-- https://mvnrepository.com/artifact/org.slf4j/slf4j-api -->
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
-            <version>2.0.1</version>
+          <groupId>org.slf4j</groupId>
+          <artifactId>slf4j-api</artifactId>
+          <version>2.0.1</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-math3 -->
         <dependency>
           <groupId>org.apache.commons</groupId>
           <artifactId>commons-math3</artifactId>
           <version>3.6.1</version>
+        </dependency>
+        <!-- Lightstreamer Client -->
+        <dependency>
+          <groupId>com.lightstreamer</groupId>
+          <artifactId>ls-javase-client</artifactId>
+          <version>5.1.0</version>
+        </dependency>
+        <dependency>
+          <groupId>org.apache.logging.log4j</groupId>
+          <artifactId>log4j-api</artifactId>
+          <version>2.17.2</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-core</artifactId>
+            <version>2.17.2</version>
         </dependency>
     </dependencies>
 
