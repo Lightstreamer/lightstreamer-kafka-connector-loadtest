@@ -5,17 +5,19 @@ import org.apache.logging.log4j.Logger;
 
 public class MessageGenerator {
 
-    private static final Logger logger = LogManager.getLogger(Main.class);
+    private static final Logger logger = LogManager.getLogger(MessageGenerator.class);
 
     public static void main(String[] args) {
         int num_producers = 1;
+        int pause_milis = 1000;
         String kconnstring;
         String topicname;
 
         logger.info("Start Kafka demo producer: " + args.length);
 
-        if (args.length < 2) {
-            logger.error("Missing arguments bootstrap-servers topic-name");
+        if (args.length < 4) {
+            logger.error(
+                    "Missing arguments: <bootstrap servers connection string> <topic name> <number of producers> <wait pause in millis>");
             return;
         }
 
@@ -29,10 +31,17 @@ public class MessageGenerator {
         }
         logger.info("number of producers : " + num_producers);
 
+        try {
+            pause_milis = Integer.parseInt(args[3]);
+        } catch (NumberFormatException e) {
+            logger.error("Impossibile convertire in int. Assicurati che l'argomento sia un numero valido.");
+        }
+        logger.info("wait pause in millis : " + pause_milis);
+
         BaseProducer[] producers = new BaseProducer[num_producers];
 
         for (int k = 0; k < num_producers; k++) {
-            producers[k] = new BaseProducer(kconnstring, "pid-" + k, topicname);
+            producers[k] = new BaseProducer(kconnstring, "pid-" + k, topicname, pause_milis);
             producers[k].start();
 
             logger.info("Producer pid-" + k + " started.");

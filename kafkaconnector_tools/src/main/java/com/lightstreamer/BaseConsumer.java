@@ -95,7 +95,7 @@ public class BaseConsumer extends Thread {
                     // To do.....
 
                 }
-                logger.debug("wait for new messages");
+                logger.trace("wait for new messages");
             }
             logger.info("End consumer loop");
         } catch (Exception e) {

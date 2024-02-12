@@ -1,33 +1,37 @@
 package com.lightstreamer;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import com.lightstreamer.client.ClientListener;
 
 public class MyClientListener implements ClientListener {
 
+    private static final Logger logger = LogManager.getLogger(MyClientListener.class);
+
     @Override
     public void onListenEnd() {
-        System.out.println("Stops listening to client events");
+        logger.info("Stops listening to client events");
     }
 
     @Override
     public void onListenStart() {
-        System.out.println("Start listening to client events");
-
+        logger.info("Start listening to client events");
     }
 
     @Override
     public void onPropertyChange(String property) {
-        System.out.println("Client property changed: " + property);
+        logger.info("Client property changed: " + property);
     }
 
     @Override
     public void onServerError(int code, String message) {
-        System.out.println("Server error: " + code + ": " + message);
+        logger.info("Server error: " + code + ": " + message);
     }
 
     @Override
     public void onStatusChange(String newStatus) {
-        System.out.println("Connection status changed to " + newStatus);
+        logger.info("Connection status changed to " + newStatus);
     }
 
 }
