@@ -27,20 +27,19 @@ public class BaseConsumer extends Thread {
 
     private static final Logger logger = LogManager.getLogger(BaseConsumer.class);
 
-    private StatisticsCalculator stats;
+    private StatisticsManager stats;
 
-    private long timediff(String timestampString) {
+    private int timediff(String timestampString) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS");
         LocalDateTime timestamp = LocalDateTime.parse(timestampString, formatter);
         LocalDateTime oraAttuale = LocalDateTime.now();
 
-        long differenzaMillisecondi = Duration.between(timestamp, oraAttuale).toMillis();
+        int differenzaMillisecondi = (int) Duration.between(timestamp, oraAttuale).toMillis();
 
         return differenzaMillisecondi;
     }
 
     public BaseConsumer(String kafka_bootstrap_string, String kgroupid, String topicname, boolean bc) {
-        int lenstats = 0;
 
         this.kafkabootstrapstring = kafka_bootstrap_string;
         this.kafkaconsumergroupid = kgroupid;
@@ -48,8 +47,7 @@ public class BaseConsumer extends Thread {
         this.goconsume = true;
         this.iamblackcanary = bc;
         if (bc)
-            lenstats = 10000;
-        this.stats = new StatisticsCalculator(lenstats);
+            this.stats = new StatisticsManager();
 
         logger.info("Consumer " + kgroupid + " initialized, I am black canarin: " + bc);
     }
@@ -78,17 +76,16 @@ public class BaseConsumer extends Thread {
                     if (iamblackcanary) {
                         String message = record.value();
                         String tsmsg = message.substring(0, 23);
-                        long diff = timediff(tsmsg);
-                        stats.addValue(diff);
+                        int diff = timediff(tsmsg);
+                        stats.onData(diff);
                         logger.debug("------------------- " + diff);
                         if (k == 0) {
                             logger.info("Group id " + kafkaconsumergroupid + " offset = " + record.offset()
                                     + ", message = " + message);
 
-                            logger.info("Mean: " + stats.calculateMean() + ", Median = " + stats.calculateMedian()
-                                            + ", confidence = " + stats.calculateConfidenceInterval(500));
+                            stats.generateReport();
                         }
-                        if (++k == 100)
+                        if (++k == 1000)
                             k = 0;
                     }
 

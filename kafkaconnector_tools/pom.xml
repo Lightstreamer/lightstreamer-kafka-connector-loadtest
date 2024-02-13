@@ -34,7 +34,7 @@
               </execution>
             </executions>
             <configuration>
-              <mainClass>com.lightstreamer.LightstreamerConsumer</mainClass>
+              <mainClass>com.lightstreamer.ConfluentClient</mainClass>
             </configuration>
           </plugin>
         </plugins>

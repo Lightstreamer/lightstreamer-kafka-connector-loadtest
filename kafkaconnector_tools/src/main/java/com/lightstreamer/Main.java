@@ -22,8 +22,9 @@ public class Main {
 
         logger.info("Main consumer test started.");
 
-        if (args.length < 3) {
-            logger.error("Missing arguments bootstrap-servers topic-name number-of-consumer");
+        if (args.length < 4) {
+            logger.error(
+                    "Missing arguments <bootstrap-servers> <topic-name> <number-of-consumer> <xonsumer group prefix>");
             return;
         }
 
@@ -36,10 +37,12 @@ public class Main {
         }
         logger.info("number of consumers : " + num_consumers);
 
+        kconsumergroupid = args[3];
+
         consumers = new BaseConsumer[num_consumers];
 
         for (int k = 0; k < num_consumers; k++) {
-            consumers[k] = new BaseConsumer(kconnstring, kconsumergroupid + k, ktopicname, k == 0);
+            consumers[k] = new BaseConsumer(kconnstring, kconsumergroupid + k, ktopicname, k == 900);
             consumers[k].start();
 
             logger.info("Group id " + kconsumergroupid + k + " started.");
