@@ -10,12 +10,13 @@ public class MessageGenerator {
     public static void main(String[] args) {
         int num_producers = 1;
         int pause_milis = 1000;
+        int msg_size = 1024;
         String kconnstring;
         String topicname;
 
         logger.info("Start Kafka demo producer: " + args.length);
 
-        if (args.length < 4) {
+        if (args.length < 5) {
             logger.error(
                     "Missing arguments: <bootstrap servers connection string> <topic name> <number of producers> <wait pause in millis>");
             return;
@@ -38,10 +39,17 @@ public class MessageGenerator {
         }
         logger.info("wait pause in millis : " + pause_milis);
 
+        try {
+            msg_size = Integer.parseInt(args[4]);
+        } catch (NumberFormatException e) {
+            logger.error("Impossibile convertire in int. Assicurati che l'argomento sia un numero valido.");
+        }
+        logger.info("message size requested : " + msg_size);
+
         BaseProducer[] producers = new BaseProducer[num_producers];
 
         for (int k = 0; k < num_producers; k++) {
-            producers[k] = new BaseProducer(kconnstring, "pid-" + k, topicname, pause_milis);
+            producers[k] = new BaseProducer(kconnstring, "pid-" + k, topicname, pause_milis, msg_size);
             producers[k].start();
 
             logger.info("Producer pid-" + k + " started.");

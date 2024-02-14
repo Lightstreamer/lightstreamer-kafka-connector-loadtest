@@ -18,7 +18,6 @@ public class Main {
     private static final Logger logger = LogManager.getLogger(Main.class);
 
     public static void main(String[] args) {
-        BaseConsumer[] consumers;
 
         logger.info("Main consumer test started.");
 
@@ -39,24 +38,46 @@ public class Main {
 
         kconsumergroupid = args[3];
 
-        consumers = new BaseConsumer[num_consumers];
+        if (kconsumergroupid.equals("standalone")) {
+            StandaloneConsumer[] consumers;
+            consumers = new StandaloneConsumer[num_consumers];
 
-        for (int k = 0; k < num_consumers; k++) {
-            consumers[k] = new BaseConsumer(kconnstring, kconsumergroupid + k, ktopicname, k == 900);
-            consumers[k].start();
+            for (int k = 0; k < num_consumers; k++) {
+                consumers[k] = new StandaloneConsumer(kconnstring, ktopicname, k == 900);
+                consumers[k].start();
 
-            logger.info("Group id " + kconsumergroupid + k + " started.");
+                logger.info("Standalone consumer n. " + k + " started.");
+            }
+
+            String input = System.console().readLine();
+            while (!input.equalsIgnoreCase("stop")) {
+                input = System.console().readLine();
+                if (input == null)
+                    input = "";
+            }
+
+            for (int j = 0; j < num_consumers; j++)
+                consumers[j].stopconsuming();
+        } else {
+            BaseConsumer[] consumers;
+            consumers = new BaseConsumer[num_consumers];
+
+            for (int k = 0; k < num_consumers; k++) {
+                consumers[k] = new BaseConsumer(kconnstring, kconsumergroupid + k, ktopicname, k == 900);
+                consumers[k].start();
+
+                logger.info("Group id " + kconsumergroupid + k + " started.");
+            }
+
+            String input = System.console().readLine();
+            while (!input.equalsIgnoreCase("stop")) {
+                input = System.console().readLine();
+                if (input == null)
+                    input = "";
+            }
+
+            for (int j = 0; j < num_consumers; j++)
+                consumers[j].stopconsuming();
         }
-
-        String input = System.console().readLine();
-        while (!input.equalsIgnoreCase("stop")) {
-            input = System.console().readLine();
-            if (input == null)
-                input = "";
-        }
-
-        for (int j = 0; j < num_consumers; j++)
-            consumers[j].stopconsuming();
-
     }
 }

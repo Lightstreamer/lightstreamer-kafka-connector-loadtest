@@ -26,9 +26,9 @@ public class BaseProducer extends Thread {
 
     private int millisp;
 
-    private static final String CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    private int msg_size;
 
-    private static final int MSG_LEN = 1024;
+    private static final String CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 
     private static final Logger logger = LogManager.getLogger(BaseProducer.class);
 
@@ -58,12 +58,13 @@ public class BaseProducer extends Thread {
         return formattedDate;
     }
 
-    public BaseProducer(String kafka_bootstrap_string, String pid, String topicname, int pause) {
+    public BaseProducer(String kafka_bootstrap_string, String pid, String topicname, int pause, int msgsize) {
         this.kafkabootstrapstring = kafka_bootstrap_string;
         this.producerid = pid;
         this.ktopicname = topicname;
         this.goproduce = true;
         this.millisp = pause;
+        this.msg_size = msgsize;
     }
 
     public void stopproducing() {
@@ -85,7 +86,7 @@ public class BaseProducer extends Thread {
             Producer<String, String> producer = new KafkaProducer<>(props);
 
             while (goproduce) {
-                String message = generateMillisTS() + "-" + this.producerid + "-" + generateRandomString(MSG_LEN);
+                String message = generateMillisTS() + "-" + this.producerid + "-" + generateRandomString(msg_size);
 
                 logger.debug("New Message : " + message);
 
