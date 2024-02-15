@@ -42,14 +42,13 @@ public class StandaloneConsumer extends Thread {
         return differenzaMillisecondi;
     }
 
-    public StandaloneConsumer(String kafka_bootstrap_string, String topicname, boolean bc) {
+    public StandaloneConsumer(String kafka_bootstrap_string, String topicname, boolean bc, StatisticsManager sts) {
 
         this.kafkabootstrapstring = kafka_bootstrap_string;
         this.ktopicname = topicname;
         this.goconsume = true;
         this.iamblackcanary = bc;
-        if (bc)
-            this.stats = new StatisticsManager();
+        this.stats = sts;
 
         logger.info("Standalone consumer initialized, I am black canarin: " + bc);
     }
@@ -81,23 +80,24 @@ public class StandaloneConsumer extends Thread {
 
                 consumer.assign(partitions);
 
-                int k = 0;
+                int k = -1;
                 while (goconsume) {
-                    ConsumerRecords<String, String> records = consumer.poll(Duration.ofMillis(60000));
+                    ConsumerRecords<String, String> records = consumer.poll(Duration.ofMillis(5000));
                     for (ConsumerRecord<String, String> record : records) {
                         if (iamblackcanary) {
                             String message = record.value();
                             String tsmsg = message.substring(0, 23);
                             int diff = timediff(tsmsg);
+
                             stats.onData(diff);
-                            logger.debug("------------------- " + diff);
+
                             if (k == 0) {
                                 logger.info("Group id " + kafkaconsumergroupid + " offset = " + record.offset()
                                         + ", message = " + message);
 
-                                stats.generateReport();
+                                logger.debug("------------------- " + diff);
                             }
-                            if (++k == 1000)
+                            if (++k == 100)
                                 k = 0;
                         }
 

@@ -39,17 +39,17 @@ public class BaseConsumer extends Thread {
         return differenzaMillisecondi;
     }
 
-    public BaseConsumer(String kafka_bootstrap_string, String kgroupid, String topicname, boolean bc) {
+    public BaseConsumer(String kafka_bootstrap_string, String kgroupid, String topicname, boolean bc,
+            StatisticsManager sts) {
 
         this.kafkabootstrapstring = kafka_bootstrap_string;
         this.kafkaconsumergroupid = kgroupid;
         this.ktopicname = topicname;
         this.goconsume = true;
         this.iamblackcanary = bc;
-        if (bc)
-            this.stats = new StatisticsManager();
+        this.stats = sts;
 
-        logger.info("Consumer " + kgroupid + " initialized, I am black canarin: " + bc);
+        logger.info("Consumer " + kgroupid + " initialized, I am black canarin: " + this.iamblackcanary);
     }
 
     public void stopconsuming() {
@@ -69,27 +69,32 @@ public class BaseConsumer extends Thread {
         try {
             KafkaConsumer<String, String> consumer = new KafkaConsumer<>(props);
             consumer.subscribe(Arrays.asList(ktopicname));
-            int k = 0;
+
+            int k = -1;
             while (goconsume) {
-                ConsumerRecords<String, String> records = consumer.poll(Duration.ofMillis(60000));
+                ConsumerRecords<String, String> records = consumer.poll(Duration.ofMillis(5000));
                 for (ConsumerRecord<String, String> record : records) {
+                    String message = record.value();
+
                     if (iamblackcanary) {
-                        String message = record.value();
                         String tsmsg = message.substring(0, 23);
                         int diff = timediff(tsmsg);
+
                         stats.onData(diff);
-                        logger.debug("------------------- " + diff);
+
                         if (k == 0) {
+
                             logger.info("Group id " + kafkaconsumergroupid + " offset = " + record.offset()
                                     + ", message = " + message);
 
-                            stats.generateReport();
+                            logger.debug("------------------- " + diff);
                         }
-                        if (++k == 1000)
+                        if (++k == 100)
                             k = 0;
                     }
 
-                    // To do.....
+                    logger.debug("Group id " + kafkaconsumergroupid + " offset = " + record.offset()
+                            + ", message = " + message);
 
                 }
                 logger.trace("wait for new messages");

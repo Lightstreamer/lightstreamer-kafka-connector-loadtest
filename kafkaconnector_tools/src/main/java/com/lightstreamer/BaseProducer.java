@@ -93,9 +93,9 @@ public class BaseProducer extends Thread {
                 futurek = producer
                         .send(new ProducerRecord<String, String>(ktopicname, message));
 
-                rmtdta = futurek.get();
+                // rmtdta = futurek.get();
 
-                logger.debug("Sent message to partition : " + rmtdta.partition());
+                logger.debug("Sent message : " + futurek.isDone());
 
                 Thread.sleep(millisp);
             }

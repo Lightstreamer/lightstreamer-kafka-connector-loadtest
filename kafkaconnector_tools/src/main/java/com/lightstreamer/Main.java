@@ -18,12 +18,13 @@ public class Main {
     private static final Logger logger = LogManager.getLogger(Main.class);
 
     public static void main(String[] args) {
+        StatisticsManager statsManager = null;
 
         logger.info("Main consumer test started.");
 
-        if (args.length < 4) {
+        if (args.length < 5) {
             logger.error(
-                    "Missing arguments <bootstrap-servers> <topic-name> <number-of-consumer> <xonsumer group prefix>");
+                    "Missing arguments <bootstrap-servers> <topic-name> <number-of-consumer> <consumer group prefix> <is latency reporter>");
             return;
         }
 
@@ -38,12 +39,17 @@ public class Main {
 
         kconsumergroupid = args[3];
 
+        boolean flag = Boolean.parseBoolean(args[4]);
+        logger.info("is latency reporter : " + flag);
+
+        statsManager = new StatisticsManager();
+
         if (kconsumergroupid.equals("standalone")) {
             StandaloneConsumer[] consumers;
             consumers = new StandaloneConsumer[num_consumers];
 
             for (int k = 0; k < num_consumers; k++) {
-                consumers[k] = new StandaloneConsumer(kconnstring, ktopicname, k == 900);
+                consumers[k] = new StandaloneConsumer(kconnstring, ktopicname, flag, statsManager);
                 consumers[k].start();
 
                 logger.info("Standalone consumer n. " + k + " started.");
@@ -63,7 +69,7 @@ public class Main {
             consumers = new BaseConsumer[num_consumers];
 
             for (int k = 0; k < num_consumers; k++) {
-                consumers[k] = new BaseConsumer(kconnstring, kconsumergroupid + k, ktopicname, k == 900);
+                consumers[k] = new BaseConsumer(kconnstring, kconsumergroupid + k, ktopicname, flag, statsManager);
                 consumers[k].start();
 
                 logger.info("Group id " + kconsumergroupid + k + " started.");
