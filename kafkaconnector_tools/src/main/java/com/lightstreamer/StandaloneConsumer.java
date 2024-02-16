@@ -82,7 +82,7 @@ public class StandaloneConsumer extends Thread {
 
                 int k = -1;
                 while (goconsume) {
-                    ConsumerRecords<String, String> records = consumer.poll(Duration.ofMillis(5000));
+                    ConsumerRecords<String, String> records = consumer.poll(Duration.ofMillis(500));
                     for (ConsumerRecord<String, String> record : records) {
                         if (iamblackcanary) {
                             String message = record.value();
@@ -97,7 +97,7 @@ public class StandaloneConsumer extends Thread {
 
                                 logger.debug("------------------- " + diff);
                             }
-                            if (++k == 100)
+                            if (++k == 1000)
                                 k = 0;
                         }
 

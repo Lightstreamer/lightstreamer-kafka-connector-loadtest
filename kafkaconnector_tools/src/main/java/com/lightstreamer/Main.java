@@ -53,6 +53,12 @@ public class Main {
                 consumers[k].start();
 
                 logger.info("Standalone consumer n. " + k + " started.");
+
+                try {
+                    Thread.sleep(25);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
             }
 
             String input = System.console().readLine();

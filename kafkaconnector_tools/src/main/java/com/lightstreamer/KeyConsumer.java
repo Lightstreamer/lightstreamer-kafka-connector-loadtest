@@ -13,13 +13,15 @@ import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public class BaseConsumer extends Thread {
+public class KeyConsumer extends Thread {
 
     private String kafkabootstrapstring;
 
     private String kafkaconsumergroupid;
 
     private String ktopicname;
+
+    private String ktopickey;
 
     private boolean goconsume;
 
@@ -39,8 +41,8 @@ public class BaseConsumer extends Thread {
         return differenzaMillisecondi;
     }
 
-    public BaseConsumer(String kafka_bootstrap_string, String kgroupid, String topicname, boolean bc,
-            StatisticsManager sts) {
+    public KeyConsumer(String kafka_bootstrap_string, String kgroupid, String topicname, boolean bc,
+            StatisticsManager sts, String key) {
 
         this.kafkabootstrapstring = kafka_bootstrap_string;
         this.kafkaconsumergroupid = kgroupid;
@@ -48,6 +50,7 @@ public class BaseConsumer extends Thread {
         this.goconsume = true;
         this.iamblackcanary = bc;
         this.stats = sts;
+        this.ktopickey = key;
 
         logger.info("Consumer " + kgroupid + " initialized, I am black canarin: " + this.iamblackcanary);
     }
@@ -74,6 +77,9 @@ public class BaseConsumer extends Thread {
             while (goconsume) {
                 ConsumerRecords<String, String> records = consumer.poll(Duration.ofMillis(500));
                 for (ConsumerRecord<String, String> record : records) {
+                    if (!record.key().equals(ktopickey)) {
+                        continue; //
+                    }
                     String message = record.value();
 
                     if (iamblackcanary) {
@@ -89,7 +95,7 @@ public class BaseConsumer extends Thread {
 
                             logger.debug("------------------- " + diff);
                         }
-                        if (++k == 1000)
+                        if (++k == 100)
                             k = 0;
                     }
 
