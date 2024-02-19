@@ -16,7 +16,7 @@ public class MessageGenerator {
 
         logger.info("Start Kafka demo producer: " + args.length);
 
-        if (args.length < 5) {
+        if (args.length < 6) {
             logger.error(
                     "Missing arguments: <bootstrap servers connection string> <topic name> <number of producers> <wait pause in millis>");
             return;
@@ -46,6 +46,27 @@ public class MessageGenerator {
         }
         logger.info("message size requested : " + msg_size);
 
+        String keyornot = args[5];
+
+        if (keyornot.equals("keyed")) {
+            KeyProducer[] producers = new KeyProducer[num_producers];
+
+            for (int k = 0; k < num_producers; k++) {
+                producers[k] = new KeyProducer(kconnstring, "pid-" + k, topicname, pause_milis, msg_size);
+                producers[k].start();
+
+                logger.info("Key Producer pid-" + k + " started.");
+            }
+        } else {
+            BaseProducer[] producers = new BaseProducer[num_producers];
+
+            for (int k = 0; k < num_producers; k++) {
+                producers[k] = new BaseProducer(kconnstring, "pid-" + k, topicname, pause_milis, msg_size);
+                producers[k].start();
+
+                logger.info("Producer pid-" + k + " started.");
+            }
+        }
         BaseProducer[] producers = new BaseProducer[num_producers];
 
         for (int k = 0; k < num_producers; k++) {
