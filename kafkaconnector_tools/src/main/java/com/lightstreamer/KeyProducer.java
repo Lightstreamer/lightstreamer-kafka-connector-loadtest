@@ -2,15 +2,11 @@ package com.lightstreamer;
 
 import java.security.SecureRandom;
 import java.text.SimpleDateFormat;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.Properties;
 import java.util.Random;
 import java.util.concurrent.Future;
 
-import org.apache.kafka.clients.consumer.ConsumerRecord;
-import org.apache.kafka.clients.consumer.ConsumerRecords;
-import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerRecord;
@@ -18,23 +14,18 @@ import org.apache.kafka.clients.producer.RecordMetadata;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public class KeyProducer extends Thread {
-
-    private boolean goproduce;
-
-    private String kafkabootstrapstring;
-
-    private String producerid;
-
-    private String ktopicname;
-
-    private int millisp;
-
-    private int msg_size;
+public class KeyProducer extends BaseProducer {
 
     private static final String CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 
-    String[] stringkeys = { "Apple", "Banana", "Orange", "Grape", "Pineapple" };
+    String[] strings = { "Apple", "Banana", "Orange", "Grape", "Pineapple",
+            "Strawberry", "Watermelon", "Mango", "Kiwi", "Lemon",
+            "Peach", "Cherry", "Blueberry", "Raspberry", "Blackberry",
+            "Coconut", "Pomegranate", "Cantaloupe", "Apricot", "Fig",
+            "Plum", "Pear", "Avocado", "Lychee", "Guava",
+            "Dragonfruit", "Passionfruit", "Papaya", "Melon", "Lime",
+            "Nectarine", "Persimmon", "Starfruit", "Tangerine", "Durian",
+            "Kumquat", "Cranberry", "Rambutan", "Mangosteen", "Jackfruit" };
 
     private static final Logger logger = LogManager.getLogger(KeyProducer.class);
 
@@ -65,16 +56,7 @@ public class KeyProducer extends Thread {
     }
 
     public KeyProducer(String kafka_bootstrap_string, String pid, String topicname, int pause, int msgsize) {
-        this.kafkabootstrapstring = kafka_bootstrap_string;
-        this.producerid = pid;
-        this.ktopicname = topicname;
-        this.goproduce = true;
-        this.millisp = pause;
-        this.msg_size = msgsize;
-    }
-
-    public void stopproducing() {
-        this.goproduce = false;
+        super(kafka_bootstrap_string, pid, topicname, pause, msgsize);
     }
 
     @Override
@@ -94,8 +76,8 @@ public class KeyProducer extends Thread {
             while (goproduce) {
                 String message = generateMillisTS() + "-" + this.producerid + "-" + generateRandomString(msg_size);
 
-                int index = random.nextInt(stringkeys.length);
-                String key = stringkeys[index];
+                int index = random.nextInt(strings.length);
+                String key = strings[index];
 
                 logger.debug("New Message : " + message + ", key: " + key);
 

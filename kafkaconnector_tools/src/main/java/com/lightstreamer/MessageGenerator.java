@@ -48,32 +48,29 @@ public class MessageGenerator {
 
         String keyornot = args[5];
 
-        if (keyornot.equals("keyed")) {
-            KeyProducer[] producers = new KeyProducer[num_producers];
+        BaseProducer[] producers = new BaseProducer[num_producers];
 
+        if (keyornot.equals("keyed")) {
             for (int k = 0; k < num_producers; k++) {
                 producers[k] = new KeyProducer(kconnstring, "pid-" + k, topicname, pause_milis, msg_size);
                 producers[k].start();
 
                 logger.info("Key Producer pid-" + k + " started.");
             }
-        } else {
-            BaseProducer[] producers = new BaseProducer[num_producers];
+        } else if (keyornot.equals("json")) {
+            for (int k = 0; k < num_producers; k++) {
+                producers[k] = new JsonProducer(kconnstring, "pid-" + k, topicname, pause_milis, msg_size);
+                producers[k].start();
 
+                logger.info("Json Producer pid-" + k + " started.");
+            }
+        } else {
             for (int k = 0; k < num_producers; k++) {
                 producers[k] = new BaseProducer(kconnstring, "pid-" + k, topicname, pause_milis, msg_size);
                 producers[k].start();
 
                 logger.info("Producer pid-" + k + " started.");
             }
-        }
-        BaseProducer[] producers = new BaseProducer[num_producers];
-
-        for (int k = 0; k < num_producers; k++) {
-            producers[k] = new BaseProducer(kconnstring, "pid-" + k, topicname, pause_milis, msg_size);
-            producers[k].start();
-
-            logger.info("Producer pid-" + k + " started.");
         }
 
         String input = System.console().readLine();

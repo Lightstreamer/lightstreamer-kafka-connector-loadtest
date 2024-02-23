@@ -64,6 +64,7 @@ public class mySubListener implements SubscriptionListener {
             String tsmsg = field.getValue().substring(0, 23);
             long diff = timediff(tsmsg);
             stats.addValue(diff);
+            logger.debug("Key: " + update.getValue("key") + ", Value: " + update.getValue("value"));
             logger.debug("------------------- " + diff);
             if (k == 0) {
                 logger.info("Mean: " + stats.calculateMean() + ", Median = " + stats.calculateMedian()

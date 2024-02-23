@@ -9,28 +9,17 @@ import java.util.concurrent.Future;
 
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.Producer;
+import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.clients.producer.RecordMetadata;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public class BaseProducer extends Thread {
-
-    protected boolean goproduce;
-
-    protected String kafkabootstrapstring;
-
-    protected String producerid;
-
-    protected String ktopicname;
-
-    protected int millisp;
-
-    protected int msg_size;
+public class JsonProducer extends BaseProducer {
 
     private static final String CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 
-    private static final Logger logger = LogManager.getLogger(BaseProducer.class);
+    private static final Logger logger = LogManager.getLogger(JsonProducer.class);
 
     private static final Random random = new SecureRandom();
 
@@ -46,6 +35,10 @@ public class BaseProducer extends Thread {
         return sb.toString();
     }
 
+    private int generateRndInt() {
+        return random.nextInt();
+    }
+
     private static String generateMillisTS() {
         long milliseconds = System.currentTimeMillis();
 
@@ -58,17 +51,10 @@ public class BaseProducer extends Thread {
         return formattedDate;
     }
 
-    public BaseProducer(String kafka_bootstrap_string, String pid, String topicname, int pause, int msgsize) {
-        this.kafkabootstrapstring = kafka_bootstrap_string;
-        this.producerid = pid;
-        this.ktopicname = topicname;
-        this.goproduce = true;
-        this.millisp = pause;
-        this.msg_size = msgsize;
-    }
+    public JsonProducer(String kafka_bootstrap_string, String pid, String topicname, int pause, int msgsize) {
+        super(kafka_bootstrap_string, pid, topicname, pause, msgsize);
 
-    public void stopproducing() {
-        this.goproduce = false;
+        logger.info("Json producer " + pid + " ok.");
     }
 
     @Override
@@ -76,22 +62,25 @@ public class BaseProducer extends Thread {
         Properties props = new Properties();
         props.put("bootstrap.servers", kafkabootstrapstring);
         props.put("linger.ms", 1);
-        props.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer");
-        props.put("value.serializer", "org.apache.kafka.common.serialization.StringSerializer");
+        props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG,
+                org.apache.kafka.common.serialization.StringSerializer.class);
+        props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG,
+                io.confluent.kafka.serializers.KafkaJsonSerializer.class);
 
         try {
             Future<RecordMetadata> futurek;
-            RecordMetadata rmtdta;
 
-            Producer<String, String> producer = new KafkaProducer<>(props);
+            Producer<String, TestObj> producer = new KafkaProducer<>(props);
 
             while (goproduce) {
-                String message = generateMillisTS() + "-" + this.producerid + "-" + generateRandomString(msg_size);
+                TestObj message = new TestObj(generateMillisTS(), generateRandomString(msg_size),
+                        generateRandomString(512),
+                        generateRndInt());
 
                 logger.debug("New Message : " + message);
 
                 futurek = producer
-                        .send(new ProducerRecord<String, String>(ktopicname, message));
+                        .send(new ProducerRecord<String, TestObj>(ktopicname, message));
 
                 // rmtdta = futurek.get();
 

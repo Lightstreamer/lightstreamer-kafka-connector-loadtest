@@ -17,12 +17,12 @@ public class LightstreamerConsumer {
         client.addListener(new MyClientListener());
         client.connect();
 
-        logger.info("Subscribe to Kafka Topic MSKTest1.");
+        logger.info("Subscribe to Kafka Topic jsontest.");
 
-        String[] items = { "ltest-<key=orange>" };
-        String[] fields = { "key", "value", "ts", "partition" };
+        String[] items = { "jsontest" };
+        String[] fields = { "key", "timestamp", "sndValue", "ts", "partition" };
         Subscription sub = new Subscription("RAW", items, fields);
-        sub.setDataAdapter("QuickStart");
+        sub.setDataAdapter("JsonStart");
         // sub.setRequestedSnapshot("no");
         sub.addListener(new mySubListener());
         client.subscribe(sub);
