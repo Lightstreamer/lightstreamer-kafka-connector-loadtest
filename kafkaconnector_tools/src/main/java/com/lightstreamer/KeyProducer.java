@@ -84,9 +84,13 @@ public class KeyProducer extends BaseProducer {
                 futurek = producer
                         .send(new ProducerRecord<String, String>(ktopicname, key, message));
 
-                // rmtdta = futurek.get();
-
                 logger.debug("Sent message : " + futurek.isDone());
+
+                /*
+                 * RecordMetadata rmtdta = futurek.get();
+                 * 
+                 * logger.debug("Partition : " + rmtdta.partition() + ", " + rmtdta.offset());
+                 */
 
                 Thread.sleep(millisp);
             }

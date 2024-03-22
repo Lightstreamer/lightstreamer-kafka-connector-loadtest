@@ -55,7 +55,7 @@ public class Main {
                 logger.info("Standalone consumer n. " + k + " started.");
 
                 try {
-                    Thread.sleep(25);
+                    Thread.sleep(15);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }

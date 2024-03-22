@@ -15,28 +15,30 @@ import org.apache.logging.log4j.Logger;
 
 public class BaseConsumer extends Thread {
 
-    private String kafkabootstrapstring;
+    protected String kafkabootstrapstring;
 
-    private String kafkaconsumergroupid;
+    protected String kafkaconsumergroupid;
 
-    private String ktopicname;
+    protected String ktopicname;
 
-    private boolean goconsume;
+    protected boolean goconsume;
 
-    private boolean iamblackcanary;
+    protected boolean iamblackcanary;
 
     private static final Logger logger = LogManager.getLogger(BaseConsumer.class);
 
-    private StatisticsManager stats;
+    protected StatisticsManager stats;
 
-    private int timediff(String timestampString) {
+    protected static long msg_counter = 0;
+
+    protected int timediff(String timestampString) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS");
         LocalDateTime timestamp = LocalDateTime.parse(timestampString, formatter);
         LocalDateTime oraAttuale = LocalDateTime.now();
 
-        int differenzaMillisecondi = (int) Duration.between(timestamp, oraAttuale).toMillis();
+        int diffmillis = (int) Duration.between(timestamp, oraAttuale).toMillis();
 
-        return differenzaMillisecondi;
+        return diffmillis;
     }
 
     public BaseConsumer(String kafka_bootstrap_string, String kgroupid, String topicname, boolean bc,
@@ -75,6 +77,7 @@ public class BaseConsumer extends Thread {
                 ConsumerRecords<String, String> records = consumer.poll(Duration.ofMillis(500));
                 for (ConsumerRecord<String, String> record : records) {
                     String message = record.value();
+                    String key = record.key();
 
                     if (iamblackcanary) {
                         String tsmsg = message.substring(0, 23);
@@ -89,12 +92,17 @@ public class BaseConsumer extends Thread {
 
                             logger.debug("------------------- " + diff);
                         }
-                        if (++k == 1000)
+                        if (++k == 500)
                             k = 0;
+                    } else {
+                        msg_counter++;
+                        if ((msg_counter % 50000) == 0) {
+                            logger.info("N. message received: " + msg_counter);
+                        }
                     }
 
                     logger.debug("Group id " + kafkaconsumergroupid + " offset = " + record.offset()
-                            + ", message = " + message);
+                            + ", key = " + key + ", message = " + message);
 
                 }
                 logger.trace("wait for new messages");

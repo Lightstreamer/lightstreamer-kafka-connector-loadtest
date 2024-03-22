@@ -57,22 +57,39 @@ public class mySubListener implements SubscriptionListener {
     @Override
     public void onItemUpdate(ItemUpdate update) {
 
-        Iterator<Entry<String, String>> changedValues = update.getChangedFields().entrySet().iterator();
-        while (changedValues.hasNext()) {
-            Entry<String, String> field = changedValues.next();
-            // logger.debug("Field " + field.getKey() + " changed: " + field.getValue());
-            String tsmsg = field.getValue().substring(0, 23);
-            long diff = timediff(tsmsg);
-            stats.addValue(diff);
-            logger.debug("Key: " + update.getValue("key") + ", Value: " + update.getValue("value"));
-            logger.debug("------------------- " + diff);
-            if (k == 0) {
-                logger.info("Mean: " + stats.calculateMean() + ", Median = " + stats.calculateMedian()
-                        + ", confidence = " + stats.calculateConfidenceInterval(500));
-            }
-            if (++k == 100)
-                k = 0;
-        }
+        /*
+         * String tsmsg = update.getValue("timestamp");
+         * long diff = timediff(tsmsg);
+         * stats.addValue(diff);
+         * logger.debug("2ndValue: " + update.getValue("sndValue"));
+         * logger.debug("------------------- " + diff);
+         */
+
+        logger.info("Value: " + update.getValue("value"));
+        String tsmsg = update.getValue("value").substring(0, 23);
+        long diff = timediff(tsmsg);
+        stats.addValue(diff);
+
+        // Iterator<Entry<String, String>> changedValues =
+        // update.getChangedFields().entrySet().iterator();
+        // while (changedValues.hasNext()) {
+        // Entry<String, String> field = changedValues.next();
+        // // logger.debug("Field " + field.getKey() + " changed: " + field.getValue());
+        // // String tsmsg = field.getValue().substring(0, 23);
+
+        // long diff = timediff(tsmsg);
+        // stats.addValue(diff);
+        // logger.debug("Key: " + update.getValue("key") + ", Value: " +
+        // update.getValue("value"));
+        // logger.debug("------------------- " + diff);
+        // if (k == 0) {
+        // logger.info("Mean: " + stats.calculateMean() + ", Median = " +
+        // stats.calculateMedian()
+        // + ", confidence = " + stats.calculateConfidenceInterval(500));
+        // }
+        // if (++k == 100)
+        // k = 0;
+        // }
     }
 
     @Override

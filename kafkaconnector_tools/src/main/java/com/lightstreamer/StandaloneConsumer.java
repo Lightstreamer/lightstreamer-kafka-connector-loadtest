@@ -1,10 +1,7 @@
 package com.lightstreamer;
 
 import java.time.Duration;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
 
@@ -16,45 +13,15 @@ import org.apache.kafka.common.TopicPartition;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public class StandaloneConsumer extends Thread {
+public class StandaloneConsumer extends BaseConsumer {
 
-    private String kafkabootstrapstring;
-
-    private final String kafkaconsumergroupid = "";
-
-    private String ktopicname;
-
-    private boolean goconsume;
-
-    private boolean iamblackcanary;
-
-    private static final Logger logger = LogManager.getLogger(BaseConsumer.class);
-
-    private StatisticsManager stats;
-
-    private int timediff(String timestampString) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS");
-        LocalDateTime timestamp = LocalDateTime.parse(timestampString, formatter);
-        LocalDateTime oraAttuale = LocalDateTime.now();
-
-        int differenzaMillisecondi = (int) Duration.between(timestamp, oraAttuale).toMillis();
-
-        return differenzaMillisecondi;
-    }
+    private static final Logger logger = LogManager.getLogger(StandaloneConsumer.class);
 
     public StandaloneConsumer(String kafka_bootstrap_string, String topicname, boolean bc, StatisticsManager sts) {
 
-        this.kafkabootstrapstring = kafka_bootstrap_string;
-        this.ktopicname = topicname;
-        this.goconsume = true;
-        this.iamblackcanary = bc;
-        this.stats = sts;
+        super(kafka_bootstrap_string, "", topicname, bc, sts);
 
-        logger.info("Standalone consumer initialized, I am black canarin: " + bc);
-    }
-
-    public void stopconsuming() {
-        this.goconsume = false;
+        logger.info("Standalone go!");
     }
 
     @Override
@@ -84,25 +51,27 @@ public class StandaloneConsumer extends Thread {
                 while (goconsume) {
                     ConsumerRecords<String, String> records = consumer.poll(Duration.ofMillis(500));
                     for (ConsumerRecord<String, String> record : records) {
+                        String message = record.value();
+
                         if (iamblackcanary) {
-                            String message = record.value();
                             String tsmsg = message.substring(0, 23);
                             int diff = timediff(tsmsg);
 
                             stats.onData(diff);
 
                             if (k == 0) {
-                                logger.info("Group id " + kafkaconsumergroupid + " offset = " + record.offset()
-                                        + ", message = " + message);
+                                logger.info("Offset = " + record.offset() + ", message = " + message);
 
                                 logger.debug("------------------- " + diff);
                             }
                             if (++k == 1000)
                                 k = 0;
+                        } else {
+                            msg_counter++;
+                            if ((msg_counter % 50000) == 0) {
+                                logger.info("N. message received: " + msg_counter);
+                            }
                         }
-
-                        // To do.....
-
                     }
                     logger.trace("wait for new messages");
                 }

@@ -15,9 +15,20 @@ import org.apache.kafka.clients.producer.RecordMetadata;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class JsonProducer extends BaseProducer {
 
     private static final String CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+
+    String[] strings = { "Apple", "Banana", "Orange", "Grape", "Pineapple",
+            "Strawberry", "Watermelon", "Mango", "Kiwi", "Lemon",
+            "Peach", "Cherry", "Blueberry", "Raspberry", "Blackberry",
+            "Coconut", "Pomegranate", "Cantaloupe", "Apricot", "Fig",
+            "Plum", "Pear", "Avocado", "Lychee", "Guava",
+            "Dragonfruit", "Passionfruit", "Papaya", "Melon", "Lime",
+            "Nectarine", "Persimmon", "Starfruit", "Tangerine", "Durian",
+            "Kumquat", "Cranberry", "Rambutan", "Mangosteen", "Jackfruit" };
 
     private static final Logger logger = LogManager.getLogger(JsonProducer.class);
 
@@ -73,18 +84,23 @@ public class JsonProducer extends BaseProducer {
             Producer<String, TestObj> producer = new KafkaProducer<>(props);
 
             while (goproduce) {
-                TestObj message = new TestObj(generateMillisTS(), generateRandomString(msg_size),
-                        generateRandomString(512),
-                        generateRndInt());
+                int index = random.nextInt(strings.length);
+                String sndV = strings[index];
 
-                logger.debug("New Message : " + message);
+                TestObj message = new TestObj(generateMillisTS(), generateRandomString(512), sndV, generateRndInt());
+
+                logger.debug("New Message : " + message.sndValue);
 
                 futurek = producer
-                        .send(new ProducerRecord<String, TestObj>(ktopicname, message));
-
-                // rmtdta = futurek.get();
+                        .send(new ProducerRecord<String, TestObj>(ktopicname, sndV, message));
 
                 logger.debug("Sent message : " + futurek.isDone());
+
+                /*
+                 * RecordMetadata rmtdta = futurek.get();
+                 * 
+                 * logger.debug("Partition : " + rmtdta.partition() + ", " + rmtdta.offset());
+                 */
 
                 Thread.sleep(millisp);
             }
@@ -95,4 +111,5 @@ public class JsonProducer extends BaseProducer {
             logger.error("Error during producer loop: " + e.getMessage());
         }
     }
+
 }
