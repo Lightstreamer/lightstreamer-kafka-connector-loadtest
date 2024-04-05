@@ -38,6 +38,10 @@ public class TestComplexObj {
     @JsonProperty
     public String timestamp;
 
+    public void setTimestamp(String timestamp) {
+        this.timestamp = timestamp;
+    }
+
     public void setFirstText(String firstText) {
         this.firstText = firstText;
     }

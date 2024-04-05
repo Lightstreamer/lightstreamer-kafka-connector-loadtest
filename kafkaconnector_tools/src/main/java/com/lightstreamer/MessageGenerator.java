@@ -14,11 +14,11 @@ public class MessageGenerator {
         String kconnstring;
         String topicname;
 
-        logger.info("Start Kafka demo producer: " + args.length);
+        logger.info("Start kafka message generator: {} ...", args.length);
 
         if (args.length < 6) {
             logger.error(
-                    "Missing arguments: <bootstrap servers connection string> <topic name> <number of producers> <wait pause in millis>");
+                    "Missing arguments: <bootstrap servers connection string> <topic name> <number of producers> <wait pause in millis> <msg size>");
             return;
         }
 
@@ -28,23 +28,23 @@ public class MessageGenerator {
         try {
             num_producers = Integer.parseInt(args[2]);
         } catch (NumberFormatException e) {
-            logger.error("Impossibile convertire in int. Assicurati che l'argomento sia un numero valido.");
+            logger.error("Unable to convert to integer. Make sure the argument %d is a valid number.", 2);
         }
-        logger.info("number of producers : " + num_producers);
+        logger.info("\t\t number of producers : {}", num_producers);
 
         try {
             pause_milis = Integer.parseInt(args[3]);
         } catch (NumberFormatException e) {
-            logger.error("Impossibile convertire in int. Assicurati che l'argomento sia un numero valido.");
+            logger.error("Unable to convert to integer. Make sure the argument %d is a valid number.", 3);
         }
-        logger.info("wait pause in millis : " + pause_milis);
+        logger.info("\t\t wait pause in millis : {}", pause_milis);
 
         try {
             msg_size = Integer.parseInt(args[4]);
         } catch (NumberFormatException e) {
-            logger.error("Impossibile convertire in int. Assicurati che l'argomento sia un numero valido.");
+            logger.error("Unable to convert to integer. Make sure the argument %d is a valid number.", 4);
         }
-        logger.info("message size requested : " + msg_size);
+        logger.info("\t\t message size requested : {}", msg_size);
 
         String keyornot = args[5];
 
@@ -55,21 +55,28 @@ public class MessageGenerator {
                 producers[k] = new KeyProducer(kconnstring, "pid-" + k, topicname, pause_milis, msg_size);
                 producers[k].start();
 
-                logger.info("Key Producer pid-" + k + " started.");
+                logger.info("Key Producer pid-{} started.", k);
             }
         } else if (keyornot.equals("json")) {
             for (int k = 0; k < num_producers; k++) {
                 producers[k] = new JsonProducer(kconnstring, "pid-" + k, topicname, pause_milis, msg_size);
                 producers[k].start();
 
-                logger.info("Json Producer pid-" + k + " started.");
+                logger.info("Json Producer pid-{} started.", k);
+            }
+        } else if (keyornot.equals("complex")) {
+            for (int k = 0; k < num_producers; k++) {
+                producers[k] = new JsonComplexProducer(kconnstring, "pid-" + k, topicname, pause_milis, msg_size);
+                producers[k].start();
+
+                logger.info("Json Producer pid-{} started.", k);
             }
         } else {
             for (int k = 0; k < num_producers; k++) {
                 producers[k] = new BaseProducer(kconnstring, "pid-" + k, topicname, pause_milis, msg_size);
                 producers[k].start();
 
-                logger.info("Producer pid-" + k + " started.");
+                logger.info("Producer pid-{} started.", k);
             }
         }
 
@@ -82,6 +89,6 @@ public class MessageGenerator {
         for (int j = 0; j < num_producers; j++)
             producers[j].stopproducing();
 
-        logger.info("End Kafka demo producer.");
+        logger.info("End kafka message generator.");
     }
 }

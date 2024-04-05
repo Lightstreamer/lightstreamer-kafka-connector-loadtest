@@ -18,7 +18,7 @@ public class JsonConsumer extends BaseConsumer {
 
         super(kafka_bootstrap_string, kgroupid, topicname, bc, sts);
 
-        logger.info("JSON consumer go!");
+        logger.info("JSON consumer {} go!", kgroupid);
     }
 
     @Override
@@ -35,17 +35,17 @@ public class JsonConsumer extends BaseConsumer {
             KafkaConsumer<String, TestObj> consumer = new KafkaConsumer<>(props);
             consumer.subscribe(Arrays.asList(ktopicname));
 
-            logger.debug("consumer subscribed to topic " + ktopicname);
+            logger.debug("Consumer {} subscribed to topic {}", kafkaconsumergroupid, ktopicname);
 
             int k = -1;
             while (goconsume) {
                 ConsumerRecords<String, TestObj> records = consumer.poll(Duration.ofMillis(500));
 
-                logger.debug("polled " + records.count() + " messages.");
+                logger.debug("polled {} messages.", records.count());
                 for (ConsumerRecord<String, TestObj> record : records) {
                     TestObj message = record.value();
 
-                    logger.info("Timestamp: " + message.timestamp + ", sndValue: " + message.sndValue);
+                    logger.info("Timestamp: {}, sndValue: {}", message.timestamp, message.sndValue);
                     if (iamblackcanary) {
                         String tsmsg = message.timestamp;
                         int diff = timediff(tsmsg);

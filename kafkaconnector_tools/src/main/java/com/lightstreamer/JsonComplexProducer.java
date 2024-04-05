@@ -19,8 +19,6 @@ import org.apache.kafka.clients.producer.RecordMetadata;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 public class JsonComplexProducer extends BaseProducer {
 
     private static final String CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
@@ -43,7 +41,7 @@ public class JsonComplexProducer extends BaseProducer {
 
     private static final Logger logger = LogManager.getLogger(JsonProducer.class);
 
-    private static HashMap<String, TestComplexObj> messages;
+    private HashMap<String, TestComplexObj> messages;
 
     private static final Random random = new SecureRandom();
 
@@ -94,7 +92,9 @@ public class JsonComplexProducer extends BaseProducer {
     public JsonComplexProducer(String kafka_bootstrap_string, String pid, String topicname, int pause, int msgsize) {
         super(kafka_bootstrap_string, pid, topicname, pause, msgsize);
 
-        logger.info("Json complex producer %s ok.", pid);
+        messages = new HashMap<String, TestComplexObj>();
+
+        logger.info("Json complex producer {} ok.", pid);
     }
 
     @Override
@@ -119,7 +119,7 @@ public class JsonComplexProducer extends BaseProducer {
                 futurek = producer
                         .send(new ProducerRecord<String, TestComplexObj>(ktopicname, message.id, message));
 
-                logger.debug("Sent message : %s", message.id);
+                logger.debug("Sent message : {}", message.id);
 
                 futurek.get();
             }
@@ -127,16 +127,32 @@ public class JsonComplexProducer extends BaseProducer {
             while (goproduce) {
                 int index = random.nextInt(stringids.length);
                 String id = stringids[index];
+                TestComplexObj message = messages.get(id);
 
-                Thread.sleep(millisp);
+                logger.debug("New Message for : {}", id);
 
-                logger.debug("New Message for : %s", id);
+                index = random.nextInt(stringids.length);
+                if (index == 0) {
+                    message.setFirstText(generateRandomString(256));
+                    message.setFourthNumber(generateRndInt());
+                } else if (index == 1) {
+                    message.setSecondText(generateRandomString(256));
+                    message.setThirdNumber(generateRndInt());
+                } else if (index == 2) {
+                    message.setThirdText(generateRandomString(256));
+                    message.setSecondNumber(generateRndInt());
+                } else {
+                    message.setFourthText(generateRandomString(256));
+                    message.setFirstnumber(generateRndInt());
+                }
+                message.setTimestamp(generateMillisTS());
 
                 futurek = producer
                         .send(new ProducerRecord<String, TestComplexObj>(ktopicname, message.id, message));
 
-                logger.debug("Sent message : %s", futurek.isDone());
+                logger.debug("Sent message : {}", futurek.isDone());
 
+                Thread.sleep(millisp);
                 /*
                  * RecordMetadata rmtdta = futurek.get();
                  * 
@@ -147,7 +163,7 @@ public class JsonComplexProducer extends BaseProducer {
             producer.close();
 
         } catch (Exception e) {
-            logger.error("Error during producer loop: " + e.getMessage());
+            logger.error("Error during producer loop: {}", e.getMessage());
         }
     }
 

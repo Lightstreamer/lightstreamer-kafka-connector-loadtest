@@ -64,18 +64,19 @@ public class mySubListener implements SubscriptionListener {
          * logger.debug("2ndValue: " + update.getValue("sndValue"));
          * logger.debug("------------------- " + diff);
          */
+        /*
+         * logger.info("Value: " + update.getValue("value"));
+         * String tsmsg = update.getValue("value").substring(0, 23);
+         * long diff = timediff(tsmsg);
+         * stats.addValue(diff);
+         */
 
-        logger.info("Value: " + update.getValue("value"));
-        String tsmsg = update.getValue("value").substring(0, 23);
-        long diff = timediff(tsmsg);
-        stats.addValue(diff);
+        Iterator<Entry<String, String>> changedValues = update.getChangedFields().entrySet().iterator();
+        while (changedValues.hasNext()) {
+            Entry<String, String> field = changedValues.next();
+            logger.info("Field " + field.getKey() + " changed: " + field.getValue());
 
-        // Iterator<Entry<String, String>> changedValues =
-        // update.getChangedFields().entrySet().iterator();
-        // while (changedValues.hasNext()) {
-        // Entry<String, String> field = changedValues.next();
-        // // logger.debug("Field " + field.getKey() + " changed: " + field.getValue());
-        // // String tsmsg = field.getValue().substring(0, 23);
+            // String tsmsg = field.getValue().substring(0, 23);
 
         // long diff = timediff(tsmsg);
         // stats.addValue(diff);
@@ -89,7 +90,7 @@ public class mySubListener implements SubscriptionListener {
         // }
         // if (++k == 100)
         // k = 0;
-        // }
+    }
     }
 
     @Override

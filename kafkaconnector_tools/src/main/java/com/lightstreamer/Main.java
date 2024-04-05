@@ -52,7 +52,7 @@ public class Main {
                 consumers[k] = new StandaloneConsumer(kconnstring, ktopicname, flag, statsManager);
                 consumers[k].start();
 
-                logger.info("Standalone consumer n. " + k + " started.");
+                logger.info("Standalone consumer n. {} started.", k);
 
                 try {
                     Thread.sleep(15);
@@ -78,7 +78,7 @@ public class Main {
                 consumers[k] = new JsonConsumer(kconnstring, kconsumergroupid + k, ktopicname, flag, statsManager);
                 consumers[k].start();
 
-                logger.info("Json consumer n. " + k + " started.");
+                logger.info("Json consumer n. {} started.", k);
 
                 try {
                     Thread.sleep(25);
