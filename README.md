@@ -38,14 +38,39 @@ In addition to the benefits of targeted subscription to a particular key, the Li
 
 These scenarios demonstrate how key-based filtering and selective field transmission can enhance the scalability, efficiency, and responsiveness of data distribution in real-time streaming applications.
 
-*Key-based Filtering:* By including a key value in each message sent to Kafka, Lightstreamer clients can subscribe to specific items associated with particular keys. This allows clients to receive only the messages relevant to their subscribed keys, reducing network bandwidth usage and processing overhead.
-*Efficient Message Processing:* While a generic Kafka client would receive all messages and need to filter them based on the key, Lightstreamer clients can optimize message processing by subscribing directly to the desired key, resulting in more efficient message handling and reduced latency.
-*JSON Serialization with Key:* Serializing JSON messages in Kafka with associated keys enables more granular data distribution and processing.
-*Selective Field Transmission:* The Lightstreamer server can leverage the key-value pairs to optimize data transmission, sending only the fields from the JSON structure that have changed since the last update. This minimizes redundant data transfer and improves overall network efficiency.
-*Dynamic Data Updates:* In real-world scenarios where JSON data structures contain numerous fields, transmitting only the changed fields allows for dynamic updates to be efficiently propagated to clients without unnecessary data overhead.
+ __Key-based Filtering:__ By including a key value in each message sent to Kafka, Lightstreamer clients can subscribe to specific items associated with particular keys. This allows clients to receive only the messages relevant to their subscribed keys, reducing network bandwidth usage and processing overhead.
+
+ __Efficient Message Processing:__ While a generic Kafka client would receive all messages and need to filter them based on the key, Lightstreamer clients can optimize message processing by subscribing directly to the desired key, resulting in more efficient message handling and reduced latency.
+
+ __JSON Serialization with Key:__ Serializing JSON messages in Kafka with associated keys enables more granular data distribution and processing.
+
+ __Selective Field Transmission:__ The Lightstreamer server can leverage the key-value pairs to optimize data transmission, sending only the fields from the JSON structure that have changed since the last update. This minimizes redundant data transfer and improves overall network efficiency.
+
+ __Dynamic Data Updates:__ In real-world scenarios where JSON data structures contain numerous fields, transmitting only the changed fields allows for dynamic updates to be efficiently propagated to clients without unnecessary data overhead.
+
+### Results
+
+* __Scenario 1__ 
+
+| N. Clients | 1K | 2K | 4K | 8K | 12K | 14K | 16K | 18K | 20K | 32K | 40K | 50K |
+|----------|----------|----------|----------|----------|----------|----------|----------|----------|-----------|----------|-----------|-----------|
+| Kafka Clients (N consumer groups) | 6 (17) | 13 (18) | 35 (344) | 53 (45) | 363 (1494) | 1068 (914) | 3376 (507) | x | x | x | x |
+| Kafka Clients (standalone) | - | - | - | 74 (84) | - | 111 (59) | 375 (219) | 1202 (979) | 2201 (1944) |  x | x | x |
+| Lightstreamer Clients | 10 (17) | 16 (15) | 27 (17) | 33 (21) | - | 52 (21) | 91 (37) | 144 (34) | 128 (147) | 158 (71) | 252 (87) | 787 (226) |
+
+
+
+* __Scenario 2__ 
+
+| N. Clients | 6K | 8K | 10K | 52K | 64K | 70K |
+|----------|----------|----------|----------|----------|----------|----------|
+| Kafka Clients (N consumer groups) | - | 1079 (221) | x | x | x |
+| Kafka Clients (standalone) | 603 (695) | 756 (1097) | 1426 (4157) | x | x |
+| Lightstreamer Clients | - | - | 22 (13) | 45 (37) | 98 (132) | 936 (1256) |
+
+*Mean (Standard Deviation) expressed in millisecond*
 
 ## Usage
-To use the benchmarking tool, follow the instructions provided in the Documentation section. Detailed guides and examples are available to help you set up and run benchmark tests against Lightstreamer and Kafka installations.
 
 ## Contributing
 We welcome contributions from the community! If you encounter any issues, have feature requests, or would like to contribute enhancements to the benchmarking tool, please see the Contribution Guidelines for instructions on how to get involved.
