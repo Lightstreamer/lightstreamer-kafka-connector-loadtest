@@ -81,7 +81,34 @@ public class Main {
                 logger.info("Json consumer n. {} started.", k);
 
                 try {
-                    Thread.sleep(25);
+                    Thread.sleep(10);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            String input = System.console().readLine();
+            while (!input.equalsIgnoreCase("stop")) {
+                input = System.console().readLine();
+                if (input == null)
+                    input = "";
+            }
+
+            for (int j = 0; j < num_consumers; j++)
+                consumers[j].stopconsuming();
+        } else if (kconsumergroupid.startsWith("complex")) {
+            JsonComplexConsumer[] consumers;
+            consumers = new JsonComplexConsumer[num_consumers];
+
+            for (int k = 0; k < num_consumers; k++) {
+                consumers[k] = new JsonComplexConsumer(kconnstring, kconsumergroupid + k, ktopicname, flag,
+                        statsManager);
+                consumers[k].start();
+
+                logger.info("Json consumer n. {} started.", k);
+
+                try {
+                    Thread.sleep(5);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }

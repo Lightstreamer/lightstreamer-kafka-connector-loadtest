@@ -69,27 +69,39 @@ These values are passed to an instance of the StatisticsManager class, which col
 A report is produced to the console every minute; here is an example:
 
 ```sh
-Test Duration: 0 Hours 12 minutes and 0 seconds
-Number of samples: 4744
+Test Duration: 0 Hours 24 minutes and 0 seconds
+Number of samples: 6335
 Min = 4 ms
-Mean = 10 ms - Standard Deviation = 17 ms
-Max = 542 ms
+Mean = 15 ms - Standard Deviation = 86 ms
+Max = 2643 ms
 25th Percentile = 7 ms
-50th Percentile = 8 ms
-75th Percentile = 9 ms
-90th Percentile = 21 ms
-95th Percentile = 28 ms
-98th Percentile = 32 ms
+50th Percentile = 10 ms
+75th Percentile = 14 ms
+90th Percentile = 18 ms
+95th Percentile = 24 ms
+98th Percentile = 33 ms
 Min
-0004 - 0072 ********************|
-0072 - 0140
-0140 - 0208
-0208 - 0276
-0276 - 0344
-0344 - 0412
-0412 - 0480
-0480 - 0548 |
+0004 - 0334 ********************|
+0334 - 0664
+0664 - 0994 |
+0994 - 1324 |
+1324 - 1654 |
+1654 - 1984 |
+1984 - 2314 |
+2314 - 2644 |
 Max
+
+ZOOM
+Min
+0004 - 0006 *******************|
+0006 - 0008 ********************|
+0008 - 0010 *******************|
+0010 - 0012 ****************|
+0012 - 0014 ***********|
+0014 - 0016 *******|
+0016 - 0018 *****|
+0018 - 0020
+90th percentile
 ```
 
 ### Results
@@ -102,8 +114,6 @@ Max
 | Kafka Clients (standalone) | - | - | - | 74 (84) | - | 111 (59) | 375 (219) | 1202 (979) | 2201 (1944) |  x | x | x |
 | Lightstreamer Clients | 10 (17) | 16 (15) | 27 (17) | 33 (21) | - | 52 (21) | 91 (37) | 144 (34) | 128 (147) | 158 (71) | 252 (87) | 787 (226) |
 
-
-
 * __Scenario 2__ 
 
 | N. Clients | 6K | 8K | 10K | 52K | 64K | 70K |
@@ -112,7 +122,24 @@ Max
 | Kafka Clients (standalone) | 603 (695) | 756 (1097) | 1426 (4157) | x | x |
 | Lightstreamer Clients | - | - | 22 (13) | 45 (37) | 98 (132) | 936 (1256) |
 
+* __Scenario 3__ 
+
+| N. Clients | 6K | 8K | 20K | 52K | 64K | 70K |
+|----------|----------|----------|----------|----------|----------|----------|
+| Kafka Clients (N consumer groups) | - | - | x | x | x |
+| Kafka Clients (standalone) | - |- | - | x | x |
+| Lightstreamer Clients | - | - | 15 (86) | - | - | - |
 *Mean (Standard Deviation) expressed in millisecond*
+
+| N. Clients | 6K | 8K | 20K | 52K | 64K | 70K |
+|----------|----------|----------|----------|----------|----------|----------|
+| Kafka Clients (N consumer groups) | - | - | x | x | x |
+| Kafka Clients (standalone) | - |- | - | x | x |
+| Lightstreamer Clients | - | - | 429.76 | - | - | - |
+*Mbit/s
+
+
+
 
 ## Contributing
 We welcome contributions from the community! If you encounter any issues, have feature requests, or would like to contribute enhancements to the benchmarking tool, please see the Contribution Guidelines for instructions on how to get involved.
