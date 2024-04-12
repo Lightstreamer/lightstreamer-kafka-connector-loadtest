@@ -1,0 +1,107 @@
+<?xml version="1.0"?>
+
+<!--
+    This is the configuration file of the Lightstreamer Kafka Connector pluggable into Lightstreamer Server.
+
+
+    A very simple variable-expansion feature is available; see
+    <enable_expansion_for_adapters_config> in the Server's main configuration file.
+-->
+
+<!-- Mandatory. Define the Kafka Connector Adapter Set and its unique ID. -->
+<adapters_conf id="KafkaConnector">
+    <metadata_provider>
+        <!-- Java class name of the Kafka Connector Metadata Adapter. DO NOT EDIT IT. -->
+        <adapter_class>com.lightstreamer.kafka_connector.adapters.ConnectorMetadataAdapter</adapter_class>
+
+        <!-- Mandatory. Path of the configuration file for the log4j-based logging system.
+             The file path is relative to the Kafka Connector deployment directory.
+        -->
+        <param name="logging.configuration.path">log4j.properties</param>
+
+    </metadata_provider>
+	
+	<data_provider name="JsonStart-k">
+        <adapter_class>com.lightstreamer.kafka_connector.adapters.ConnectorDataAdapter</adapter_class>
+
+        <!-- The Kafka cluster address -->
+        <param name="bootstrap.servers">localhost:9092</param>
+
+        <!-- TOPIC MAPPING SECTION -->
+
+        <!-- Define a "sample" item-template, which is simply made of the "sample" item name to be used by the Lighstreamer Client subscription. -->
+        <param name="item-template.jsontest">jsontest-#{key=KEY}</param>
+
+        <!-- Map the topic "sample-topic" to the previous defined "sample" item template. -->
+        <param name="map.LTest.to">item-template.jsontest</param>
+		
+		<param name="value.evaluator.type">JSON</param>
+        <!-- FIELDS MAPPING SECTION -->
+
+        <!-- Extraction of the record key mapped to the field "key". -->
+        <param name="field.key">#{KEY}</param>
+
+        <!-- Extraction of the JSON record value mapped to the field "value". -->
+        <param name="field.timestamp">#{VALUE.timestamp}</param>
+		<param name="field.firstText">#{VALUE.firstText}</param>
+		<param name="field.secondText">#{VALUE.secondText}</param>
+		<param name="field.thirdText">#{VALUE.thirdText}</param>
+        <param name="field.fourthText">#{VALUE.fourthText}</param>
+        <param name="field.firstnumber">#{VALUE.firstnumber}</param>
+        <param name="field.secondNumber">#{VALUE.secondNumber}</param>
+        <param name="field.thirdNumber">#{VALUE.thirdNumber}</param>
+        <param name="field.fourthNumber">#{VALUE.fourthNumber}</param>
+        <param name="field.hobbies">#{VALUE.hobbies[0]}</param>
+
+        <!-- Extraction of the record timestamp to the field "ts". -->
+        <param name="field.ts">#{TIMESTAMP}</param>
+
+        <!-- Extraction of the record partition mapped to the field "partition". -->
+        <param name="field.partition">#{PARTITION}</param>
+
+        <!-- Extraction of the record offset mapped to the field "offset". -->
+        <param name="field.offset">#{OFFSET}</param>
+    </data_provider>
+	
+	 <data_provider name="AirpotDemo">
+        <adapter_class>com.lightstreamer.kafka_connector.adapters.ConnectorDataAdapter</adapter_class>
+
+        <!-- The Kafka cluster address -->
+        <param name="bootstrap.servers">b-2.testcluster1.pou82p.c3.kafka.eu-west-1.amazonaws.com:9092,b-1.testcluster1.pou82p.c3.kafka.eu-west-1.amazonaws.com:9092</param>
+
+        <!-- TOPIC MAPPING SECTION -->
+
+        <!-- Define a "sample" item-template, which is simply made of the "sample" item name to be used by the Lighstreamer Client subscription. -->
+        <param name="item-template.flights">flights</param>
+
+        <!-- Map the topic "sample-topic" to the previous defined "sample" item template. -->
+        <param name="map.Flights.to">item-template.flights</param>
+
+		<param name="value.evaluator.type">JSON</param>	
+        <!-- FIELDS MAPPING SECTION -->
+
+        <!-- Extraction of the record key mapped to the field "key". -->
+        <param name="field.key">#{KEY}</param>
+
+        <!-- Extraction of the record value mapped to the field "value". -->
+        <!-- Extraction of the record value mapped to the field "value". -->
+        <param name="field.destination">#{VALUE.destination}</param>
+		<param name="field.departure">#{VALUE.departure}</param>
+		<param name="field.flightNo">#{VALUE.flightNo}</param>
+		<param name="field.terminal">#{VALUE.terminal}</param>
+		<param name="field.status">#{VALUE.status}</param>
+		<param name="field.airline">#{VALUE.airline}</param>
+		<param name="field.currentTime">#{VALUE.currentTime}</param>
+		
+        <!-- Extraction of the record timestamp to the field "ts". -->
+        <param name="field.ts">#{TIMESTAMP}</param>
+
+        <!-- Extraction of the record partition mapped to the field "partition". -->
+        <param name="field.partition">#{PARTITION}</param>
+
+        <!-- Extraction of the record offset mapped to the field "offset". -->
+        <param name="field.offset">#{OFFSET}</param>
+    </data_provider>
+
+
+</adapters_conf>

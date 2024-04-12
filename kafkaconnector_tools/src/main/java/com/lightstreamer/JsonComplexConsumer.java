@@ -4,7 +4,6 @@ import java.time.Duration;
 import java.util.Arrays;
 import java.util.Properties;
 import java.util.LinkedHashMap;
-import java.util.Collection;
 
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
@@ -44,29 +43,21 @@ public class JsonComplexConsumer extends BaseConsumer {
             while (goconsume) {
                 ConsumerRecords<String, LinkedHashMap> records = consumer.poll(Duration.ofMillis(500));
 
-                logger.debug("polled {} messages.", records.count());
                 for (ConsumerRecord<String, LinkedHashMap> record : records) {
-                    LinkedHashMap message = record.value();
+                    LinkedHashMap<String, Object> message = record.value();
 
                     if (iamblackcanary) {
-                        Collection<String> entries = message.values();
+                        String tsmsg = message.get("timestamp").toString();
 
-                        // for (entry<String> value : entries) {
+                        int diff = timediff(tsmsg);
+                        stats.onData(diff);
 
-                        // }
-                        // String tsmsg = message.timestamp;
-                        // int diff = timediff(tsmsg);
-
-                        // stats.onData(diff);
-
-                        // if (k == 0) {
-                        // logger.info("Timestamp: {}, sndValue: {}", message.timestamp,
-                        // message.secondText);
-
-                        // logger.debug("------------------- " + diff);
-                        // }
-                        // if (++k == 1000)
-                        // k = 0;
+                        if (k == 0) {
+                            logger.info("Timestamp of the message {}.", tsmsg);
+                            logger.info("\t\tlatency in ms " + diff);
+                        }
+                        if (++k == 1000)
+                            k = 0;
                     } else {
                         msg_counter++;
                         if ((msg_counter % 50000) == 0) {
