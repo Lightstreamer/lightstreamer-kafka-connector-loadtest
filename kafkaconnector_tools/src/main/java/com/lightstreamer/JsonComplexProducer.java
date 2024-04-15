@@ -132,13 +132,13 @@ public class JsonComplexProducer extends BaseProducer {
                 logger.debug("New Message for : {}", id);
 
                 index = random.nextInt(stringids.length);
-                if (index == 0) {
+                if (index < 10) {
                     message.setFirstText(generateRandomString(256));
                     message.setFourthNumber(generateRndInt());
-                } else if (index == 1) {
+                } else if (index < 20) {
                     message.setSecondText(generateRandomString(256));
                     message.setThirdNumber(generateRndInt());
-                } else if (index == 2) {
+                } else if (index < 30) {
                     message.setThirdText(generateRandomString(256));
                     message.setSecondNumber(generateRndInt());
                 } else {
