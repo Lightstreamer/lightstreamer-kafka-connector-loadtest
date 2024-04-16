@@ -1,17 +1,17 @@
 # Lightstreamer vs. Kafka Benchmarking Tool
 
-Welcome to the Lightstreamer vs. Kafka Benchmarking Tool!
-This project provides a suite of programs designed to benchmark the performance of Lightstreamer and Kafka in handling high-volume data streams across thousands of clients.
+Welcome to the Lightstreamer Kafka Connector Benchmarking Tool!
+This project provides a suite of programs designed to benchmark the performance of Lightstreamer Kafka Connector in handling high-volume data streams across thousands of clients.
 
-Lightstreamer optimizes data delivery to clients through its real-time streaming engine, which efficiently manages and prioritizes data updates. By employing techniques like delta streaming and smart throttling, Lightstreamer minimizes bandwidth usage while ensuring timely delivery of relevant updates to connected clients. This approach allows Lightstreamer to scale seamlessly to support large numbers of concurrently connected clients, making it ideal for high-throughput real-time applications.
+Lightstreamer kernel, that is the core of Lightstreamer Kafka Connector, optimizes data delivery to clients through its real-time streaming engine, which efficiently manages and prioritizes data updates. By employing techniques like delta streaming and smart throttling, Lightstreamer minimizes bandwidth usage while ensuring timely delivery of relevant updates to connected clients. This approach allows Lightstreamer to scale seamlessly to support large numbers of concurrently connected clients, making it ideal for high-throughput real-time applications.
 
 ## Introduction
-This benchmarking tool is intended to assist developers and system administrators in evaluating the real-time data streaming capabilities of Lightstreamer and Kafka. By simulating a large number of client connections and measuring various performance metrics, users can gain insights into the scalability, throughput, and latency characteristics of each platform.
+This benchmarking tool is intended to assist developers and system administrators in evaluating the real-time data streaming capabilities of Lightstreamer Kafka Connector. By simulating a large number of client connections and measuring various performance metrics, users can gain insights into the scalability, throughput, and latency characteristics of each platform.
 
 The tool includes components for generating synthetic data streams, simulating client connections, and measuring key performance indicators such as message delivery latency, throughput, and system resource utilization.
 
 ## Features
-* __Scalability Testing__: Simulate thousands of concurrent client connections to assess the scalability of Lightstreamer and Kafka.
+* __Scalability Testing__: Simulate thousands of concurrent client connections to assess the scalability of Lightstreamer Kafka Connector.
 * __Latency Measurement__: Measure end-to-end message delivery latency under varying load conditions.
 * __Throughput Analysis__: Evaluate the maximum throughput achievable by each platform under different scenarios.
 * __Resource Monitoring__: Monitor system resource utilization (CPU, memory, network) during benchmarking tests.
@@ -143,18 +143,19 @@ Min
 
 ### __Scenario 2__ 
 
-| N. Clients | 4K | 6K | 8K | 10K | 52K | 64K | 70K |
-|----------|----------|----------|----------|----------|----------|----------|
-| Kafka Clients (N consumer groups) | 112 (34) | - | 1079 (221) | x | x | x |
-| Kafka Clients (standalone) | - | 603 (695) | 756 (1097) | 1426 (4157) | x | x |
-| Lightstreamer Clients | 8 (16) | 12 (17) | 16 (8) | 19 (13) | 45 (37) | 98 (132) | 936 (1256) |
+| N. Clients | 4K | 6K | 8K | 10K | ... | 52K | 64K | 70K | 100K |
+|----------|----------|----------|----------|----------|----------|----------|----------|----------|----------|
+| Kafka Clients (N consumer groups) | 114 (34) | 717 (70) | 1051 (137) | x | ... | x | x | x | x |
+| Kafka Clients (standalone) | 268 (388) | 513 (625) | 785 (814) | 1426 (4157) | ... | x | x | x | x |
+| Lightstreamer Clients | 8 (16) | 12 (17) | 16 (8) | 19 (13) | ... | 24 (16) | 28 (26) | 59 (56) | - |
+
 *Mean (Standard Deviation) expressed in millisecond*
 
-| N. Clients | 4K | 6K | 8K | 10K | 52K | 64K | 70K |
-|----------|----------|----------|----------|----------|----------|----------|
-| Kafka Clients (N consumer groups) | 3.2G | - | - | x | x | x | x |
-| Kafka Clients (standalone) | - | - | - | - | x | x | x |
-| Lightstreamer Clients | 90M | 133.5M | 179.5M | 223.5M | - | - | - |
+| N. Clients | 4K | 6K | 8K | 10K | ... | 52K | 64K | 70K | 100K |
+|----------|----------|----------|----------|----------|----------|----------|----------|----------|----------|
+| Kafka Clients (N consumer groups) | 3.6G | 5.4G | 7.1G | x | ... | x | x | x | x | x |
+| Kafka Clients (standalone) | 3.6G | 5.4G | 7.1G | 8.9G | ... | x | x | x | x |
+| Lightstreamer Clients | 90M | 133.5M | 179.5M | 223.5M | ... | 1.16G | 1.43G | 1.57G | - |
 *bit/s*
  
 
@@ -165,6 +166,7 @@ Min
 | Kafka Clients (N consumer groups) | 25 (103) | 503 (669) | 918 (1068) | x | x | x | x | x !
 | Kafka Clients (standalone) | 25 (103) | 298 (362) | 504 (535) | x | x | x | x | x |
 | Lightstreamer Clients | 6 (23) | 9 (71) | 10 (72) | 15 (86) | 21 (104) | 45 (253) | 53 (135) | 231 (234) |
+
 *Mean (Standard Deviation) expressed in millisecond*
 
 | N. Clients | 2K | 4K | 6K | 20K | 40K | 50K | 65K | 75K |
