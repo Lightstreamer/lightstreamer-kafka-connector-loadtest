@@ -75,17 +75,19 @@ public class JsonComplexProducer extends BaseProducer {
 
     private void generateMessage() {
         for (int i = 0; i < stringids.length; i++) {
-            int index = random.nextInt(stringids.length);
-            String sndV = stringids[index];
+            // int index = random.nextInt(stringids.length);
 
             List<String> hList = new LinkedList<>();
             for (int k = 0; k < random.nextInt(stringids.length); k++) {
                 hList.add(hobbies[random.nextInt(hobbies.length)]);
             }
 
-            messages.put(stringids[i], new TestComplexObj(sndV, generateRandomString(256), generateRandomString(256),
+            messages.put(stringids[i],
+                    new TestComplexObj(stringids[i], generateRandomString(256), generateRandomString(256),
                     generateRandomString(256), generateRandomString(256), generateRndInt(), generateRndInt(),
                     generateRndInt(), generateRndInt(), hList, generateMillisTS()));
+
+            logger.info("Generated first message for {} ok.", stringids[i]);
         }
     }
 

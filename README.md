@@ -34,7 +34,7 @@ The message producer, for each key, would send a sequence of messages with varia
 In addition to the benefits of targeted subscription to a particular key, the Lightstreamer server could optimize data transmission by sending only the fields from the JSON structure that have actually changed.
 
 A scenario extra, it is a particular varition of the third sceario. In this one the json obeject is not mapped in the Lightstremaer Kafka Connector to several fields of the Lightstreamer item; but it is mapped to a single field and mapped as a string. In such a scenario  the delta delivery mechanism inherent in Lightstreamer, which leverages transmitting only the values of the fields that have actually changed, cannot be applied. However, similar benefits can be achieved by leveraging 
-available diff optimizations such as `Json patch`.
+available diff optimizations such as `Json patch`. The use of optimization with the `Json patch` algorithm can be useful in the case of very complex structures that are difficult to map to fields statically, or when, for specific requirements, the client application requests to receive the JSON object as is.
 
 These scenarios demonstrate how key-based filtering and selective field transmission can enhance the scalability, efficiency, and responsiveness of data distribution in real-time streaming applications.
 
@@ -165,7 +165,8 @@ Min
 |----------|----------|----------|----------|----------|----------|----------|----------|----------|
 | Kafka Clients (N consumer groups) | 25 (103) | 503 (669) | 918 (1068) | x | x | x | x | x !
 | Kafka Clients (standalone) | 25 (103) | 298 (362) | 504 (535) | x | x | x | x | x |
-| Lightstreamer Clients | 6 (23) | 9 (71) | 10 (72) | 15 (86) | 21 (104) | 45 (253) | 53 (135) | 231 (234) |
+| Lightstreamer Clients | 6 (23) | 7 (57) | 10 (72) | 15 (86) | 21 (104) | 45 (253) | 53 (135) | 231 (234) |
+| Lightstreamer (jsonpatch) | 8 (37) | 9 (49) | 12 (79) | 27 (55) | - | - | - | - |
 
 *Mean (Standard Deviation) expressed in millisecond*
 
@@ -173,10 +174,11 @@ Min
 |----------|----------|----------|----------|----------|----------|----------|----------|----------|
 | Kafka Clients (N consumer groups) | 2.3G | 4.7G | 6.9G | x | x | x | x | x |
 | Kafka Clients (standalone) | 2.3G | 4.5G | 6.7G | x | x | x | x| x |
-| Lightstreamer Clients | 0.04G | 0.08G | 0.12G | 0.4G | 0.84G | 1.07G | 1.42G | 1.78G |
+| Lightstreamer Clients | 42M | 87M | 127M | 0.4G | 0.84G | 1.07G | 1.42G | 1.78G |
+| Lightstreamer (jsonpatch) | 77M | 155M | 223M | 742M | - | - | - | - |
 *bit/s*
 
-## Usefule links
+## Useful links
 
 - Lightstreamer Server download page: [https://lightstreamer.com/download/](https://lightstreamer.com/download/)
 - Lightstreamer Kafka Connector: [https://github.com/Lightstreamer/Lightstreamer-kafka-connector](https://github.com/Lightstreamer/Lightstreamer-kafka-connector)
