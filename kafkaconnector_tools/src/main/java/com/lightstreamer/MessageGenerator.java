@@ -65,8 +65,17 @@ public class MessageGenerator {
                 logger.info("Json Producer pid-{} started.", k);
             }
         } else if (keyornot.equals("complex")) {
-            for (int k = 0; k < num_producers; k++) {
-                producers[k] = new JsonComplexProducer(kconnstring, "pid-" + k, topicname, pause_milis, msg_size);
+            producers[0] = new JsonComplexProducer(kconnstring, "pid-0", topicname, pause_milis, msg_size, true);
+            producers[0].start();
+            try {
+                Thread.sleep(200);
+            } catch (InterruptedException e) {
+                // .
+            }
+
+            for (int k = 1; k < num_producers; k++) {
+                producers[k] = new JsonComplexProducer(kconnstring, "pid-" + k, topicname, pause_milis, msg_size,
+                        false);
                 producers[k].start();
 
                 logger.info("Json Producer pid-{} started.", k);

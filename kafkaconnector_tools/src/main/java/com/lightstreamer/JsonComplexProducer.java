@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Random;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Future;
 
 import org.apache.kafka.clients.producer.KafkaProducer;
@@ -41,11 +42,11 @@ public class JsonComplexProducer extends BaseProducer {
 
     private static final Logger logger = LogManager.getLogger(JsonProducer.class);
 
-    private HashMap<String, TestComplexObj> messages;
+    private static ConcurrentHashMap<String, TestComplexObj> messages = new ConcurrentHashMap<String, TestComplexObj>();
 
-    private static final Random random = new SecureRandom();
+    private Random random = new SecureRandom();
 
-    private static String generateRandomString(int length) {
+    private String generateRandomString(int length) {
         StringBuilder sb = new StringBuilder(length);
 
         for (int i = 0; i < length; i++) {
@@ -75,10 +76,10 @@ public class JsonComplexProducer extends BaseProducer {
 
     private void generateMessage() {
         for (int i = 0; i < stringids.length; i++) {
-            // int index = random.nextInt(stringids.length);
 
+            // choose 3 hobbies random
             List<String> hList = new LinkedList<>();
-            for (int k = 0; k < random.nextInt(stringids.length); k++) {
+            for (int k = 0; k < 3; k++) {
                 hList.add(hobbies[random.nextInt(hobbies.length)]);
             }
 
@@ -91,10 +92,13 @@ public class JsonComplexProducer extends BaseProducer {
         }
     }
 
-    public JsonComplexProducer(String kafka_bootstrap_string, String pid, String topicname, int pause, int msgsize) {
+    public JsonComplexProducer(String kafka_bootstrap_string, String pid, String topicname, int pause, int msgsize,
+            boolean first) {
         super(kafka_bootstrap_string, pid, topicname, pause, msgsize);
 
-        messages = new HashMap<String, TestComplexObj>();
+        if (first) {
+            generateMessage();
+        }
 
         logger.info("Json complex producer {} ok.", pid);
     }
@@ -113,8 +117,6 @@ public class JsonComplexProducer extends BaseProducer {
             Future<RecordMetadata> futurek;
             Producer<String, TestComplexObj> producer = new KafkaProducer<>(props);
 
-            generateMessage();
-
             // Send a first message for each key in the stringids arrays
             for (Map.Entry<String, TestComplexObj> entry : messages.entrySet()) {
                 TestComplexObj message = entry.getValue();
@@ -129,29 +131,31 @@ public class JsonComplexProducer extends BaseProducer {
             while (goproduce) {
                 int index = random.nextInt(stringids.length);
                 String id = stringids[index];
-                TestComplexObj message = messages.get(id);
 
-                logger.debug("New Message for : {}", id);
+                synchronized (messages) {
+                    TestComplexObj message = messages.get(id);
 
-                index = random.nextInt(stringids.length);
-                if (index < 10) {
-                    message.setFirstText(generateRandomString(256));
-                    message.setFourthNumber(generateRndInt());
-                } else if (index < 20) {
-                    message.setSecondText(generateRandomString(256));
-                    message.setThirdNumber(generateRndInt());
-                } else if (index < 30) {
-                    message.setThirdText(generateRandomString(256));
-                    message.setSecondNumber(generateRndInt());
-                } else {
-                    message.setFourthText(generateRandomString(256));
-                    message.setFirstnumber(generateRndInt());
+                    logger.debug("New Message for : {}", id);
+
+                    index = random.nextInt(stringids.length);
+                    if (index < 10) {
+                        message.setFirstText(generateRandomString(256));
+                        message.setFourthNumber(generateRndInt());
+                    } else if (index < 20) {
+                        message.setSecondText(generateRandomString(256));
+                        message.setThirdNumber(generateRndInt());
+                    } else if (index < 30) {
+                        message.setThirdText(generateRandomString(256));
+                        message.setSecondNumber(generateRndInt());
+                    } else {
+                        message.setFourthText(generateRandomString(256));
+                        message.setFirstnumber(generateRndInt());
+                    }
+                    message.setTimestamp(generateMillisTS());
+
+                    futurek = producer
+                            .send(new ProducerRecord<String, TestComplexObj>(ktopicname, message.id, message));
                 }
-                message.setTimestamp(generateMillisTS());
-
-                futurek = producer
-                        .send(new ProducerRecord<String, TestComplexObj>(ktopicname, message.id, message));
-
                 logger.debug("Sent message : {}", futurek.isDone());
 
                 Thread.sleep(millisp);

@@ -21,7 +21,7 @@ We conducted a series of tests with various configurations to simulate different
 
 In the first scenario, we generated simple messages consisting of a single field with a string value of 1024 bytes.
 Each message was accompanied by a basic header containing the creation timestamp and the producer's ID.
-These messages were sent to Kafka without specifying a key, resulting in all clients receiving all messages.
+These messages were sent to a Kafka topic without specifying a key, resulting in all clients receiving all messages.
 Furthermore, there was no possibility of performing delta delivery on the message payload.
 
 The second scenario replicated the message composition of the first scenario, but each message sent to Kafka also included a key value chosen from a set of 40 possibilities.
@@ -29,7 +29,7 @@ This allowed Lightstreamer clients to subscribe to a single item associated with
 In contrast, a generic Kafka client would receive all messages and have to determine which message to process based on the key.
 The advantages in terms of network bandwidth savings are evident.
 
-In the third scenario, we serialized JSON messages in Kafka, including the key value.
+In the third scenario, we serialized JSON messages in Kafka.
 The message producer, for each key, would send a sequence of messages with variations relative to only a subset of the fields composing the JSON structure.
 In addition to the benefits of targeted subscription to a particular key, the Lightstreamer server could optimize data transmission by sending only the fields from the JSON structure that have actually changed.
 
@@ -165,8 +165,8 @@ Min
 |----------|----------|----------|----------|----------|----------|----------|----------|----------|
 | Kafka Clients (N consumer groups) | 25 (103) | 503 (669) | 918 (1068) | x | x | x | x | x !
 | Kafka Clients (standalone) | 25 (103) | 298 (362) | 504 (535) | x | x | x | x | x |
-| Lightstreamer Clients | 6 (23) | 7 (57) | 10 (72) | 15 (86) | 21 (104) | 45 (253) | 53 (135) | 231 (234) |
-| Lightstreamer (jsonpatch) | 8 (37) | 9 (49) | 12 (79) | 27 (55) | - | - | - | - |
+| Lightstreamer Clients | 6 (8) | 8 (47) | 10 (72) | 17 (47) | 24 (24) | 27 (40) | 53 (135) | 231 (234) |
+| Lightstreamer (jsonpatch) | 6 (7) | 8 (63) | 8 (7) | 19 (52) | - | - | - | - |
 
 *Mean (Standard Deviation) expressed in millisecond*
 
@@ -174,8 +174,8 @@ Min
 |----------|----------|----------|----------|----------|----------|----------|----------|----------|
 | Kafka Clients (N consumer groups) | 2.3G | 4.7G | 6.9G | x | x | x | x | x |
 | Kafka Clients (standalone) | 2.3G | 4.5G | 6.7G | x | x | x | x| x |
-| Lightstreamer Clients | 42M | 87M | 127M | 0.4G | 0.84G | 1.07G | 1.42G | 1.78G |
-| Lightstreamer (jsonpatch) | 77M | 155M | 223M | 742M | - | - | - | - |
+| Lightstreamer Clients | 16M | 33M | 48M | 165M | 328M | 1.02G | 1.42G | 1.78G |
+| Lightstreamer (jsonpatch) | 20M | 40M | 60M | 195M | - | - | - | - |
 *bit/s*
 
 ## Useful links
