@@ -151,31 +151,31 @@ Min
 
 *Mean (Standard Deviation) expressed in millisecond*
 
-| N. Clients | 4K | 6K | 8K | 10K | ... | 52K | 64K | 70K | 80K | 90K |
+| N. Clients                        | 4K | 6K | 8K | 10K | ... | 52K | 64K | 70K | 80K | 90K |
 |----------|----------|----------|----------|----------|----------|----------|----------|----------|----------|----------|
 | Kafka Clients (N consumer groups) | 3.6G | 5.4G | 7.1G | x | ... | x | x | x | x | x | x |
-| Kafka Clients (standalone) | 3.6G | 5.4G | 7.1G | 8.9G | ... | x | x | x | x | x |
-| Lightstreamer Clients | 90M | 133.5M | 179.5M | 223.5M | ... | 1.16G | 1.43G | 1.57G | 1.75G | 2.01G |
+| Kafka Clients (standalone)        | 3.6G | 5.4G | 7.1G | 8.9G | ... | x | x | x | x | x |
+| Lightstreamer Clients             | 90M | 133.5M | 179.5M | 223.5M | ... | 1.16G | 1.43G | 1.57G | 1.75G | 2.01G |
 *bit/s*
  
 
 ### __Scenario 3__ 
 
-| N. Clients | 2K | 4K | 6K | 20K | 40K | 50K | 65K | 75K |
-|----------|----------|----------|----------|----------|----------|----------|----------|----------|
-| Kafka Clients (N consumer groups) | 25 (103) | 503 (669) | 918 (1068) | x | x | x | x | x !
-| Kafka Clients (standalone) | 25 (103) | 298 (362) | 504 (535) | x | x | x | x | x |
-| Lightstreamer Clients | 6 (8) | 8 (47) | 10 (72) | 17 (47) | 24 (24) | 27 (40) | 53 (135) | 231 (234) |
-| Lightstreamer (jsonpatch) | 6 (7) | 8 (63) | 8 (7) | 19 (52) | - | - | - | - |
+| N. Clients                        | 2K | 4K | 6K | 10K | 20K | 40K | 50K | 65K | 75K |
+|----------|----------|----------|----------|----------|----------|----------|----------|----------|----------|
+| Kafka Clients (N consumer groups) | 25 (103) | 503 (669) | 918 (1068) | x | x | x | x | x | x |
+| Kafka Clients (standalone)        | 25 (103) | 298 (362) | 504 (535) | x | x | x | x | x | x |
+| Lightstreamer Clients             | 7 (21) | 8 (47) | 8 (27) | 9 (36) | 16 (42) | 27 (49) | 33 (51) | 53 (74) | 139 (214) |
+| Lightstreamer (jsonpatch)         | 6 (8) | 8 (63) | 8 (7) | 9 (6) | 19 (52) | 33 (17) | 44 (57) | 91 (75) | 221 (134) |
 
 *Mean (Standard Deviation) expressed in millisecond*
 
-| N. Clients | 2K | 4K | 6K | 20K | 40K | 50K | 65K | 75K |
-|----------|----------|----------|----------|----------|----------|----------|----------|----------|
-| Kafka Clients (N consumer groups) | 2.3G | 4.7G | 6.9G | x | x | x | x | x |
-| Kafka Clients (standalone) | 2.3G | 4.5G | 6.7G | x | x | x | x| x |
-| Lightstreamer Clients | 16M | 33M | 48M | 165M | 328M | 1.02G | 1.42G | 1.78G |
-| Lightstreamer (jsonpatch) | 20M | 40M | 60M | 195M | - | - | - | - |
+| N. Clients                        | 2K | 4K | 6K | 10K | 20K | 40K | 50K | 65K | 75K |
+|----------|----------|----------|----------|----------|----------|----------|----------|----------|----------|
+| Kafka Clients (N consumer groups) | 2.3G | 4.7G | 6.9G | x | x | x | x | x | x |
+| Kafka Clients (standalone)        | 2.3G | 4.5G | 6.7G | x | x | x | x | x | x |
+| Lightstreamer Clients             | 14.5M | 29M | 43M | 72M | 143M | 288M | 355M | 460M | 537G |
+| Lightstreamer (jsonpatch)         | 20M | 40M | 60M | 99M | 195M | 394M | 482M | 605M | 655G |
 *bit/s*
 
 ## Useful links
