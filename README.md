@@ -3,12 +3,12 @@
 Welcome to the Lightstreamer Kafka Connector Benchmarking Tool!
 This project provides a suite of programs designed to benchmark the performance of Lightstreamer Kafka Connector in handling high-volume data streams across thousands of clients.
 
-Lightstreamer kernel, that is the core of Lightstreamer Kafka Connector, optimizes data delivery to clients through its real-time streaming engine, which efficiently manages and prioritizes data updates. By employing techniques like delta streaming and smart throttling, Lightstreamer minimizes bandwidth usage while ensuring timely delivery of relevant updates to connected clients. This approach allows Lightstreamer to scale seamlessly to support large numbers of concurrently connected clients, making it ideal for high-throughput real-time applications.
+Lightstreamer kernel, that is the core of Lightstreamer Kafka Connector, optimizes data delivery to clients through its real-time streaming engine, which efficiently manages and prioritizes data updates. By employing techniques like publish-subscribe, delta delivery, conflation, and smart throttling, Lightstreamer minimizes bandwidth usage while ensuring timely delivery of relevant updates to connected clients. This approach allows Lightstreamer to scale seamlessly to support large numbers of concurrently connected clients, making it ideal for high-throughput real-time applications.
 
 ## Introduction
 This benchmarking tool is intended to assist developers and system administrators in evaluating the real-time data streaming capabilities of Lightstreamer Kafka Connector. By simulating a large number of client connections and measuring various performance metrics, users can gain insights into the scalability, throughput, and latency characteristics of each platform.
 
-The tool includes components for generating synthetic data streams, simulating client connections, and measuring key performance indicators such as message delivery latency, throughput, and system resource utilization.
+The tool includes components for generating load with random data streams, simulating client connections, and measuring key performance indicators such as message delivery latency, throughput, and system resource utilization.
 
 ## Features
 * __Scalability Testing__: Simulate thousands of concurrent client connections to assess the scalability of Lightstreamer Kafka Connector.
@@ -17,24 +17,48 @@ The tool includes components for generating synthetic data streams, simulating c
 * __Resource Monitoring__: Monitor system resource utilization (CPU, memory, network) during benchmarking tests.
 
 ## Scearions of Test
-We conducted a series of tests with various configurations to simulate different scenarios.
+Leveraging the software tools from this project, we conducted a series of tests with various configurations to simulate different scenarios.
 
 In the first scenario, we generated simple messages consisting of a single field with a string value of 1024 bytes.
 Each message was accompanied by a basic header containing the creation timestamp and the producer's ID.
 These messages were sent to a Kafka topic without specifying a key, resulting in all clients receiving all messages.
 Furthermore, there was no possibility of performing delta delivery on the message payload.
 
-The second scenario replicated the message composition of the first scenario, but each message sent to Kafka also included a key value chosen from a set of 40 possibilities.
-This allowed Lightstreamer clients to subscribe to a single item associated with a specific key, receiving only the messages relevant to that key.
+The second scenario replicated the message composition of the first but added a key value chosen from a set of 40 possibilities to each message sent to Kafka.
+This allowed Lightstreamer clients to take advantage of the publish-subscribe functionality and subscribe to a specific item associated with a single key, receiving only the messages relevant to that key.
 In contrast, a generic Kafka client would receive all messages and have to determine which message to process based on the key.
 The advantages in terms of network bandwidth savings are evident.
 
-In the third scenario, we serialized JSON messages in Kafka.
-The message producer, for each key, would send a sequence of messages with variations relative to only a subset of the fields composing the JSON structure.
-In addition to the benefits of targeted subscription to a particular key, the Lightstreamer server could optimize data transmission by sending only the fields from the JSON structure that have actually changed.
+In the third scenario, we serialized JSON messages in Kafka. Here, the message producer would send a sequence of messages with variations relative to only a subset of the fields composing the JSON structure, for each key. This approach leverages the benefits of targeted subscription to a particular key, and additionally, the Lightstreamer server could optimize data delivery by sending only the fields from the JSON structure that have actually changed.
 
-A scenario extra, it is a particular varition of the third sceario. In this one the json obeject is not mapped in the Lightstremaer Kafka Connector to several fields of the Lightstreamer item; but it is mapped to a single field and mapped as a string. In such a scenario  the delta delivery mechanism inherent in Lightstreamer, which leverages transmitting only the values of the fields that have actually changed, cannot be applied. However, similar benefits can be achieved by leveraging 
-available diff optimizations such as `Json patch`. The use of optimization with the `Json patch` algorithm can be useful in the case of very complex structures that are difficult to map to fields statically, or when, for specific requirements, the client application requests to receive the JSON object as is.
+In this particular case, the test load is generated through messages composed of a complex JSON structure with various fields:
+```JSON
+{
+  "id": "random_person_name",
+  "firstText": "random_alphanumeric_string(256)",
+  "secondText": "random_alphanumeric_string(256)",
+  "thirdText": "random_alphanumeric_string(256)",
+  "fourthText": "random_alphanumeric_string(256)",
+  "firstNumber": "random_integer",
+  "secondNumber": "random_integer",
+  "thirdNumber": "random_integer",
+  "fourthNumber": "random_integer",
+  "hobbies": ["random_hobby", "random_hobby", "random_hobby"],
+  "timestamp": "current_timestamp"
+}
+```
+
+With each update related to a specific key, the values change only for these fields:
+ - timestamp: Always changes to the exact time the new message is generated.
+ - One random field among firstText, secondText, thirdText, fourthText: These are 256-character alphanumeric strings generated randomly.
+ - One random field among firstnumber, secondNumber, thirdNumber, fourthNumber: These are random integer values.
+ - id: This field corresponds to the key used to send the message to Kafka and is a randomly generated person name. It never changes.
+ - hobbies: This field is a list of 3 hobbies randomly selected from a list. It never changes.
+
+Here, a variation of the third scenario exists.
+In this variation, the JSON object is not mapped to individual fields within the Lightstreamer item by the Lightstreamer Kafka Connector. Instead, it's mapped as a single string value.
+Unfortunately, Lightstreamer's delta delivery mechanism, which transmits only changed fields, cannot be used in this situation.
+However, similar optimization benefits can be achieved by leveraging available diff algorithms like `Json patch`. This approach is particularly useful for very complex structures that are difficult to map statically or when the client application needs the entire JSON object for specific reasons.
 
 These scenarios demonstrate how key-based filtering and selective field transmission can enhance the scalability, efficiency, and responsiveness of data distribution in real-time streaming applications.
 
@@ -166,7 +190,7 @@ Min
 | Kafka Clients (N consumer groups) | 25 (103) | 503 (669) | 918 (1068) | x | x | x | x | x | x |
 | Kafka Clients (standalone)        | 25 (103) | 298 (362) | 504 (535) | x | x | x | x | x | x |
 | Lightstreamer Clients             | 7 (21) | 8 (47) | 8 (27) | 9 (36) | 16 (42) | 27 (49) | 33 (51) | 53 (74) | 139 (214) |
-| Lightstreamer (jsonpatch)         | 6 (8) | 8 (63) | 8 (7) | 9 (6) | 19 (52) | 33 (17) | 44 (57) | 91 (75) | 221 (134) |
+| Lightstreamer (jsonpatch)         | 6 (8) | 8 (63) | 8 (7) | 9 (6) | 19 (12) | 33 (17) | 44 (57) | 91 (75) | 221 (134) |
 
 *Mean (Standard Deviation) expressed in millisecond*
 
