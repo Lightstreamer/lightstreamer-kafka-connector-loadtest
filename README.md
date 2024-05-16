@@ -16,7 +16,7 @@ The tool includes components for generating load with random data streams, simul
 * __Throughput Analysis__: Evaluate the maximum throughput achievable by each platform under different scenarios.
 * __Resource Monitoring__: Monitor system resource utilization (CPU, memory, network) during benchmarking tests.
 
-## Scearions of Test
+## Scenarios of Test
 Leveraging the software tools from this project, we conducted a series of tests with various configurations to simulate different scenarios.
 
 In the first scenario, we generated simple messages consisting of a single field with a string value of 1024 bytes.
@@ -70,9 +70,11 @@ Few headlines emerged form the tests:
 
  __JSON Serialization with Key:__ Serializing JSON messages in Kafka with associated keys enables more granular data distribution and processing.
 
- __Selective Field Transmission:__ The Lightstreamer server can leverage the key-value pairs to optimize data transmission, sending only the fields from the JSON structure that have changed since the last update. This minimizes redundant data transfer and improves overall network efficiency.
-
  __Dynamic Data Updates:__ In real-world scenarios where JSON data structures contain numerous fields, transmitting only the changed fields allows for dynamic updates to be efficiently propagated to clients without unnecessary data overhead.
+
+ __Selective Field Transmission:__ In addition, the Lightstreamer client can further optimize bandwidth usage by subscribing to only a subset of the available fields, selecting only those actually required for its operations. This approach results in additional resources savings.
+
+
 
 ## Test Methodology
 
