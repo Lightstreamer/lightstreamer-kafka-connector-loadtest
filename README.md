@@ -350,6 +350,8 @@ Min
 
 Few headlines emerged form the tests:
 
+ __Lightstreamer Kafka Connector Scalability:__ Even under the same conditions without special optimizations, the Lightstreamer Kafka Connector can scale to tens of thousands of clients, far surpassing the scalability of clients connecting directly to the Kafka broker.
+
  __Key-based Filtering:__ By including a key value in each message sent to Kafka, Lightstreamer clients can subscribe to specific items associated with particular keys. This allows clients to receive only the messages relevant to their subscribed keys, reducing network bandwidth usage and processing overhead.
 
  __Efficient Message Processing:__ Compared to a traditional approach with generic Kafka clients where all messages from a topic are sent to all connected clients, forcing each client to filter them based on a key, the Lightstreamer Kafka Connector operates differently. It acts as a single client for the Kafka broker, receiving each message only once. The connector then efficiently distributes messages to relevant clients based on their specific requests, resulting in more efficient message handling and reduced latency.
