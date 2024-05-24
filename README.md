@@ -56,24 +56,12 @@ With each update related to a specific key, the values change only for these fie
  - hobbies: This field is a list of 3 hobbies randomly selected from a list. It never changes.
 
 Here, a variation of the third scenario exists.
-In this variation, the JSON object is not mapped to individual fields within the Lightstreamer item by the Lightstreamer Kafka Connector. Instead, it's mapped as a single string value.
+In this variation, the JSON object is not mapped to individual fields within the Lightstreamer item by the Lightstreamer Kafka Connector. Instead, it's mapped as a string value into a single field.
 Unfortunately, Lightstreamer's delta delivery mechanism, which transmits only changed fields, cannot be used in this situation.
-However, similar optimization benefits can be achieved by leveraging available diff algorithms like `Json patch`; it applies a sequence of operations to modify a JSON document, enabling partial updates and leveraging human-readable syntax.
+However, similar optimization benefits can be achieved by leveraging on the field one of the available diff algorithms like `Json Patch`. The `JSON Patch` algorithm  allows for efficient data transmission by sending only the changes (patches) made to a JSON document instead of the entire document. This significantly reduces bandwidth usage when updating JSON messages.
 This approach is particularly useful for very complex structures that are difficult to map statically or when the client application needs the entire JSON object for specific reasons.
 
 These scenarios demonstrate how key-based filtering and selective field transmission can enhance the scalability, efficiency, and responsiveness of data distribution in real-time streaming applications.
-
-Few headlines emerged form the tests:
-
- __Key-based Filtering:__ By including a key value in each message sent to Kafka, Lightstreamer clients can subscribe to specific items associated with particular keys. This allows clients to receive only the messages relevant to their subscribed keys, reducing network bandwidth usage and processing overhead.
-
- __Efficient Message Processing:__ Compared to a traditional approach with generic Kafka clients where all messages from a topic are sent to all connected clients, forcing each client to filter them based on a key, the Lightstreamer Kafka Connector operates differently. It acts as a single client for the Kafka broker, receiving each message only once. The connector then efficiently distributes messages to relevant clients based on their specific requests, resulting in more efficient message handling and reduced latency.
-
- __JSON Serialization with Key:__ Serializing JSON messages in Kafka with associated keys enables more granular data distribution and processing.
-
- __Dynamic Data Updates:__ In real-world scenarios where JSON data structures contain numerous fields, transmitting only the changed fields allows for dynamic updates to be efficiently propagated to clients without unnecessary data overhead.
-
- __Selective Field Transmission:__ In addition, the Lightstreamer client can further optimize bandwidth usage by subscribing to only a subset of the available fields, selecting only those actually required for its operations. This approach would result in additional resources savings.
 
 ## Test Methodology
 
@@ -88,7 +76,7 @@ The tests were conducted in an AWS environment using EC2 instances. Specifically
 - A t2.small instance: this instance served two purposes: simulating the various scenarios with the message producer and consuming messages with the 'latency report' function enabled to calculate statistics. Since both the producer (generating timestamps) and the latency-calculating client reside on the same machine, clock synchronization issues were avoided.
 - A c7i.xlarge instance: This instance was dedicated to the Kafka broker. We used the official Apache Kafka distribution version 3.5.1 for the installation.
 - A c7i.xlarge instance: This instance was dedicated to the Lightstreamer Kafka Connector.
-- *N* c7i.2xlarge instances: These instances simulated clients. For the pure Kafka case, we used the project's built-in consumers. For the Lightstreamer Connector case, we used a modified version of the [Lightstreamer Load Test Toolkit](https://github.com/Lightstreamer/load-test-toolkit).
+- *N* c7i.2xlarge instances: These instances simulated clients. For the pure Kafka case, we used the project's built-in consumers. For the Lightstreamer Connector case, we used a modified version of the [Lightstreamer Load Test Toolkit](https://github.com/Lightstreamer/load-test-toolkit/tree/lightstreamer-kafka-connector-benchmark).
 
 The Lightstreamer server version used was 7.4.2 and Lightstreamer Kafka Connector version 0.1.0.
 The `resources/ConnectorConfigurations` folder contains the configurations (the `adapters.xml` file) used for the Lightstreamer Kafka Connector in various scenarios. In all configurations the parameter
@@ -247,12 +235,12 @@ In this variation of scenario 3, we revert to a Lightstreamer Kafka Connector co
         <!-- Extraction of the record value mapped to the field "value". -->
         <param name="field.value">#{VALUE}</param>
 ```
-However, to enable JSON Patch optimization for the `value` field, a dedicated global configuration of the Lightstreamer server is required. Specifically, the following parameters need to be modified in the `lightstreamer_conf.xml` file:
+However, to enable JSON Patch optimization for the `value` field, a dedicated global configuration of the Lightstreamer server is required. Specifically, the following parameters need to be modified in the `lightstreamer_conf.xml` file (the complete file is presente in the `scenario3` folder):
 ```xml
 <default_diff_order>jsonpatch</default_diff_order>
 <jsonpatch_min_length>500</jsonpatch_min_length>
 ```
-
+Instead this is the relevant configuraion for the `ClientSimulator`:
 ```xml
     <param name="protocol">ws://</param>
     <param name="host">localhost</param>
@@ -269,10 +257,11 @@ However, to enable JSON Patch optimization for the `value` field, a dedicated gl
 ```
 
 ## Measurements
-The consumers reading the messages can be activated with a special flag to enable latency calculation. In this case, the difference between the timestamp in the message (for string messages, the timestamp value is in the first 23 characters, for JSON messages, there is a specific field) and the reception time is calculated for each message. In all tests, the message source and the clients configured for latency calculation, which were only 5 sessions in the tests, are run on the same machine. The real massive traffic will be generated by other instances of the Client Simulator running on different machines, which do not analyze latencies.
-These values are passed to an instance of the StatisticsManager class, which collects all the information from all client sessions and processes the statistics.
-A report is produced to the console every minute; here is an example:
+Consumers can be configured with a special flag to enable latency calculation. When enabled, the consumer calculates the difference between the message timestamp (extracted from the first 23 characters for string messages or a specific field for JSON messages) and the reception time for each message.
 
+It's important to note that during testing, both the message source and latency-calculating clients (a very small subset of total sessions) were run on the same machine. Real-world, high-volume traffic will be generated by separate Client Simulator instances on different machines that will not perform latency analysis.
+
+These latency values are then passed to the StatisticsManager class, which collects data from all client sessions and processes the statistics. A report is generated to the console every minute. An example is shown below:
 ```sh
 Test Duration: 0 Hours 24 minutes and 0 seconds
 Number of samples: 6335
@@ -357,11 +346,26 @@ Min
 | Lightstreamer (jsonpatch)         | 20M | 40M | 60M | 99M | 195M | 394M | 482M | 605M | 655G |
 *bit/s*
 
+## Conclusions
+
+Few headlines emerged form the tests:
+
+ __Key-based Filtering:__ By including a key value in each message sent to Kafka, Lightstreamer clients can subscribe to specific items associated with particular keys. This allows clients to receive only the messages relevant to their subscribed keys, reducing network bandwidth usage and processing overhead.
+
+ __Efficient Message Processing:__ Compared to a traditional approach with generic Kafka clients where all messages from a topic are sent to all connected clients, forcing each client to filter them based on a key, the Lightstreamer Kafka Connector operates differently. It acts as a single client for the Kafka broker, receiving each message only once. The connector then efficiently distributes messages to relevant clients based on their specific requests, resulting in more efficient message handling and reduced latency.
+
+ __JSON Serialization with Key:__ Serializing JSON messages in Kafka with associated keys enables more granular data distribution and processing.
+
+ __Dynamic Data Updates:__ In real-world scenarios where JSON data structures contain numerous fields, transmitting only the changed fields allows for dynamic updates to be efficiently propagated to clients without unnecessary data overhead.
+
+ __Selective Field Transmission:__ In addition, the Lightstreamer client can further optimize bandwidth usage by subscribing to only a subset of the available fields, selecting only those actually required for its operations. This approach would result in additional resources savings.
+
 ## Useful links
 
 - Lightstreamer Server download page: [https://lightstreamer.com/download/](https://lightstreamer.com/download/)
 - Lightstreamer Kafka Connector: [https://github.com/Lightstreamer/Lightstreamer-kafka-connector](https://github.com/Lightstreamer/Lightstreamer-kafka-connector)
 - Apache Kafka: [https://kafka.apache.org/quickstart](https://kafka.apache.org/quickstart)
+- The specialized version of [Lightstreamer Load Test Toolkit](https://github.com/Lightstreamer/load-test-toolkit/tree/lightstreamer-kafka-connector-benchmark)
 
 ## Contributing
-We welcome contributions from the community! If you encounter any issues, have feature requests, or would like to contribute enhancements to the benchmarking tool, please see the Contribution Guidelines for instructions on how to get involved.
+We welcome contributions from the community! If you encounter any issues, have feature requests, or would like to contribute enhancements to the benchmarking tool, please let us know.
