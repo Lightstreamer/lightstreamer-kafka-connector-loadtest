@@ -51,11 +51,11 @@ In this particular case, the test load is generated through messages composed of
 ```
 
 With each update related to a specific key, the values change only for these fields:
- - timestamp: Always changes to the exact time the new message is generated.
- - One random field among firstText, secondText, thirdText, fourthText: These are 256-character alphanumeric strings generated randomly.
- - One random field among firstnumber, secondNumber, thirdNumber, fourthNumber: These are random integer values.
- - id: This field corresponds to the key used to send the message to Kafka and is a randomly generated person name. It never changes.
- - hobbies: This field is a list of 3 hobbies randomly selected from a list. It never changes.
+ - `timestamp`: Always changes to the exact time the new message is generated.
+ - One random field among `firstText`, `secondTextv, `hirdTextv, `fourthTextv: These are 256-character alphanumeric strings generated randomly.
+ - One random field among `firstnumber`, `secondNumber`, `thirdNumber`, `fourthNumber`: These are random integer values.
+ - `id`: This field corresponds to the key used to send the message to Kafka and is a randomly generated person name. It never changes.
+ - `hobbies`: This field is an array of string valued with 3 names of hobbies randomly selected from a list. It never changes.
 
 Here, a variation of the third scenario exists.
 In this variation, the JSON object is not mapped to individual fields within the Lightstreamer item by the Lightstreamer Kafka Connector. Instead, it's mapped as a string value into a single field.
