@@ -60,7 +60,7 @@ With each update related to a specific key, the values change only for these fie
 Here, a variation of the third scenario exists.
 In this variation, the JSON object is not mapped to individual fields within the Lightstreamer item by the Lightstreamer Kafka Connector. Instead, it's mapped as a string value into a single field.
 Unfortunately, Lightstreamer's delta delivery mechanism, which transmits only changed fields, cannot be used in this situation.
-However, similar optimization benefits can be achieved by leveraging on the field one of the available diff algorithms like `Json Patch`. The `JSON Patch` algorithm  allows for efficient data transmission by sending only the changes (patches) made to a JSON document instead of the entire document. This significantly reduces bandwidth usage when updating JSON messages.
+However, similar optimization benefits can be achieved by leveraging on the field one of the available diff algorithms like `JSON Patch`. The `JSON Patch` algorithm  allows for efficient data transmission by sending only the changes (patches) made to a JSON document instead of the entire document. This significantly reduces bandwidth usage when updating JSON messages.
 This approach is particularly useful for very complex structures that are difficult to map statically or when the client application needs the entire JSON object for specific reasons.
 
 These scenarios demonstrate how key-based filtering and selective field transmission can enhance the scalability, efficiency, and responsiveness of data distribution in real-time streaming applications.
