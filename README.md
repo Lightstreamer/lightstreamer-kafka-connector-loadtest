@@ -1,4 +1,4 @@
-# Lightstreamer vs. Kafka Benchmarking Tool
+# Lightstreamer Kafka Connector Benchmarking Tool
 
 Welcome to the Lightstreamer Kafka Connector Benchmarking Tool!
 This project provides a suite of programs designed to benchmark the performance of Lightstreamer Kafka Connector in handling high-volume data streams across thousands or more clients.
@@ -12,7 +12,7 @@ This benchmarking tool is intended to assist developers and system administrator
 
 The tool includes components for generating load with random data streams, simulating client connections, and measuring key performance indicators such as message delivery latency, throughput, and system resource utilization.
 
-### Features
+### Features and Purpose of Tests
 * __Scalability Testing__: Simulate thousands of concurrent client connections to assess the scalability of Lightstreamer Kafka Connector.
 * __Latency Measurement__: Measure end-to-end message delivery latency under varying load conditions.
 * __Throughput Analysis__: Evaluate the maximum throughput achievable by each platform under different scenarios.
