@@ -1,6 +1,7 @@
 # Lightstreamer Kafka Connector Benchmarking Tool
 
 Welcome to the Lightstreamer Kafka Connector Benchmarking Tool!
+
 This project provides a suite of programs designed to benchmark the performance of Lightstreamer Kafka Connector in handling high-volume data streams across thousands or more clients.
 In particular, the main purpose is to conduct a comparison between two different architectures:
 
@@ -25,12 +26,12 @@ The [Lightstreamer Kafka Connector](https://github.com/Lightstreamer/Lightstream
 
 Lightstreamer kernel, that is the core of Lightstreamer Kafka Connector, optimizes data delivery to clients through its real-time streaming engine, which efficiently manages data updates. By employing techniques like publish-subscribe, delta delivery, conflation, and smart throttling, Lightstreamer minimizes bandwidth usage while ensuring timely delivery of relevant updates to connected clients. This approach allows Lightstreamer to scale seamlessly to support large numbers of concurrently connected clients, making it ideal for high-throughput real-time applications.
 
-## Introduction
+## Features and purpose of tests
 This benchmarking tool is intended to assist developers and system administrators in evaluating the real-time data streaming capabilities of Lightstreamer Kafka Connector. By simulating a large number of client connections and measuring various performance metrics, users can gain insights into the scalability, throughput, and latency characteristics of each platform.
 
 The tool includes components for generating load with random data streams, simulating client connections, and measuring key performance indicators such as message delivery latency, throughput, and system resource utilization.
 
-### Features and purpose of tests
+To recap:
 * __Scalability Testing__: Simulate thousands of concurrent client connections to assess the scalability of Lightstreamer Kafka Connector.
 * __Latency Measurement__: Measure end-to-end message delivery latency under varying load conditions.
 * __Throughput Analysis__: Evaluate the maximum throughput achievable by each platform under different scenarios.
@@ -108,10 +109,10 @@ All tests were conducted without using TLS communication between clients and ser
 In the simplest scenario, the relevant configuration for the Lightstreamer Kafka Connector is reduced to defining the topic to read messages from and mapping the corresponding item and message text to a single Lightstreamer field:
 ```xml
         <!-- TOPIC MAPPING SECTION -->
-        <!-- Define a "sample" item-template, which is simply made of the "sample" item name to be used by the Lighstreamer Client subscription. -->
+        <!-- Define a "ltest" item-template, which is simply made of the "ltest" item name to be used by the Lighstreamer Client subscription. -->
         <param name="item-template.ltest">ltest</param>
 
-        <!-- Map the topic "sample-topic" to the previous defined "sample" item template. -->
+        <!-- Map the topic "LTest" to the previous defined "ltest" item template. -->
         <param name="map.LTest.to">item-template.ltest</param>
 
         <!-- FIELDS MAPPING SECTION -->
@@ -316,7 +317,7 @@ Min
 
 ### __Scenario 1__ 
 
-| N. Clients | 1K | 2K | 4K | 8K | 12K | 14K | 16K | 18K | 20K | 32K | 40K | 50K |
+| No. of clients | 1K | 2K | 4K | 8K | 12K | 14K | 16K | 18K | 20K | 32K | 40K | 50K |
 |----------|----------|----------|----------|----------|----------|----------|----------|----------|-----------|----------|-----------|-----------|
 | Kafka Clients (N consumer groups) | 6 (17) | 13 (18) | 35 (344) | 53 (45) | 363 (1494) | 1068 (914) | 3376 (507) | x | x | x | x |
 | Kafka Clients (standalone) | - | - | - | 74 (84) | - | 111 (59) | 375 (219) | 1202 (979) | 2201 (1944) |  x | x | x |
@@ -326,7 +327,7 @@ Min
 
 ### __Scenario 2__ 
 
-| N. Clients | 4K | 6K | 8K | 10K | ... | 52K | 64K | 70K | 80K | 90K |
+| No. of clients | 4K | 6K | 8K | 10K | ... | 52K | 64K | 70K | 80K | 90K |
 |----------|----------|----------|----------|----------|----------|----------|----------|----------|----------|----------|
 | Kafka Clients (N consumer groups) | 114 (34) | 717 (70) | 1051 (137) | x | ... | x | x | x | x | x |
 | Kafka Clients (standalone) | 268 (388) | 513 (625) | 785 (814) | 1426 (4157) | ... | x | x | x | x | x |
@@ -334,7 +335,7 @@ Min
 
 *Mean (Standard Deviation) expressed in millisecond*
 
-| N. Clients                        | 4K | 6K | 8K | 10K | ... | 52K | 64K | 70K | 80K | 90K |
+| No. of clients | 4K | 6K | 8K | 10K | ... | 52K | 64K | 70K | 80K | 90K |
 |----------|----------|----------|----------|----------|----------|----------|----------|----------|----------|----------|
 | Kafka Clients (N consumer groups) | 3.6G | 5.4G | 7.1G | x | ... | x | x | x | x | x | x |
 | Kafka Clients (standalone)        | 3.6G | 5.4G | 7.1G | 8.9G | ... | x | x | x | x | x |
@@ -345,7 +346,7 @@ Min
 
 ### __Scenario 3__ 
 
-| N. Clients                        | 2K | 4K | 6K | 10K | 20K | 40K | 50K | 65K | 75K |
+| No. of clients | 2K | 4K | 6K | 10K | 20K | 40K | 50K | 65K | 75K |
 |----------|----------|----------|----------|----------|----------|----------|----------|----------|----------|
 | Kafka Clients (N consumer groups) | 25 (103) | 503 (669) | 918 (1068) | x | x | x | x | x | x |
 | Kafka Clients (standalone)        | 25 (103) | 298 (362) | 504 (535) | x | x | x | x | x | x |
@@ -354,7 +355,7 @@ Min
 
 *Mean (Standard Deviation) expressed in millisecond*
 
-| N. Clients                        | 2K | 4K | 6K | 10K | 20K | 40K | 50K | 65K | 75K |
+| No. of clients | 2K | 4K | 6K | 10K | 20K | 40K | 50K | 65K | 75K |
 |----------|----------|----------|----------|----------|----------|----------|----------|----------|----------|
 | Kafka Clients (N consumer groups) | 2.3G | 4.7G | 6.9G | x | x | x | x | x | x |
 | Kafka Clients (standalone)        | 2.3G | 4.5G | 6.7G | x | x | x | x | x | x |
