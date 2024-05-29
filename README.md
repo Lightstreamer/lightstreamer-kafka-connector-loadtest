@@ -2,6 +2,24 @@
 
 Welcome to the Lightstreamer Kafka Connector Benchmarking Tool!
 This project provides a suite of programs designed to benchmark the performance of Lightstreamer Kafka Connector in handling high-volume data streams across thousands or more clients.
+In particular, the main purpose is to conduct a comparison between two different architectures:
+
+ __Pure Kafka Clients Case__: In this scenario, one or more producers send messages to a single Kafka topic, and all test clients connect directly to the Kafka broker to consume all messages associated with that topic.
+        
+ ![Pure Kafka Clients Diagram](purekafkaclients_dark.png)
+
+ __Lightstreamer Kafka Connector Case__: In contrast, this approach employs the Lightstreamer Kafka Connector as the sole client for the Kafka broker. Similar to the previous case, it consumes all messages produced for the single topic defined in the simulation and distributes them to the multitude of clients requiring message consumption.
+
+ ![Lightstreamer Connector Diagram](lightstreamerconnector_dark.png)
+
+The simulation employs a single topic with a single partition. This choice aligns with the nature of the simulations we will conduct, where all clients are expected to consume all messages produced for the topic. In certain instances, only a subset of messages may be delivered to clients, but the selection is based on application logic, such as the key value.
+
+Additionally, the decision to use a single topic and a single partition is also motivated by the desire to maintain simplicity. This approach simplifies the overall architecture and facilitates easier implementation and management. By avoiding unnecessary complexity, we can focus on the core aspects of the performance evaluation and gain clearer insights into the comparative analysis.
+
+Examples of this type of message flow include:
+* __Financial applications__: Transmission of stock prices to trading applications. In this scenario, keys could be associated with individual stocks or stock indices.
+* __Telemetry applications__: Real-time data delivery from various devices. Here, the key could be the device identifier.
+* __Chat applications__: Message delivery to specific chat groups. In this case, the key could be the chat group identifier.
 
 The [Lightstreamer Kafka Connector](https://github.com/Lightstreamer/Lightstreamer-kafka-connector) is a powerful tool that bridges Apache Kafka with Lightstreamer's real-time data streaming capabilities. It enables efficient and scalable real-time data distribution from Kafka topics to a multitude of mobile and web apps via the Lightstreamer server.
 
@@ -12,13 +30,13 @@ This benchmarking tool is intended to assist developers and system administrator
 
 The tool includes components for generating load with random data streams, simulating client connections, and measuring key performance indicators such as message delivery latency, throughput, and system resource utilization.
 
-### Features and Purpose of Tests
+### Features and purpose of tests
 * __Scalability Testing__: Simulate thousands of concurrent client connections to assess the scalability of Lightstreamer Kafka Connector.
 * __Latency Measurement__: Measure end-to-end message delivery latency under varying load conditions.
 * __Throughput Analysis__: Evaluate the maximum throughput achievable by each platform under different scenarios.
 * __Resource Monitoring__: Monitor system resource utilization (CPU, memory, network) during benchmarking tests.
 
-## Scenarios of Test
+## Scenarios
 Leveraging the software tools from this project, we conducted a series of tests with various configurations to simulate different scenarios.
 
 The first scenario involved generating simple messages with a single field containing a randomly generated alphanumeric string of 1024 bytes.
@@ -65,20 +83,13 @@ This approach is particularly useful for very complex structures that are diffic
 
 These scenarios demonstrate how key-based filtering and selective field transmission can enhance the scalability, efficiency, and responsiveness of data distribution in real-time streaming applications.
 
-## Test Methodology
-
-#### Pure Kafka Clients Case
-![Pure Kafka Clients Diagram](purekafkaclients_dark.png)
-
-#### Lightstreamer Kafka Connector Case
-![Lightstreamer Connector Diagram](lightstreamerconnector_dark.png)
-
+## Test methodology
 The tests were conducted in an AWS environment using EC2 instances. Specifically, the following instances were dedicated:
 
-- A t2.small instance: this instance served two purposes: simulating the various scenarios with the message producer and consuming messages with the 'latency report' function enabled to calculate statistics. Since both the producer (generating timestamps) and the latency-calculating client reside on the same machine, clock synchronization issues were avoided.
-- A c7i.xlarge instance: This instance was dedicated to the Kafka broker. We used the official Apache Kafka distribution version 3.5.1 for the installation.
-- A c7i.xlarge instance: This instance was dedicated to the Lightstreamer Kafka Connector.
-- *N* c7i.2xlarge instances: These instances simulated clients. For the pure Kafka case, we used the project's built-in consumers. For the Lightstreamer Connector case, we used a modified version of the [Lightstreamer Load Test Toolkit](https://github.com/Lightstreamer/load-test-toolkit/tree/lightstreamer-kafka-connector-benchmark).
+* __t2.small instance__ This instance served two purposes: simulating the various scenarios with the message producer and consuming messages with the 'latency report' function enabled to calculate statistics. Since both the producer (generating timestamps) and the latency-calculating client reside on the same machine, clock synchronization issues were avoided.
+* __c7i.xlarge instance__ This instance was dedicated to the Kafka broker. We used the official Apache Kafka distribution version 3.5.1 for the installation.
+* __c7i.xlarge instance__ This instance was dedicated to the Lightstreamer Kafka Connector.
+* __Multiple c7i.2xlarge instances__ These instances simulated clients. For the pure Kafka case, we used the project's built-in consumers. For the Lightstreamer Connector case, we used a modified version of the [Lightstreamer Load Test Toolkit](https://github.com/Lightstreamer/load-test-toolkit/tree/lightstreamer-kafka-connector-benchmark).
 
 The Lightstreamer server version used was 7.4.2 and Lightstreamer Kafka Connector version 0.1.0. The JVM used in all tests was `OpenJDK Runtime Environment Corretto-21.0.2.13.1 (build 21.0.2+13-LTS)`.
 
