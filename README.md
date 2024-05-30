@@ -152,7 +152,6 @@ In this scenario, where each message sent to Kafka is assigned a key value, the 
         <!-- Map the topic "LTest" to the previous defined "ltest" item template. -->
         <param name="map.LTest.to">item-template.ltest</param>
 
-
         <!-- FIELDS MAPPING SECTION -->
         <!-- Extraction of the record key mapped to the field "key". -->
         <param name="field.key">#{KEY}</param>
@@ -186,14 +185,13 @@ Note that in the case of Lightstreamer clients, the messages actually delivered 
 In this scenario, where messages have a key and their content is a JSON-structured payload, the Lightstreamer Kafka Connector configuration needs to consider this type of deserialization and provide static mapping of the JSON structure to relevant Lightstreamer item fields. Based on the JSON structure presented in the previous section, the configuration takes on the following salient parameters:
 ```xml
         <!-- TOPIC MAPPING SECTION -->
-        <!-- Define a "jsontest" item-template, which is made of the "jsontest" item name to be used by the Lighstreamer Client subscription. -->
+        <!-- Define a "jsontest" item-template, which is made of the "jsontest-" prefix and a value of the key. Some examples are: "jsontest-[key=James]", "jsontest-[key=Robert]", "jsontest-[key=Larry]. -->
         <param name="item-template.jsontest">jsontest-#{key=KEY}</param>
 
-        <!-- Map the topic "sample-topic" to the previous defined "sample" item template. -->
+        <!-- Map the topic "LTest" to the previous defined "jsontest" item template. -->
         <param name="map.LTest.to">item-template.jsontest</param>
 
-		    <param name="value.evaluator.type">JSON</param>
-
+		<param name="value.evaluator.type">JSON</param>
 
         <!-- FIELDS MAPPING SECTION -->
         <!-- Extraction of the record key mapped to the field "key". -->
@@ -237,10 +235,10 @@ As for the scenario before, note that in the case of Lightstreamer clients, the 
 In this variation of scenario 3, we revert to a Lightstreamer Kafka Connector configuration similar to scenario 2, where the entire message received from Kafka is mapped to a single string:
 ```xml
         <!-- TOPIC MAPPING SECTION -->
-        <!-- Define a "sample" item-template, which is simply made of the "sample" item name to be used by the Lighstreamer Client subscription. -->
+        <!-- Define a "ltest" item-template, which is made of the "ltest-" prefix and a key value. -->
         <param name="item-template.ltest">ltest-#{key=KEY}</param>
 
-        <!-- Map the topic "sample-topic" to the previous defined "sample" item template. -->
+        <!-- Map the topic "LTest" to the previous defined "ltest" item template. -->
         <param name="map.LTest.to">item-template.ltest</param>
 
         <!-- FIELDS MAPPING SECTION -->
@@ -323,6 +321,8 @@ Min
 | Lightstreamer Clients | 10 (17) | 16 (15) | 27 (17) | 33 (21) | - | 52 (21) | 91 (37) | 144 (34) | 128 (147) | 158 (71) | 252 (87) | 787 (226) |
 
 *Mean (Standard Deviation) expressed in millisecond*
+
+![Scenario1 time series](Scenario1.svg)
 
 ### __Scenario 2__ 
 
