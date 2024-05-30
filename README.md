@@ -40,17 +40,20 @@ To recap:
 ## Scenarios
 Leveraging the software tools from this project, we conducted a series of tests with various configurations to simulate different scenarios.
 
-The first scenario involved generating simple messages with a single field containing a randomly generated alphanumeric string of 1024 bytes.
+The first scenario involved generating simple messages with a single field containing a randomly generated __alphanumeric string of 1024 bytes__.
 Each message was accompanied by a basic header containing the creation timestamp and the producer's ID.
 These messages were sent to a Kafka topic without specifying a key, resulting in all clients receiving all messages.
 Furthermore, there was no possibility of performing delta delivery on the message payload.
+For this scenario, we have set a message production and sending frequency of __4 messages per second__.
 
-The second scenario replicated the message composition of the first but added a key value chosen from a set of 40 possibilities to each message sent to Kafka.
+The second scenario replicated the message composition of the first but __added a key value__ chosen from a set of 40 possibilities to each message sent to Kafka.
 This allowed Lightstreamer clients to take advantage of the publish-subscribe functionality and subscribe to a specific item associated with a single key, receiving only the messages relevant to that key.
 In contrast, a generic Kafka client would receive all messages and have to determine which message to process based on the key.
 The advantages in terms of network bandwidth savings are evident.
+For this scenario, we have set a message production and sending frequency of __100 messages per second__.
 
-In the third scenario, we serialized JSON messages in Kafka. The message producer would send a sequence of messages with variations relative to only a subset of the fields composing the JSON structure, for each key. In this case the Lightstreamer Kafka Connector allows you to specify that messages read from a particular topic should be deserialized into JSON objects and, in addition, to map the JSON structure to different Lightstreamer fields. This allows, in addition to the optimization due to key filtering, to exploit the delta delivery mechanism offered by the Lightstreamer engine; that is, for each message, to determine which fields have actually changed and therefore send only the differences. An additional saving in the use of network resources
+In the third scenario, we __serialized JSON messages in Kafka__. The message producer would send a sequence of messages with variations relative to only a subset of the fields composing the JSON structure, for each key. In this case the Lightstreamer Kafka Connector allows you to specify that messages read from a particular topic should be deserialized into JSON objects and, in addition, to map the JSON structure to different Lightstreamer fields. This allows, in addition to the optimization due to key filtering, to exploit the delta delivery mechanism offered by the Lightstreamer engine; that is, for each message, to determine which fields have actually changed and therefore send only the differences. An additional saving in the use of network resources.
+For this scenario, we have set a message production and sending frequency of __100 messages per second__.
 
 In this particular case, the test load is generated through messages composed of a complex JSON structure with various fields:
 ```JSON
@@ -134,8 +137,7 @@ In this configuration, tests were conducted under various conditions with a load
 
     <!-- This is the adapter set name of the Adapter Simulator. -->
     <param name="adapterSetName">KafkaConnector</param>
-    <!--  <param name="dataAdapterName">DEFAULT</param> -->
-
+    
     <!-- Number of sessions launched by a single Client Simulator. -->
     <param name="numberOfSessions">20000</param>
 ```
@@ -144,10 +146,10 @@ In this configuration, tests were conducted under various conditions with a load
 In this scenario, where each message sent to Kafka is assigned a key value, the Lightstreamer Kafka Connector configuration needs to be slightly modified to include the key value in the Item name. This allows clients to subscribe to messages relevant to that specific key value. For example, some Item names could be "ltest-[key=Apple]", "ltest-[key=Banana]", "ltest-[key=Orange]", ... corresponding to subscriptions for key values of "Apple", "Banana", "Orange", respectively. Additionally, the key value is also mapped to a dedicated field.
 ```xml
         <!-- TOPIC MAPPING SECTION -->
-        <!-- Define a "sample" item-template, which is simply made of the "sample" item name to be used by the Lighstreamer Client subscription. -->
+        <!-- Define a "ltest" item-template, which is made of the "ltest-" prefix and a value of the key. Some examples are: "ltest-[key=Apple]", "ltest-[key=Banana]", "ltest-[key=Orange]. -->
         <param name="item-template.ltest">ltest-#{key=KEY}</param>
 
-        <!-- Map the topic "sample-topic" to the previous defined "sample" item template. -->
+        <!-- Map the topic "LTest" to the previous defined "ltest" item template. -->
         <param name="map.LTest.to">item-template.ltest</param>
 
 
@@ -174,8 +176,7 @@ For the Lightstreamer Kafka Connector case, the `ClientSimulator` of the Load Te
 
     <!-- This is the adapter set name of the Adapter Simulator. -->
     <param name="adapterSetName">KafkaConnector</param>
-    <!--  <param name="dataAdapterName">DEFAULT</param> -->
-
+    
     <!-- Number of sessions launched by a single Client Simulator. -->
     <param name="numberOfSessions">20000</param>
 ```
@@ -185,7 +186,7 @@ Note that in the case of Lightstreamer clients, the messages actually delivered 
 In this scenario, where messages have a key and their content is a JSON-structured payload, the Lightstreamer Kafka Connector configuration needs to consider this type of deserialization and provide static mapping of the JSON structure to relevant Lightstreamer item fields. Based on the JSON structure presented in the previous section, the configuration takes on the following salient parameters:
 ```xml
         <!-- TOPIC MAPPING SECTION -->
-        <!-- Define a "sample" item-template, which is simply made of the "sample" item name to be used by the Lighstreamer Client subscription. -->
+        <!-- Define a "jsontest" item-template, which is made of the "jsontest" item name to be used by the Lighstreamer Client subscription. -->
         <param name="item-template.jsontest">jsontest-#{key=KEY}</param>
 
         <!-- Map the topic "sample-topic" to the previous defined "sample" item template. -->
@@ -198,7 +199,7 @@ In this scenario, where messages have a key and their content is a JSON-structur
         <!-- Extraction of the record key mapped to the field "key". -->
         <param name="field.key">#{KEY}</param>
 
-        <!-- Extraction of the JSON record value mapped to the field "value". -->
+        <!-- Extraction of the JSON record value mapped to corresponding field names. -->
         <param name="field.timestamp">#{VALUE.timestamp}</param>
         <param name="field.firstText">#{VALUE.firstText}</param>
         <param name="field.secondText">#{VALUE.secondText}</param>
@@ -226,8 +227,7 @@ For the Lightstreamer Kafka Connector case, the `ClientSimulator` of the Load Te
 
     <!-- This is the adapter set name of the Adapter Simulator. -->
     <param name="adapterSetName">KafkaConnector</param>
-    <!--  <param name="dataAdapterName">DEFAULT</param> -->
-
+    
     <!-- Number of sessions launched by a single Client Simulator. -->
     <param name="numberOfSessions">20000</param>
 ```
@@ -265,8 +265,7 @@ Instead this is the relevant configuraion for the `ClientSimulator`:
 
     <!-- This is the adapter set name of the Adapter Simulator. -->
     <param name="adapterSetName">KafkaConnector</param>
-    <!--  <param name="dataAdapterName">DEFAULT</param> -->
-
+    
     <!-- Number of sessions launched by a single Client Simulator. -->
     <param name="numberOfSessions">20000</param>
 ```
@@ -385,7 +384,7 @@ Few headlines emerged form the tests:
 - Lightstreamer Server download page: [https://lightstreamer.com/download/](https://lightstreamer.com/download/)
 - Lightstreamer Kafka Connector: [https://github.com/Lightstreamer/Lightstreamer-kafka-connector](https://github.com/Lightstreamer/Lightstreamer-kafka-connector)
 - Apache Kafka: [https://kafka.apache.org/quickstart](https://kafka.apache.org/quickstart)
-- The specialized version of [Lightstreamer Load Test Toolkit](https://github.com/Lightstreamer/load-test-toolkit/tree/lightstreamer-kafka-connector-benchmark)
+- The specialized version of Lightstreamer Load Test Toolkit: [https://github.com/Lightstreamer/load-test-toolkit/tree/lightstreamer-kafka-connector-benchmark](https://github.com/Lightstreamer/load-test-toolkit/tree/lightstreamer-kafka-connector-benchmark)
 
 ## Contributing
-We welcome contributions from the community! If you encounter any issues, have feature requests, or would like to contribute enhancements to the benchmarking tool, please let us know.
+We welcome contributions from the community! If you encounter any issues, have feature requests, or would like to contribute enhancements to the benchmarking tool, please opem an [issue](https://github.com/Lightstreamer/lightstreamer-kafka-connector-loadtest/issues) or sens us an email at support@lightstreamer.com.
