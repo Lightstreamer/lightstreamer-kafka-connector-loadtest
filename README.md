@@ -334,6 +334,8 @@ Min
 
 *Mean (Standard Deviation) expressed in millisecond*
 
+![Scenario2 time series](Scenario2.svg)
+
 | No. of clients | 4K | 6K | 8K | 10K | ... | 52K | 64K | 70K | 80K | 90K |
 |----------|----------|----------|----------|----------|----------|----------|----------|----------|----------|----------|
 | Kafka Clients (N consumer groups) | 3.6G | 5.4G | 7.1G | x | ... | x | x | x | x | x | x |
@@ -342,6 +344,7 @@ Min
 
 *bit/s*
  
+![Scenario2 bandwidth](Scenario2bw.svg)
 
 ### __Scenario 3__ 
 
