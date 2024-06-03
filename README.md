@@ -82,7 +82,7 @@ With each update related to a specific key, the values change only for these fie
 Here, a variation of the third scenario exists.
 In this variation, the JSON object is not mapped to individual fields within the Lightstreamer item by the Lightstreamer Kafka Connector. Instead, it's mapped as a string value into a single field.
 Unfortunately, Lightstreamer's delta delivery mechanism, which transmits only changed fields, cannot be used in this situation.
-However, similar optimization benefits can be achieved by leveraging on the field one of the available diff algorithms like `JSON Patch`. The `JSON Patch` algorithm  allows for efficient data transmission by sending only the changes (patches) made to a JSON document instead of the entire document. This significantly reduces bandwidth usage when updating JSON messages.
+However, similar optimization benefits can be achieved by leveraging on the field one of the available diff algorithms like `JSON Patch`. __The JSON Patch algorithm  allows for efficient data transmission__ by sending only the changes (patches) made to a JSON document instead of the entire document. This significantly reduces bandwidth usage when updating JSON messages.
 This approach is particularly useful for very complex structures that are difficult to map statically or when the client application needs the entire JSON object for specific reasons.
 
 These scenarios demonstrate how key-based filtering and selective field transmission can enhance the scalability, efficiency, and responsiveness of data distribution in real-time streaming applications.
@@ -357,6 +357,8 @@ Min
 
 *Mean (Standard Deviation) expressed in millisecond*
 
+![Scenario3 time series](Scenario3.svg)
+
 | No. of clients | 2K | 4K | 6K | 10K | 20K | 40K | 50K | 65K | 75K |
 |----------|----------|----------|----------|----------|----------|----------|----------|----------|----------|
 | Kafka Clients (N consumer groups) | 2.3G | 4.7G | 6.9G | x | x | x | x | x | x |
@@ -365,6 +367,8 @@ Min
 | Lightstreamer (jsonpatch)         | 20M | 40M | 60M | 99M | 195M | 394M | 482M | 605M | 655G |
 
 *bit/s*
+
+![Scenario3 bandwidth](Scenario3bw.svg)
 
 ## Conclusions
 
