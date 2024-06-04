@@ -323,7 +323,7 @@ Min
 
 *Mean latency (Standard Deviation) expressed in millisecond*
 
-![Scenario1 time series](Scenario1.svg)
+![Scenario1 time series](Scenario1dark.svg)
 
 ### __Scenario 2__ 
 
