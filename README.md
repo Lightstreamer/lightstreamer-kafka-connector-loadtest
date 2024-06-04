@@ -317,9 +317,9 @@ Min
 
 | No. of clients | 1K | 2K | 4K | 8K | 12K | 14K | 16K | 18K | 20K | 32K | 40K | 50K |
 |----------|----------|----------|----------|----------|----------|----------|----------|----------|-----------|----------|-----------|-----------|
-| Kafka Clients (N consumer groups) | 6 (17) | 13 (18) | 35 (344) | 53 (45) | 363 (1494) | 1068 (914) | 3376 (507) | x | x | x | x |
-| Kafka Clients (standalone) | - | - | - | 74 (84) | - | 111 (59) | 375 (219) | 1202 (979) | 2201 (1944) |  x | x | x |
-| Lightstreamer Clients | 10 (17) | 16 (15) | 27 (17) | 33 (21) | - | 52 (21) | 91 (37) | 144 (34) | 128 (147) | 158 (71) | 252 (87) | 787 (226) |
+| <span style="color:blue">Kafka Clients (N consumer groups)</span> | <span style="color:blue">6 (17)</span>  | <span style="color:blue">13 (18)</span> | <span style="color:blue">35 (344)</span>| <span style="color:blue">53 (45)</span> | <span style="color:blue">363 (1494)</span>| <span style="color:blue">1068 (914)</span>| <span style="color:blue">3376 (507)</span>| <span style="color:blue">x</span>      | <span style="color:blue">x</span>      | <span style="color:blue">x</span>      | <span style="color:blue">x</span>      | <span style="color:blue">x</span>      |
+| <span style="color:red">Kafka Clients (standalone)</span>        | <span style="color:red">-</span>      | <span style="color:red">-</span>      | <span style="color:red">-</span>      | <span style="color:red">74 (84)</span> | <span style="color:red">-</span>      | <span style="color:red">111 (59)</span>| <span style="color:red">375 (219)</span>| <span style="color:red">1202 (979)</span>| <span style="color:red">2201 (1944)</span>| <span style="color:red">x</span>      | <span style="color:red">x</span>      | <span style="color:red">x</span>      |
+| <span style="color:green">Lightstreamer Clients</span>             | <span style="color:green">10 (17)</span>| <span style="color:green">16 (15)</span>| <span style="color:green">27 (17)</span>| <span style="color:green">33 (21)</span>| <span style="color:green">-</span>      | <span style="color:green">52 (21)</span>| <span style="color:green">91 (37)</span>| <span style="color:green">144 (34)</span>| <span style="color:green">128 (147)</span>| <span style="color:green">158 (71)</span>| <span style="color:darkgreen">252 (87)</span>| <span style="color:darkgreen">787 (226)</span>|
 
 *Mean latency (Standard Deviation) expressed in millisecond*
 
