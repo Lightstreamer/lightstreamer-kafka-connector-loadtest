@@ -5,15 +5,18 @@ Welcome to the Lightstreamer Kafka Connector Benchmarking Tool!
 This project provides a suite of programs designed to benchmark the performance of Lightstreamer Kafka Connector in handling high-volume data streams across thousands or more clients.
 In particular, the main purpose is to conduct a comparison between two different architectures:
 
- __Pure Kafka Clients Case__: In this scenario, one or more producers send messages to a single Kafka topic, and all test clients connect directly to the Kafka broker to consume all messages associated with that topic.
+ __Pure Kafka Clients Case__ - In this scenario, one or more producers send messages to a single Kafka topic, and all test clients connect directly to the Kafka broker to consume all messages associated with that topic.
         
  ![Pure Kafka Clients Diagram](purekafkaclients_dark.png)
 
- __Lightstreamer Kafka Connector Case__: In contrast, this approach employs the Lightstreamer Kafka Connector as the sole client for the Kafka broker. Similar to the previous case, it consumes all messages produced for the single topic defined in the simulation and distributes them to the multitude of clients requiring message consumption.
+ __Lightstreamer Kafka Connector Case__ - In contrast, this approach employs the Lightstreamer Kafka Connector as the sole client for the Kafka broker. Similar to the previous case, it consumes all messages produced for the single topic defined in the simulation and distributes them to the multitude of clients requiring message consumption.
 
  ![Lightstreamer Connector Diagram](lightstreamerconnector_dark.png)
 
-The simulation employs a single topic with a single partition. This choice aligns with the nature of the simulations we will conduct, where all clients are expected to consume all messages produced for the topic. In certain instances, only a subset of messages may be delivered to clients, but the selection is based on application logic, such as the key value.
+The simulation employs a single topic with a single partition. This choice aligns with the nature of the simulations we will conduct, where all clients are expected to consume all messages produced for the topic.
+In some scenarios, it is expected that only a subset of messages will reach each client; however, the selection is solely governed by the application logic of individual clients.
+For example, this could involve, for instance, a specific value of the message key or even a particular value of a field within the message itself.
+Such a scenario would be hard challenging to adapt to the distribution of various consumer groups across multiple partitions.
 
 Additionally, the decision to use a single topic and a single partition is also motivated by the desire to maintain simplicity. This approach simplifies the overall architecture and facilitates easier implementation and management. By avoiding unnecessary complexity, we can focus on the core aspects of the performance evaluation and gain clearer insights into the comparative analysis.
 
