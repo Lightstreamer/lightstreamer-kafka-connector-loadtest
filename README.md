@@ -14,7 +14,7 @@ In particular, the main purpose is to conduct a comparison between two different
  ![Lightstreamer Connector Diagram](lightstreamerconnector_dark.png)
 
 The simulation employs a single topic with a single partition. This choice aligns with the nature of the simulations we will conduct, where all clients are expected to consume all messages produced for the topic.
-In some scenarios, it is expected that only a subset of messages will reach each client; however, the selection is solely governed by the application logic of individual clients.
+Indeed in some scenarios, it is expected that only a subset of messages will reach each client; however, the selection is solely governed by the application logic of individual clients.
 For example, this could involve, for instance, a specific value of the message key or even a particular value of a field within the message itself.
 Such a scenario would be hard challenging to adapt to the distribution of various consumer groups across multiple partitions.
 
@@ -25,12 +25,13 @@ Examples of this type of message flow include:
 * __Telemetry applications__: Real-time data delivery from various devices. Here, the key could be the device identifier.
 * __Chat applications__: Message delivery to specific chat groups. In this case, the key could be the chat group identifier.
 
-The [Lightstreamer Kafka Connector](https://github.com/Lightstreamer/Lightstreamer-kafka-connector) is a powerful tool that bridges Apache Kafka with Lightstreamer's real-time data streaming capabilities. It enables efficient and scalable real-time data distribution from Kafka topics to a multitude of mobile and web apps via the Lightstreamer server.
+The [Lightstreamer Kafka Connector](https://github.com/Lightstreamer/Lightstreamer-kafka-connector) is a powerful tool that bridges Apache Kafka with Lightstreamer's real-time data streaming capabilities. It enables __efficient and scalable real-time data distribution from Kafka topics__ to a multitude of mobile and web apps via the Lightstreamer server.
 
 Lightstreamer kernel, that is the core of Lightstreamer Kafka Connector, optimizes data delivery to clients through its real-time streaming engine, which efficiently manages data updates. By employing techniques like publish-subscribe, delta delivery, conflation, and smart throttling, Lightstreamer minimizes bandwidth usage while ensuring timely delivery of relevant updates to connected clients. This approach allows Lightstreamer to scale seamlessly to support large numbers of concurrently connected clients, making it ideal for high-throughput real-time applications.
 
 ## Features and purpose of tests
-This benchmarking tool is intended to assist developers and system administrators in evaluating the real-time data streaming capabilities of Lightstreamer Kafka Connector. By simulating a large number of client connections and measuring various performance metrics, users can gain insights into the scalability, throughput, and latency characteristics of each platform.
+This benchmarking tool is intended to assist developers and system administrators in evaluating the __real-time data streaming capabilities__ of Lightstreamer Kafka Connector. By simulating a large number of client connections and measuring various performance metrics, users can gain insights into the scalability, throughput, and latency characteristics of each platform.
+And this is always in the context of a comparison with the architecture without the Lightstreamer Kafka Connector.
 
 The tool includes components for generating load with random data streams, simulating client connections, and measuring key performance indicators such as message delivery latency, throughput, and system resource utilization.
 
@@ -91,14 +92,21 @@ This approach is particularly useful for very complex structures that are diffic
 These scenarios demonstrate how key-based filtering and selective field transmission can enhance the scalability, efficiency, and responsiveness of data distribution in real-time streaming applications.
 
 ## Test methodology
+
+### StartUp the environment
 The tests were conducted in an AWS environment using EC2 instances. Specifically, the following instances were dedicated:
 
 * __t2.small instance__ This instance served two purposes: simulating the various scenarios with the message producer and consuming messages with the 'latency report' function enabled to calculate statistics. Since both the producer (generating timestamps) and the latency-calculating client reside on the same machine, clock synchronization issues were avoided.
-* __c7i.xlarge instance__ This instance was dedicated to the Kafka broker. We used the official Apache Kafka distribution version 3.5.1 for the installation.
+* __c7i.xlarge instance__ This instance was dedicated to the Kafka broker.
 * __c7i.xlarge instance__ This instance was dedicated to the Lightstreamer Kafka Connector.
 * __Multiple c7i.2xlarge instances__ These instances simulated clients. For the pure Kafka case, we used the project's built-in consumers. For the Lightstreamer Connector case, we used a modified version of the [Lightstreamer Load Test Toolkit](https://github.com/Lightstreamer/load-test-toolkit/tree/lightstreamer-kafka-connector-benchmark).
 
-The Lightstreamer server version used was 7.4.2 and Lightstreamer Kafka Connector version 0.1.0. The JVM used in all tests was `OpenJDK Runtime Environment Corretto-21.0.2.13.1 (build 21.0.2+13-LTS)`.
+As __Kakfa broker__ we used the official Apache distribution version 3.5.1. For the installation simply follow the basic instructions from this tutorial: [https://kafka.apache.org/quickstart](https://kafka.apache.org/quickstart)
+
+The __Lightstreamer server__ version used was 7.4.2 and __Lightstreamer Kafka Connector__ version was 0.1.0.
+For the necessary installation in these tests, you can start with the brief guide 'GETTING_STARTED.TXT' found in the default distribution of [Lightstreamer server](https://lightstreamer.com/download/). Next, you need to install the LoadTestToolkit adapter as explained [here](https://github.com/Lightstreamer/load-test-toolkit/tree/lightstreamer-kafka-connector-benchmark?tab=readme-ov-file). Finally, you need to install the Lightstreamer Kafka Connector. You can start with the installation found [here](https://github.com/Lightstreamer/Lightstreamer-kafka-connector/releases), which includes instructions within the zip file. Then for each test scenario, you will find the specific configuration file (`adapters.xml`) to use.
+
+The JVM used in all tests was `OpenJDK Runtime Environment Corretto-21.0.2.13.1 (build 21.0.2+13-LTS)`.
 
 The `resources/ConnectorConfigurations` folder contains the configurations (the `adapters.xml` file) used for the Lightstreamer Kafka Connector in various scenarios. In all configurations the parameter
 
@@ -320,7 +328,7 @@ Min
 
 | No. of clients | 1K | 2K | 4K | 8K | 12K | 14K | 16K | 18K | 20K | 32K | 40K | 50K |
 |----------|----------|----------|----------|----------|----------|----------|----------|----------|-----------|----------|-----------|-----------|
-| <span style="color:blue">Kafka Clients (N consumer groups)</span> | <span style="color:blue">6 (17)</span>  | <span style="color:blue">13 (18)</span> | <span style="color:blue">35 (344)</span>| <span style="color:blue">53 (45)</span> | <span style="color:blue">363 (1494)</span>| <span style="color:blue">1068 (914)</span>| <span style="color:blue">3376 (507)</span>| <span style="color:blue">x</span>      | <span style="color:blue">x</span>      | <span style="color:blue">x</span>      | <span style="color:blue">x</span>      | <span style="color:blue">x</span>      |
+| <span style="color:blue!">Kafka Clients (N consumer groups)</span> | <span style="color:blue!">6 (17)</span>  | <span style="color:blue">13 (18)</span> | <span style="color:blue">35 (344)</span>| <span style="color:blue">53 (45)</span> | <span style="color:blue">363 (1494)</span>| <span style="color:blue">1068 (914)</span>| <span style="color:blue">3376 (507)</span>| <span style="color:blue">x</span>      | <span style="color:blue">x</span>      | <span style="color:blue">x</span>      | <span style="color:blue">x</span>      | <span style="color:blue">x</span>      |
 | <span style="color:red">Kafka Clients (standalone)</span>        | <span style="color:red">-</span>      | <span style="color:red">-</span>      | <span style="color:red">-</span>      | <span style="color:red">74 (84)</span> | <span style="color:red">-</span>      | <span style="color:red">111 (59)</span>| <span style="color:red">375 (219)</span>| <span style="color:red">1202 (979)</span>| <span style="color:red">2201 (1944)</span>| <span style="color:red">x</span>      | <span style="color:red">x</span>      | <span style="color:red">x</span>      |
 | <span style="color:green">Lightstreamer Clients</span>             | <span style="color:green">10 (17)</span>| <span style="color:green">16 (15)</span>| <span style="color:green">27 (17)</span>| <span style="color:green">33 (21)</span>| <span style="color:green">-</span>      | <span style="color:green">52 (21)</span>| <span style="color:green">91 (37)</span>| <span style="color:green">144 (34)</span>| <span style="color:green">128 (147)</span>| <span style="color:green">158 (71)</span>| <span style="color:darkgreen">252 (87)</span>| <span style="color:darkgreen">787 (226)</span>|
 
