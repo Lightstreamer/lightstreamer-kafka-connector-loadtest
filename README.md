@@ -16,7 +16,7 @@ In particular, the main purpose is to conduct a comparison between two different
 The simulation employs a single topic with a single partition. This choice aligns with the nature of the simulations we will conduct, where all clients are expected to consume all messages produced for the topic.
 Indeed in some scenarios, it is expected that only a subset of messages will reach each client; however, the selection is solely governed by the application logic of individual clients.
 For example, this could involve, for instance, a specific value of the message key or even a particular value of a field within the message itself.
-Such a scenario would be hard challenging to adapt to the distribution of various consumer groups across multiple partitions.
+Such a scenario would be hard challenging to adapt to the distribution of various consumer groups across multiple partitions or by proliferating a multitude of topics.
 
 Additionally, the decision to use a single topic and a single partition is also motivated by the desire to maintain simplicity. This approach simplifies the overall architecture and facilitates easier implementation and management. By avoiding unnecessary complexity, we can focus on the core aspects of the performance evaluation and gain clearer insights into the comparative analysis.
 
