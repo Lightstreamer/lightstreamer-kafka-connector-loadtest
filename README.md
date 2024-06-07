@@ -2,7 +2,7 @@
 
 Welcome to the Lightstreamer Kafka Connector Benchmarking Tool!
 
-This project provides a suite of programs designed to benchmark the performance of Lightstreamer Kafka Connector in handling high-volume data streams across thousands or more clients.
+This project provides a suite of programs designed to benchmark the performance of __Lightstreamer Kafka Connector__ in handling high-volume data streams across thousands or more clients.
 In particular, the main purpose is to conduct a comparison between two different architectures:
 
  __Pure Kafka Clients Case__ - In this scenario, one or more producers send messages to a single Kafka topic, and all test clients connect directly to the Kafka broker to consume all messages associated with that topic.
@@ -96,7 +96,7 @@ These scenarios demonstrate how key-based filtering and selective field transmis
 ### StartUp the environment
 The tests were conducted in an AWS environment using EC2 instances. Specifically, the following instances were dedicated:
 
-* __t2.small instance__ This instance served two purposes: simulating the various scenarios with the message producer and consuming messages with the 'latency report' function enabled to calculate statistics. Since both the producer (generating timestamps) and the latency-calculating client reside on the same machine, clock synchronization issues were avoided.
+* __t2.small instance__ This instance served two purposes: simulating the various scenarios with the message producer and consuming messages with the 'latency report' function enabled in order to calculate statistics. Since both the producer (generating timestamps) and the latency-calculating client reside on the same machine, clock synchronization issues were avoided.
 * __c7i.xlarge instance__ This instance was dedicated to the Kafka broker.
 * __c7i.xlarge instance__ This instance was dedicated to the Lightstreamer Kafka Connector.
 * __Multiple c7i.2xlarge instances__ These instances simulated clients. For the pure Kafka case, we used the project's built-in consumers. For the Lightstreamer Connector case, we used a modified version of the [Lightstreamer Load Test Toolkit](https://github.com/Lightstreamer/load-test-toolkit/tree/lightstreamer-kafka-connector-benchmark).
@@ -104,7 +104,7 @@ The tests were conducted in an AWS environment using EC2 instances. Specifically
 As __Kakfa broker__ we used the official Apache distribution version 3.5.1. For the installation simply follow the basic instructions from this tutorial: [https://kafka.apache.org/quickstart](https://kafka.apache.org/quickstart)
 
 The __Lightstreamer server__ version used was 7.4.2 and __Lightstreamer Kafka Connector__ version was 0.1.0.
-For the necessary installation in these tests, you can start with the brief guide 'GETTING_STARTED.TXT' found in the default distribution of [Lightstreamer server](https://lightstreamer.com/download/). Next, you need to install the LoadTestToolkit adapter as explained [here](https://github.com/Lightstreamer/load-test-toolkit/tree/lightstreamer-kafka-connector-benchmark?tab=readme-ov-file). Finally, you need to install the Lightstreamer Kafka Connector. You can start with the installation found [here](https://github.com/Lightstreamer/Lightstreamer-kafka-connector/releases), which includes instructions within the zip file. Then for each test scenario, you will find the specific configuration file (`adapters.xml`) to use.
+For the necessary installation in these tests, you can start with the brief guide 'GETTING_STARTED.TXT' found in the default distribution of [Lightstreamer server](https://lightstreamer.com/download/). Next, you need to install the LoadTestToolkit adapter as explained [here](https://github.com/Lightstreamer/load-test-toolkit/tree/lightstreamer-kafka-connector-benchmark?tab=readme-ov-file). Finally, you need to install the Lightstreamer Kafka Connector. You can start with the installation found [here](https://github.com/Lightstreamer/Lightstreamer-kafka-connector/releases), which includes instructions within the zip file. Then for each test scenario, you will find the specific configuration file (`adapters.xml`) to use in the [ConnectorConfigurations](https://github.com/Lightstreamer/lightstreamer-kafka-connector-loadtest/tree/master/kafkaconnector_tools/src/main/resources/ConnectorConfigurations) folder of this project. 
 
 The JVM used in all tests was `OpenJDK Runtime Environment Corretto-21.0.2.13.1 (build 21.0.2+13-LTS)`.
 
