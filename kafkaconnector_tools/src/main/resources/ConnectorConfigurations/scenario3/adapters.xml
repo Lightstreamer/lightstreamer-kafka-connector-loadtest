@@ -29,13 +29,18 @@
 
         <!-- TOPIC MAPPING SECTION -->
 
-        <!-- Define a "sample" item-template, which is simply made of the "sample" item name to be used by the Lighstreamer Client subscription. -->
+        <!-- Define a "jsontest" item-template, is composed of a prefix "jsontest-" 
+             concatenated with a value among those possible for the message key.
+             For example: "jsontest-[key=James]", "jsontest-[key=Robert]",
+             "jsontest-[key=Larry]. -->
         <param name="item-template.jsontest">jsontest-#{key=KEY}</param>
 
-        <!-- Map the topic "sample-topic" to the previous defined "sample" item template. -->
+        <!-- Map the topic "LTest" to the previous defined "jsontest" item template. -->
         <param name="map.LTest.to">item-template.jsontest</param>
 		
+        <!-- Message payload should be deserailized as JSON object. -->
 		<param name="value.evaluator.type">JSON</param>
+        
         <!-- FIELDS MAPPING SECTION -->
 
         <!-- Extraction of the record key mapped to the field "key". -->

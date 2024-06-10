@@ -93,7 +93,7 @@ These scenarios demonstrate how key-based filtering and selective field transmis
 
 ## Test methodology
 
-### StartUp the environment
+### Setup the environment
 The tests were conducted in an AWS environment using EC2 instances. Specifically, the following instances were dedicated:
 
 * __t2.small instance__ This instance served two purposes: simulating the various scenarios with the message producer and consuming messages with the 'latency report' function enabled in order to calculate statistics. Since both the producer (generating timestamps) and the latency-calculating client reside on the same machine, clock synchronization issues were avoided.
@@ -116,7 +116,7 @@ The JVM used in all tests was `OpenJDK Runtime Environment Corretto-21.0.2.13.1 
 
 All tests were conducted without using TLS communication between clients and servers. This was done to simplify the test scenarios and considering that in real production environments, TLS is often handled by external offloaders.
 
-### Scenario1
+### Scenario 1
 In the simplest scenario, the relevant configuration for the Lightstreamer Kafka Connector is reduced to defining the topic to read messages from and mapping the corresponding item and message text to a single Lightstreamer field:
 ```xml
         <!-- TOPIC MAPPING SECTION -->
@@ -150,11 +150,14 @@ In this configuration, tests were conducted under various conditions with a load
     <param name="numberOfSessions">20000</param>
 ```
 
-### Scenario2
+### Scenario 2
 In this scenario, where each message sent to Kafka is assigned a key value, the Lightstreamer Kafka Connector configuration needs to be slightly modified to include the key value in the Item name. This allows clients to subscribe to messages relevant to that specific key value. For example, some Item names could be "ltest-[key=Apple]", "ltest-[key=Banana]", "ltest-[key=Orange]", ... corresponding to subscriptions for key values of "Apple", "Banana", "Orange", respectively. Additionally, the key value is also mapped to a dedicated field.
 ```xml
         <!-- TOPIC MAPPING SECTION -->
-        <!-- Define a "ltest" item-template, which is made of the "ltest-" prefix and a value of the key. Some examples are: "ltest-[key=Apple]", "ltest-[key=Banana]", "ltest-[key=Orange]. -->
+        <!-- Define a "ltest" item-template, which is composed of a prefix 'ltest-' 
+            concatenated with a value among those possible for the message key.
+            For example: "ltest-[key=Apple]", "ltest-[key=Banana]",
+            "ltest-[key=Orange]. -->
         <param name="item-template.ltest">ltest-#{key=KEY}</param>
 
         <!-- Map the topic "LTest" to the previous defined "ltest" item template. -->
@@ -189,16 +192,20 @@ For the Lightstreamer Kafka Connector case, the `ClientSimulator` of the Load Te
 ```
 Note that in the case of Lightstreamer clients, the messages actually delivered by Lightstreamer are only one-fortieth of the total number due to key-based filtering. This is because each message has a key value randomly selected from 40 available options.
 
-### Scenario3
+### Scenario 3
 In this scenario, where messages have a key and their content is a JSON-structured payload, the Lightstreamer Kafka Connector configuration needs to consider this type of deserialization and provide static mapping of the JSON structure to relevant Lightstreamer item fields. Based on the JSON structure presented in the previous section, the configuration takes on the following salient parameters:
 ```xml
         <!-- TOPIC MAPPING SECTION -->
-        <!-- Define a "jsontest" item-template, which is made of the "jsontest-" prefix and a value of the key. Some examples are: "jsontest-[key=James]", "jsontest-[key=Robert]", "jsontest-[key=Larry]. -->
+        <!-- Define a "jsontest" item-template, is composed of a prefix "jsontest-" 
+             concatenated with a value among those possible for the message key.
+             For example: "jsontest-[key=James]", "jsontest-[key=Robert]",
+             "jsontest-[key=Larry]. -->
         <param name="item-template.jsontest">jsontest-#{key=KEY}</param>
 
         <!-- Map the topic "LTest" to the previous defined "jsontest" item template. -->
         <param name="map.LTest.to">item-template.jsontest</param>
 
+        <!-- Message payload should be deserailized as JSON object. -->
 		<param name="value.evaluator.type">JSON</param>
 
         <!-- FIELDS MAPPING SECTION -->

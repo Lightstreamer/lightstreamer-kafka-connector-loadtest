@@ -29,10 +29,10 @@
 
         <!-- TOPIC MAPPING SECTION -->
 
-        <!-- Define a "sample" item-template, which is simply made of the "sample" item name to be used by the Lighstreamer Client subscription. -->
+        <!-- Define a "ltest" item-template, which is simply made of the "ltest" item name to be used by the Lighstreamer Client subscription.-->
         <param name="item-template.ltest">ltest</param>
 
-        <!-- Map the topic "sample-topic" to the previous defined "sample" item template. -->
+        <!-- Map the topic "LTest" to the previous defined "ltest" item template. -->
         <param name="map.LTest.to">item-template.ltest</param>
 
         <!-- FIELDS MAPPING SECTION -->

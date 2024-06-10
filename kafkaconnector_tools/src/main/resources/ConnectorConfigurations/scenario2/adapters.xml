@@ -29,10 +29,13 @@
 
         <!-- TOPIC MAPPING SECTION -->
 
-        <!-- Define a "sample" item-template, which is simply made of the "sample" item name to be used by the Lighstreamer Client subscription. -->
+        <!-- Define a "ltest" item-template, which is composed of a prefix 'ltest-' 
+            concatenated with a value among those possible for the message key.
+            For example are: "ltest-[key=Apple]", "ltest-[key=Banana]",
+            "ltest-[key=Orange]. -->
         <param name="item-template.ltest">ltest-#{key=KEY}</param>
 
-        <!-- Map the topic "sample-topic" to the previous defined "sample" item template. -->
+        <!-- Map the topic "LTest" to the previous defined "ltest" item template. -->
         <param name="map.LTest.to">item-template.ltest</param>
 
         <!-- FIELDS MAPPING SECTION -->
