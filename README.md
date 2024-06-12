@@ -114,6 +114,8 @@ contains localhost but should be changed with the actual Kafka cluster address.
 
 The JVM used in all tests was `OpenJDK Runtime Environment Corretto-21.0.2.13.1 (build 21.0.2+13-LTS)`.
 
+For all scenarios in the pure Kafka client case, we tested both with clients that specify a particular consumer group, each different from the other, so that all clients receive all the messages from the topic, and with standalone clients. A __standalone client__ processes all messages on its own, requiring manual offset management and not benefiting from load distribution.
+
 All tests were conducted without using TLS communication between clients and servers. This was done to simplify the test scenarios and considering that in real production environments, TLS is often handled by external offloaders.
 
 ### Scenario 1
@@ -282,7 +284,6 @@ Instead this is the relevant configuration for the `ClientSimulator`:
     <!-- Number of sessions launched by a single Client Simulator. -->
     <param name="numberOfSessions">20000</param>
 ```
-In all three scenarios for the pure Kafka client case, we tested both with clients that specified a particular consumer group, each one different from the others, and with standalone clients. A __standalone client__ processes all messages on its own, requiring manual offset management and not benefiting from load distribution.
 
 ## Measurements
 Consumers can be configured with a special flag to __enable latency calculation__. When enabled, the consumer calculates the difference between the message timestamp (extracted from the first 23 characters for string messages or a specific field for JSON messages) and the reception time for each message.
@@ -410,4 +411,4 @@ Few headlines emerged form the tests:
 - The specialized version of Lightstreamer Load Test Toolkit: [https://github.com/Lightstreamer/load-test-toolkit/tree/lightstreamer-kafka-connector-benchmark](https://github.com/Lightstreamer/load-test-toolkit/tree/lightstreamer-kafka-connector-benchmark)
 
 ## Contributing
-We welcome contributions from the community! If you encounter any issues, have feature requests, or would like to contribute enhancements to the benchmarking tool, please opem an [issue](https://github.com/Lightstreamer/lightstreamer-kafka-connector-loadtest/issues) or sens us an email at support@lightstreamer.com.
+We welcome contributions from the community! If you encounter any issues, have feature requests, or would like to contribute enhancements to the benchmarking tool, please open an [issue](https://github.com/Lightstreamer/lightstreamer-kafka-connector-loadtest/issues) or send us an email at support@lightstreamer.com.
