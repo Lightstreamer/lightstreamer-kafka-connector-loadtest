@@ -351,7 +351,7 @@ Min
 
 *Mean latency (Standard Deviation) expressed in millisecond*
 
-![Scenario2 time series](Scenario2.svg)
+![Scenario2 time series](Scenario2dark.svg)
 
 | No. of clients | 4K | 6K | 8K | 10K | ... | 52K | 64K | 70K | 80K | 90K |
 |----------|----------|----------|----------|----------|----------|----------|----------|----------|----------|----------|
