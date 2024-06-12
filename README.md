@@ -15,15 +15,15 @@ In particular, the main purpose is to conduct a comparison between two different
 
 The simulation employs a single topic with a single partition. This choice aligns with the nature of the simulations we will conduct, where all clients are expected to consume all messages produced for the topic.
 Indeed in some scenarios, it is expected that only a subset of messages will reach each client; however, the selection is solely governed by the application logic of individual clients.
-For example, this could involve, for instance, a specific value of the message key or even a particular value of a field within the message itself.
+This could involve, for instance, a specific value of the message key or even a particular value of a field within the message itself.
 Such a scenario would be hard challenging to adapt to the distribution of various consumer groups across multiple partitions or by proliferating a multitude of topics.
 
 Additionally, the decision to use a single topic and a single partition is also motivated by the desire to maintain simplicity. This approach simplifies the overall architecture and facilitates easier implementation and management. By avoiding unnecessary complexity, we can focus on the core aspects of the performance evaluation and gain clearer insights into the comparative analysis.
 
 Examples of this type of message flow include:
-* __Financial applications__: Transmission of stock prices to trading applications. In this scenario, keys could be associated with individual stocks or stock indices.
-* __Telemetry applications__: Real-time data delivery from various devices. Here, the key could be the device identifier.
-* __Chat applications__: Message delivery to specific chat groups. In this case, the key could be the chat group identifier.
+* __Financial applications__: Transmission of stock prices to trading applications. In this context, clients might want to receive only messages related to a stock title, a group of stock titles, or a stock index.
+* __Telemetry applications__: Real-time data delivery from various devices. In this case, client applications could build customized dashboards by specifying which metrics and from which devices to receive the data.
+* __Chat applications__: Message delivery to specific chat groups.
 
 The [Lightstreamer Kafka Connector](https://github.com/Lightstreamer/Lightstreamer-kafka-connector) is a powerful tool that bridges Apache Kafka with Lightstreamer's real-time data streaming capabilities. It enables __efficient and scalable real-time data distribution from Kafka topics__ to a multitude of mobile and web apps via the Lightstreamer server.
 
