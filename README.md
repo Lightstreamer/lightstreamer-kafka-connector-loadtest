@@ -21,7 +21,7 @@ Such a scenario would be hard challenging to adapt to the distribution of variou
 Additionally, the decision to use a single topic and a single partition is also motivated by the desire to maintain simplicity. This approach simplifies the overall architecture and facilitates easier implementation and management. By avoiding unnecessary complexity, we can focus on the core aspects of the performance evaluation and gain clearer insights into the comparative analysis.
 
 Examples of this type of message flow include:
-* __Financial applications__: Transmission of stock prices to trading applications. In this context, clients might want to receive only messages related to a stock title, a group of stock titles, or a stock index.
+* __Financial applications__: Transmission of stock prices to trading applications. In this context, clients might want to receive only messages related to a single stock, a group of stocks, or a market index.
 * __Telemetry applications__: Real-time data delivery from various devices. In this case, client applications could build customized dashboards by specifying which metrics and from which devices to receive the data.
 * __Chat applications__: Message delivery to specific chat groups.
 
