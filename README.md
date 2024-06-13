@@ -361,7 +361,7 @@ Min
 
 *bit/s*
  
-![Scenario2 bandwidth](Scenario2bw.svg)
+![Scenario2 bandwidth](Scenario2bwdark.svg)
 
 ### __Scenario 3__ 
 
