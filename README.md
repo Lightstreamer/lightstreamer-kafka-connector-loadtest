@@ -331,6 +331,7 @@ Min
 
 ### __Scenario 1__ 
 
+#### Average latency and standard deviation
 | No. of clients | 1K | 2K | 4K | 8K | 12K | 14K | 16K | 18K | 20K | 32K | 40K | 50K |
 |----------|----------|----------|----------|----------|----------|----------|----------|----------|-----------|----------|-----------|-----------|
 | <span style="color:blue!">Kafka Clients (N consumer groups)</span> | <span style="color:blue!">6 (17)</span>  | <span style="color:blue">13 (18)</span> | <span style="color:blue">35 (344)</span>| <span style="color:blue">53 (45)</span> | <span style="color:blue">363 (1494)</span>| <span style="color:blue">1068 (914)</span>| <span style="color:blue">3376 (507)</span>| <span style="color:blue">x</span>      | <span style="color:blue">x</span>      | <span style="color:blue">x</span>      | <span style="color:blue">x</span>      | <span style="color:blue">x</span>      |
@@ -343,6 +344,7 @@ Min
 
 ### __Scenario 2__ 
 
+#### Average latency and standard deviation
 | No. of clients | 4K | 6K | 8K | 10K | ... | 52K | 64K | 70K | 80K | 90K |
 |----------|----------|----------|----------|----------|----------|----------|----------|----------|----------|----------|
 | Kafka Clients (N consumer groups) | 114 (34) | 717 (70) | 1051 (137) | x | ... | x | x | x | x | x |
@@ -353,6 +355,7 @@ Min
 
 ![Scenario2 time series](Scenario2dark.svg)
 
+#### Total throughput
 | No. of clients | 4K | 6K | 8K | 10K | ... | 52K | 64K | 70K | 80K | 90K |
 |----------|----------|----------|----------|----------|----------|----------|----------|----------|----------|----------|
 | Kafka Clients (N consumer groups) | 3.6G | 5.4G | 7.1G | x | ... | x | x | x | x | x | x |
@@ -365,6 +368,7 @@ Min
 
 ### __Scenario 3__ 
 
+#### Average latency and standard deviation
 | No. of clients | 2K | 4K | 6K | 10K | 20K | 40K | 50K | 65K | 75K |
 |----------|----------|----------|----------|----------|----------|----------|----------|----------|----------|
 | Kafka Clients (N consumer groups) | 25 (103) | 503 (669) | 918 (1068) | x | x | x | x | x | x |
@@ -376,6 +380,7 @@ Min
 
 ![Scenario3 time series](Scenario3dark.svg)
 
+#### Total throughput
 | No. of clients | 2K | 4K | 6K | 10K | 20K | 40K | 50K | 65K | 75K |
 |----------|----------|----------|----------|----------|----------|----------|----------|----------|----------|
 | Kafka Clients (N consumer groups) | 2.3G | 4.7G | 6.9G | x | x | x | x | x | x |
@@ -385,7 +390,7 @@ Min
 
 *bit/s*
 
-![Scenario3 bandwidth](Scenario3bw.svg)
+![Scenario3 bandwidth](Scenario3bwdark.svg)
 
 ## Conclusions
 
