@@ -3,7 +3,7 @@
 ## TL;DR
 >_Even under the same conditions without special optimizations, Lightstreamer Kafka Connector can scale to tens of thousands of clients, far surpassing the scalability of clients connecting directly to the Kafka broker. These scalability results were achieved using a relatively modest-size server instance._
 >
->![Scenario1 time series](Scenario1dark.svg)
+>![Scenario1 time series](pictures/Scenario1dark.svg)
 
 - [Introduction](#introduction)
   - [Pure Kafka clients case](#pure-kafka-clients-case)
@@ -359,7 +359,7 @@ Min
 
 *Mean latency (Standard Deviation) expressed in millisecond*
 
-![Scenario1 time series](Scenario1dark.svg)
+![Scenario1 time series](pictures/Scenario1dark.svg)
 
 ### __Scenario 2__ 
 
@@ -372,7 +372,7 @@ Min
 
 *Mean latency (Standard Deviation) expressed in millisecond*
 
-![Scenario2 time series](Scenario2dark.svg)
+![Scenario2 time series](pictures/Scenario2dark.svg)
 
 #### Total throughput
 | No. of clients | 4K | 6K | 8K | 10K | ... | 52K | 64K | 70K | 80K | 90K |
@@ -383,7 +383,7 @@ Min
 
 *bit/s*
  
-![Scenario2 bandwidth](Scenario2bwdark.svg)
+![Scenario2 bandwidth](pictures/Scenario2bwdark.svg)
 
 ### __Scenario 3__ 
 
