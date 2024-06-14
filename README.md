@@ -44,12 +44,12 @@ The main purpose of these tests is to conduct a comparison between two different
 ### Pure Kafka clients case
 In this scenario, one or more producers send messages to a single Kafka topic, and all test clients connect directly to the Kafka broker to consume all messages associated with that topic. To achieve this, we tested two options: consumer groups with a single consumer each and standalone clients. Both options ensure that all clients receive all messages from the topic.
         
- ![Pure Kafka Clients Diagram](purekafkaclients_dark.png)
+ ![Pure Kafka Clients Diagram](pictures/purekafkaclients_dark.png)
 
 ### Lightstreamer Kafka Connector case
 In contrast, this approach uses the Lightstreamer Kafka Connector as the sole client for the Kafka broker. Like the previous case, it consumes all messages produced for the single topic defined in the simulation and distributes them to the multitude of clients requiring message consumption.
 
- ![Lightstreamer Connector Diagram](lightstreamerconnector_dark.png)
+ ![Lightstreamer Connector Diagram](pictures/lightstreamerconnector_dark.png)
 
 [Lightstreamer Kafka Connector](https://github.com/Lightstreamer/Lightstreamer-kafka-connector) is a tool that bridges Apache Kafka with Lightstreamer's real-time web streaming capabilities. __It enables efficient and scalable real-time data distribution from Kafka topics to remote mobile and web apps via the Lightstreamer broker.__
 
