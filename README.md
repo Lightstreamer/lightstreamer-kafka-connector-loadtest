@@ -5,7 +5,25 @@
 >
 >![Scenario1 time series](Scenario1dark.svg)
 
-[TOC]
+- [Introduction](#introduction)
+  - [Pure Kafka clients case](#pure-kafka-clients-case)
+  - [Lightstreamer Kafka Connector case](#lightstreamer-kafka-connector-case)
+- [Features and purpose of tests](#features-and-purpose-of-tests)
+- [Scenarios](#scenarios)
+- [Test methodology](#test-methodology)
+  - [Setup the environment](#setup-the-environment)
+  - [Scenario 1](#scenario-1)
+  - [Scenario 2](#scenario-2)
+  - [Scenario 3](#scenario-3)
+    - [JSON patch](#json-patch)
+- [Measurements](#measurements)
+- [Results](#results)
+  - [Scenario 1](#scenario-1-1)
+  - [Scenario 2](#scenario-2-1)
+  - [Scenario 3](#scenario-3-1)
+- [Conclusions](#conclusions)
+- [Useful links](#useful-links)
+- [Contributing](#contributing) 
 
 ## Introduction
 This project provides a suite of programs designed to benchmark the performance of __pure Kafka brokers__ vs. __Lightstreamer Kafka Connector__ in handling high-volume data streams across thousands or more clients.
