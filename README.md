@@ -397,7 +397,7 @@ Min
 
 *Mean latency (Standard Deviation) expressed in millisecond*
 
-![Scenario3 time series](Scenario3dark.svg)
+![Scenario3 time series](pictures/Scenario3dark.svg)
 
 #### Total throughput
 | No. of clients | 2K | 4K | 6K | 10K | 20K | 40K | 50K | 65K | 75K |
@@ -409,7 +409,7 @@ Min
 
 *bit/s*
 
-![Scenario3 bandwidth](Scenario3bwdark.svg)
+![Scenario3 bandwidth](pictures/Scenario3bwdark.svg)
 
 ## Conclusions
 
