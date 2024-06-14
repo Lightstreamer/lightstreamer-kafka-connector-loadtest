@@ -1,63 +1,62 @@
-# Lightstreamer Kafka Connector Benchmarking Tool
+# Kafka Load and Stress Testing Tool
 
-Welcome to Lightstreamer Kafka Connector Benchmarking Tool!
+## TL;DR
+>_Even under the same conditions without special optimizations, Lightstreamer Kafka Connector can scale to tens of thousands of clients, far surpassing the scalability of clients connecting directly to the Kafka broker. These scalability results were achieved using a relatively modest-size server instance._
+>
+>![Scenario1 time series](Scenario1dark.svg)
 
-This project provides a suite of programs designed to benchmark the performance of __Lightstreamer Kafka Connector__ in handling high-volume data streams across thousands or more clients.
-In particular, the main purpose is to conduct a comparison between two different architectures:
+[TOC]
 
- __Pure Kafka Clients Case__ - In this scenario, one or more producers send messages to a single Kafka topic, and all test clients connect directly to the Kafka broker to consume all messages associated with that topic.
+## Introduction
+This project provides a suite of programs designed to benchmark the performance of __pure Kafka brokers__ vs. __Lightstreamer Kafka Connector__ in handling high-volume data streams across thousands or more clients.
+
+__The tests employs a single topic with a single partition. This choice aligns with the nature of the simulations we will conduct, where all clients are expected to consume all messages produced for the topic or a subset that is solely governed by the application logic of individual clients.__
+
+Typical examples of this type of message flow include scenarios where Kafka data should be broadcast to web and mobile applications:
+* __Financial applications__: Transmitting stock prices to trading applications. A Kafka topic carries all market updates, and clients may want to receive messages related to a single stock, a group of stocks, or a market index.
+* __Telemetry applications__: A Kafka topic carries real-time telemetry data collected from producers. A client dashboard is built to display specific metrics.
+* __Chat applications__: A Kafka topic carries all chat messages, which should be delivered to specific client applications based on the chat room they are displaying.
+
+In some scenarios, it is expected that only a subset of messages will reach each client. However, this selection is entirely governed by the application logic and is fundamentally different from how Kafka distributes messages among consumers within a consumer group. For instance, this selection could be based on a specific value of the message key or a particular field within the message itself. Such a scenario would be challenging to adapt to the distribution of various consumer groups across multiple partitions or by proliferating a multitude of topics.
+
+Additionally, the decision to use a single topic and a single partition is motivated by the desire to maintain simplicity. This approach simplifies the overall architecture and facilitates easier implementation and management. By avoiding unnecessary complexity, we can focus on the core aspects of performance evaluation and gain clearer insights into the comparative analysis without compromising the generality and validity of the measurements.
+
+The main purpose of these tests is to conduct a comparison between two different architectures:
+
+### Pure Kafka clients case
+In this scenario, one or more producers send messages to a single Kafka topic, and all test clients connect directly to the Kafka broker to consume all messages associated with that topic. To achieve this, we tested two options: consumer groups with a single consumer each and standalone clients. Both options ensure that all clients receive all messages from the topic.
         
  ![Pure Kafka Clients Diagram](purekafkaclients_dark.png)
 
- __Lightstreamer Kafka Connector Case__ - In contrast, this approach employs Lightstreamer Kafka Connector as the sole client for the Kafka broker. Similar to the previous case, it consumes all messages produced for the single topic defined in the simulation and distributes them to the multitude of clients requiring message consumption.
+### Lightstreamer Kafka Connector case
+In contrast, this approach uses the Lightstreamer Kafka Connector as the sole client for the Kafka broker. Like the previous case, it consumes all messages produced for the single topic defined in the simulation and distributes them to the multitude of clients requiring message consumption.
 
  ![Lightstreamer Connector Diagram](lightstreamerconnector_dark.png)
 
-The simulation employs a single topic with a single partition. This choice aligns with the nature of the simulations we will conduct, where all clients are expected to consume all messages produced for the topic.
-Indeed in some scenarios, it is expected that only a subset of messages will reach each client; however, the selection is solely governed by the application logic of individual clients.
-This could involve, for instance, a specific value of the message key or even a particular value of a field within the message itself.
-Such a scenario would be hard challenging to adapt to the distribution of various consumer groups across multiple partitions or by proliferating a multitude of topics.
+[Lightstreamer Kafka Connector](https://github.com/Lightstreamer/Lightstreamer-kafka-connector) is a tool that bridges Apache Kafka with Lightstreamer's real-time web streaming capabilities. __It enables efficient and scalable real-time data distribution from Kafka topics to remote mobile and web apps via the Lightstreamer broker.__
 
-Additionally, the decision to use a single topic and a single partition is also motivated by the desire to maintain simplicity. This approach simplifies the overall architecture and facilitates easier implementation and management. By avoiding unnecessary complexity, we can focus on the core aspects of the performance evaluation and gain clearer insights into the comparative analysis.
-
-Examples of this type of message flow include:
-* __Financial applications__: Transmission of stock prices to trading applications. In this context, clients might want to receive only messages related to a single stock, a group of stocks, or a market index.
-* __Telemetry applications__: Real-time data delivery from various devices. In this case, client applications could build customized dashboards by specifying which metrics and from which devices to receive the data.
-* __Chat applications__: Message delivery to specific chat groups.
-
-[Lightstreamer Kafka Connector](https://github.com/Lightstreamer/Lightstreamer-kafka-connector) is a powerful tool that bridges Apache Kafka with Lightstreamer's real-time data streaming capabilities. It enables __efficient and scalable real-time data distribution from Kafka topics__ to a multitude of mobile and web apps via the Lightstreamer server.
-
-Lightstreamer kernel, that is the core of Lightstreamer Kafka Connector, optimizes data delivery to clients through its real-time streaming engine, which efficiently manages data updates. By employing techniques like publish-subscribe, delta delivery, conflation, and smart throttling, Lightstreamer minimizes bandwidth usage while ensuring timely delivery of relevant updates to connected clients. This approach allows Lightstreamer to scale seamlessly to support large numbers of concurrently connected clients, making it ideal for high-throughput real-time applications.
+The Lightstreamer broker, which is the core of the Lightstreamer Kafka Connector, optimizes data delivery to clients with __intelligent streaming__. Using WebSockets and HTTP streaming, Lightstreamer dynamically throttles the data flow, applying data resampling and conflation to adapt to the network capacity of each client, and efficiently passing through proxies, firewalls, and other network intermediaries. Lightstreamer minimizes bandwidth usage while ensuring timely delivery of relevant updates to connected clients. This approach allows Lightstreamer to scale seamlessly to support large numbers of concurrently connected clients, making it ideal for high-throughput, internet-facing, real-time applications.
 
 ## Features and purpose of tests
-This benchmarking tool is intended to assist developers and system administrators in evaluating the __real-time data streaming capabilities__ of Lightstreamer Kafka Connector. By simulating a large number of client connections and measuring various performance metrics, users can gain insights into the scalability, throughput, and latency characteristics of each platform.
-And this is always in the context of a comparison with the architecture without Lightstreamer Kafka Connector.
+The benchmarking tool contained in this project is intended to assist developers and system administrators in evaluating the scalability of Kafka topic broadcasting, with and without Lightstreamer Kafka Connector. By simulating a large number of client connections and measuring various performance metrics, users can gain insights into the scalability, throughput, and latency characteristics of each platform.
 
 The tool includes components for generating load with random data streams, simulating client connections, and measuring key performance indicators such as message delivery latency, throughput, and system resource utilization.
 
 To recap:
-* __Scalability Testing__: Simulate thousands of concurrent client connections to assess the scalability of Lightstreamer Kafka Connector.
+* __Scalability Testing__: Simulate thousands of concurrent client connections to assess the scalability of the platform.
 * __Latency Measurement__: Measure end-to-end message delivery latency under varying load conditions.
 * __Throughput Analysis__: Evaluate the maximum throughput achievable by each platform under different scenarios.
 * __Resource Monitoring__: Monitor system resource utilization (CPU, memory, network) during benchmarking tests.
 
 ## Scenarios
+
 Leveraging the software tools from this project, we conducted a series of tests with various configurations to simulate different scenarios.
 
-The first scenario involved generating simple messages with a single field containing a randomly generated __alphanumeric string of 1024 bytes__.
-Each message was accompanied by a basic header containing the creation timestamp and the producer's ID.
-These messages were sent to a Kafka topic without specifying a key, resulting in all clients receiving all messages.
-Furthermore, there was no possibility of performing delta delivery on the message payload.
-For this scenario, we have set a message production and sending frequency of __4 messages per second__.
+The first scenario involved generating simple messages with a single field containing a randomly generated __alphanumeric string of 1024 bytes__. Each message was accompanied by a basic header containing the creation timestamp and the producer's ID. These messages were sent to a Kafka topic without specifying a key, resulting in all clients receiving all messages. Furthermore, there was no possibility of performing delta delivery on the message payload. For this scenario, we set a message production and sending frequency of __4 messages per second__.
 
-The second scenario replicated the message composition of the first but __added a key value__ chosen from a set of 40 possibilities to each message sent to Kafka.
-This allowed Lightstreamer clients to take advantage of the publish-subscribe functionality and subscribe to a specific item associated with a single key, receiving only the messages relevant to that key.
-In contrast, a generic Kafka client would receive all messages and have to determine which message to process based on the key.
-The advantages in terms of network bandwidth savings are evident.
-For this scenario, we have set a message production and sending frequency of __100 messages per second__.
+The second scenario replicated the message composition of the first but __added a key value__ chosen from a set of 40 possibilities to each message sent to Kafka. This allowed Lightstreamer clients to take advantage of the publish-subscribe functionality and subscribe to a specific item associated with a single key, receiving only the messages relevant to that key. In contrast, a generic Kafka client would receive all messages and have to determine which messages to process based on the key. The advantages in terms of network bandwidth savings are evident. For this scenario, we set a message production and sending frequency of __100 messages per second__.
 
-In the third scenario, we __serialized JSON messages in Kafka__. The message producer would send a sequence of messages with variations relative to only a subset of the fields composing the JSON structure, for each key. In this case Lightstreamer Kafka Connector allows you to specify that messages read from a particular topic should be deserialized into JSON objects and, in addition, to map the JSON structure to different Lightstreamer fields. This allows, in addition to the optimization due to key filtering, to exploit the delta delivery mechanism offered by the Lightstreamer engine; that is, for each message, to determine which fields have actually changed and therefore send only the differences. An additional saving in the use of network resources.
-For this scenario, we have set a message production and sending frequency of __100 messages per second__.
+In the third scenario, we __serialized JSON messages in Kafka__. The message producer sent a sequence of messages with variations in only a subset of the fields composing the JSON structure for each key. Lightstreamer Kafka Connector allows you to specify that messages read from a particular topic should be deserialized into JSON objects and map the JSON structure to different Lightstreamer fields. This enables not only key filtering optimization but also the exploitation of the delta delivery mechanism offered by the Lightstreamer engine. This mechanism determines which fields have changed in each message and sends only the differences, resulting in additional savings in network resource usage. For this scenario, we set a message production and sending frequency of __100 messages per second__.
 
 In this particular case, the test load is generated through messages composed of a complex JSON structure with various fields:
 ```JSON
@@ -101,9 +100,9 @@ The tests were conducted in an AWS environment using EC2 instances. Specifically
 * __c7i.xlarge instance__ This instance was dedicated to Lightstreamer Kafka Connector.
 * __Multiple c7i.2xlarge instances__ These instances simulated clients. For the pure Kafka case, we used the project's built-in consumers. For the Lightstreamer Connector case, we used a modified version of the [Lightstreamer Load Test Toolkit](https://github.com/Lightstreamer/load-test-toolkit/tree/lightstreamer-kafka-connector-benchmark).
 
-As __Kakfa broker__ we used the official Apache distribution version 3.5.1. For the installation simply follow the basic instructions from this tutorial: [https://kafka.apache.org/quickstart](https://kafka.apache.org/quickstart)
+As the __Kakfa broker__ we used the official Apache distribution version 3.5.1. For the installation simply follow the basic instructions from this tutorial: [https://kafka.apache.org/quickstart](https://kafka.apache.org/quickstart)
 
-The __Lightstreamer server__ version used was __7.4.2__, and __Lightstreamer Kafka Connector__ version was __0.1.0__. For the necessary installation in these tests, you can start with the brief guide 'GETTING_STARTED.TXT' found in the default distribution of the [Lightstreamer server](https://lightstreamer.com/download/). Next, you need to install the LoadTestToolkit adapter as explained [here](https://github.com/Lightstreamer/load-test-toolkit/tree/lightstreamer-kafka-connector-benchmark?tab=readme-ov-file). Finally, you need to install Lightstreamer Kafka Connector. Begin with the installation found [here](https://github.com/Lightstreamer/Lightstreamer-kafka-connector/releases), which includes instructions within the zip file. The `resources/ConnectorConfigurations` folder contains the configurations (the `adapters.xml` file) used for Lightstreamer Kafka Connector in various scenarios. In all configurations the parameter
+The __Lightstreamer server__ version used was __7.4.2__, and __Lightstreamer Kafka Connector__ version was __0.1.0__. To install these for the tests, start with the brief guide 'GETTING_STARTED.TXT' found in the default distribution of the [Lightstreamer server](https://lightstreamer.com/download/). Next, install the LoadTestToolkit adapter as explained [here](https://github.com/Lightstreamer/load-test-toolkit/tree/lightstreamer-kafka-connector-benchmark?tab=readme-ov-file). Finally, install Lightstreamer Kafka Connector. Begin with the installation notes found [here](https://github.com/Lightstreamer/Lightstreamer-kafka-connector/releases), which includes instructions within the zip file. The `resources/ConnectorConfigurations` folder contains the configurations (the `adapters.xml` file) used for Lightstreamer Kafka Connector in various scenarios. In all configurations the parameter
 
 ```sh
     <!-- The Kafka cluster address -->
@@ -114,9 +113,12 @@ contains localhost but should be changed with the actual Kafka cluster address.
 
 The JVM used in all tests was `OpenJDK Runtime Environment Corretto-21.0.2.13.1 (build 21.0.2+13-LTS)`.
 
-For all scenarios in the pure Kafka client case, we tested both with clients that specify a particular consumer group, each different from the other, so that all clients receive all the messages from the topic, and with standalone clients. A __standalone client__ processes all messages on its own, requiring manual offset management and not benefiting from load distribution.
+For all scenarios in the pure Kafka client case, we tested with two configurations:
 
-All tests were conducted without using TLS communication between clients and servers. This was done to simplify the test scenarios and considering that in real production environments, TLS is often handled by external offloaders.
+1. **Clients in different consumer groups**: Each client specifies a unique consumer group, ensuring that all clients receive all messages from the topic.
+2. **Standalone clients**: Each standalone client processes all messages independently, requiring manual offset management and not benefiting from load distribution.
+
+All tests were conducted without using TLS communication between clients and servers. This was done to simplify the test scenarios, considering that in real production environments, TLS is often handled by external offloaders.
 
 ### Scenario 1
 In the simplest scenario, the relevant configuration for Lightstreamer Kafka Connector is reduced to defining the topic to read messages from and mapping the corresponding item and message text to a single Lightstreamer field:
@@ -137,7 +139,7 @@ The load for the test is generated by launching the `MessageGenerator` with the 
 ```sh
 java -cp "dependency/*:dependency/log4j2.xml" com.lightstreamer.MessageGenerator localhost:9092 LTest 2 500 1024 base
 ```
-In this configuration, tests were conducted under various conditions with a load ranging __from 1,000 simultaneously connected clients to 50,000 clients__. Considering that 4 messages were produced per second (two producers generating 2 messages per second), it is easy to determine that the overall load ranged from 4,000 messages per second to 200,000 messages per second. For the Kafka clients case, the `BaseConsumer` was used, distributing the load across the client machines up to a maximum of 3,000 consumers per machine. For Lightstreamer Kafka Connector case, the `ClientSimulator` of the Load Test Toolkit was used, specifying the following in the configuration and distributing the load across the client machines up to 20,000 clients per machine:
+In this configuration, tests were conducted under various conditions with a load ranging __from 1,000 simultaneously connected clients to 50,000 clients__. Considering that 4 messages were produced per second (two producers generating 2 messages per second), it is easy to determine that __the overall load ranged from 4,000 messages per second to 200,000 messages per second__. For the Kafka clients case, the `BaseConsumer` was used, distributing the load across the client machines up to a maximum of 3,000 consumers per machine. For Lightstreamer Kafka Connector case, the `ClientSimulator` of the Load Test Toolkit was used, specifying the following in the configuration and distributing the load across the client machines up to 20,000 clients per machine:
 ```xml
     <param name="protocol">ws://</param>
     <param name="host">localhost</param>
@@ -176,7 +178,7 @@ The load for the test is generated by launching the `MessageGenerator` with the 
 ```sh
 java -cp "dependency/*:dependency/log4j2.xml" com.lightstreamer.MessageGenerator ...:9092 LTest 10 100 1024 keyed
 ```
-In this configuration, tests were conducted under various conditions with a load ranging from __4,000 simultaneously connected clients to 90,000 clients__. Considering that 100 messages were produced per second (ten producers generating ten messages per second), the overall potential message flow ranged from 400,000 messages per second to 9 million messages per second. For the Kafka clients, the same `BaseConsumer` as in the previous scenario was used. Since a Kafka consumer cannot filter the incoming message stream based on a specific key value and client-side filtering was unnecessary for the test, this approach was appropriate. The load was distributed across client machines, with a maximum of 1,500 consumers per machine.
+In this configuration, tests were conducted under various conditions with a load ranging from __4,000 simultaneously connected clients to 90,000 clients__. Considering that 100 messages were produced per second (ten producers generating ten messages per second), __the overall potential message flow ranged from 400,000 messages per second to 9 million messages per second__. For the Kafka clients, the same `BaseConsumer` as in the previous scenario was used. Since a Kafka consumer cannot filter the incoming message stream based on a specific key value and client-side filtering was unnecessary for the test, this approach was appropriate. The load was distributed across client machines, with a maximum of 1,500 consumers per machine.
 For Lightstreamer Kafka Connector case, the `ClientSimulator` of the Load Test Toolkit was used, specifying the following in the configuration and distributing the load across the client machines up to 20,000 clients per machine:
 ```xml
     <param name="protocol">ws://</param>
@@ -229,7 +231,7 @@ The load for the test is generated by launching the `MessageGenerator` with the 
 ```sh
 java -cp "dependency/*:dependency/log4j2.xml" com.lightstreamer.MessageGenerator ...:9092 LTest 10 100 1024 complex
 ```
-In this configuration, tests were conducted under various conditions with a load ranging from __2,000 simultaneously connected clients to 75,000 clients__. Considering that 100 messages were produced per second (ten producers generating ten messages per second), the overall potential message flow ranged from 200,000 messages per second to 7.5 milion messages per second.
+In this configuration, tests were conducted under various conditions with a load ranging from __2,000 simultaneously connected clients to 75,000 clients__. Considering that 100 messages were produced per second (ten producers generating ten messages per second), __the overall potential message flow ranged from 200,000 messages per second to 7.5 milion messages per second__.
 For the Kafka clients case, the same `JsonComplexConsumer` was used, distributing the load across the client machines up to a maximum of 1,500 consumers per machine.
 For Lightstreamer Kafka Connector case, the `ClientSimulator` of the Load Test Toolkit was used, specifying the following in the configuration and distributing the load across the client machines up to 20,000 clients per machine:
 ```xml
@@ -393,19 +395,19 @@ Min
 
 ## Conclusions
 
-Few headlines emerged form the tests:
+A few key takeaways emerged from the tests:
 
- __Lightstreamer Kafka Connector Scalability:__ Even under the same conditions without special optimizations, Lightstreamer Kafka Connector can scale to tens of thousands of clients, far surpassing the scalability of clients connecting directly to the Kafka broker. These scalability results were achieved using a relatively modest-size server instance.
+**Lightstreamer Kafka Connector scalability:** Even under the same conditions without special optimizations, the Lightstreamer Kafka Connector can scale to tens of thousands of clients, far surpassing the scalability of clients connecting directly to the Kafka broker. These scalability results were achieved using a relatively modest-size server instance.
 
- __Key-based Filtering:__ By including a key value in each message sent to Kafka, Lightstreamer clients can subscribe to specific items associated with particular keys. This allows clients to receive only the messages relevant to their subscribed keys, reducing network bandwidth usage and processing overhead.
+**Key-based filtering:** By including a key value in each message sent to Kafka, Lightstreamer clients can subscribe to specific items associated with particular keys. This allows clients to receive only the messages relevant to their subscribed keys, reducing network bandwidth usage and processing overhead.
 
- __Efficient Message Processing:__ Compared to a traditional approach with generic Kafka clients where all messages from a topic are sent to all connected clients, forcing each client to filter them based on a key, Lightstreamer Kafka Connector operates differently. It acts as a single client for the Kafka broker, receiving each message only once. The connector then efficiently distributes messages to relevant clients based on their specific requests, resulting in more efficient message handling and reduced latency.
+**Efficient message processing:** Compared to a traditional approach with generic Kafka clients where all messages from a topic are sent to all connected clients, forcing each client to filter them based on a key, Lightstreamer Kafka Connector operates differently. It acts as a single client for the Kafka broker, receiving each message only once. The connector then efficiently distributes messages to relevant clients based on their specific requests, resulting in more efficient message handling and reduced latency.
 
- __JSON Serialization with Key:__ Serializing JSON messages in Kafka with associated keys enables more granular data distribution and processing.
+**JSON serialization with key:** Serializing JSON messages in Kafka with associated keys enables more granular data distribution and processing.
 
- __Dynamic Data Updates:__ In real-world scenarios where JSON data structures contain numerous fields, transmitting only the changed fields allows for dynamic updates to be efficiently propagated to clients without unnecessary data overhead.
+**Dynamic data updates:** In real-world scenarios where JSON data structures contain numerous fields, transmitting only the changed fields allows for dynamic updates to be efficiently propagated to clients without unnecessary data overhead.
 
- __Selective Field Transmission:__ In addition, the Lightstreamer client can further optimize bandwidth usage by subscribing to only a subset of the available fields, selecting only those actually required for its operations. This approach would result in additional resources savings.
+**Selective field transmission:** Additionally, the Lightstreamer client can further optimize bandwidth usage by subscribing to only a subset of the available fields, selecting only those actually required for its operations. This approach results in additional resource savings.
 
 ## Useful links
 
