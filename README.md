@@ -1,7 +1,7 @@
 # Kafka Load and Stress Testing Tool
 
 ## TL;DR
->_Even under the same conditions without special optimizations, Lightstreamer Kafka Connector can scale to tens of thousands of clients, far surpassing the scalability of clients connecting directly to the Kafka broker. These scalability results were achieved using a relatively modest-size server instance._
+>_Under the same test conditions, even on a modest server with 4 cores and 8 GiB of RAM, the Lightstreamer Kafka Connector demonstrated the ability to scale to tens or hundreds of thousands of concurrent clients, significantly surpassing the scalability of direct connections to the Kafka broker._
 >
 >![Scenario1 time series](pictures/Scenario1dark.svg)
 
