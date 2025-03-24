@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2024 Lightstreamer Srl
+ * Copyright (C) 2025 Lightstreamer Srl
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -61,58 +61,61 @@ public class JsonVeryComplexProducer extends BaseProducer {
     private static ConcurrentHashMap<String, TestVeryComplexObj> messages = new ConcurrentHashMap<String, TestVeryComplexObj>();
 
     private Random random = new SecureRandom();
-
-    private String generateRandomString(int length) {
-        StringBuilder sb = new StringBuilder(length);
-
-        for (int i = 0; i < length; i++) {
-            int randomIndex = random.nextInt(CHARACTERS.length());
-            char randomChar = CHARACTERS.charAt(randomIndex);
-            sb.append(randomChar);
-        }
-
-        return sb.toString();
-    }
-
-    private int generateRndInt() {
-        return random.nextInt();
-    }
-
-    private static String generateMillisTS() {
-        long milliseconds = System.currentTimeMillis();
-
-        Date date = new Date(milliseconds);
-
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
-
-        String formattedDate = sdf.format(date);
-
-        return formattedDate;
-    }
-
-    private void generateMessage() {
-        for (int i = 0; i < stringids.length; i++) {
-
-            // choose 3 hobbies random
-            List<String> hList = new LinkedList<>();
-            for (int k = 0; k < 3; k++) {
-                hList.add(hobbies[random.nextInt(hobbies.length)]);
+    
+        private boolean addPrefix;
+    
+        private String generateRandomString(int length) {
+            StringBuilder sb = new StringBuilder(length);
+    
+            for (int i = 0; i < length; i++) {
+                int randomIndex = random.nextInt(CHARACTERS.length());
+                char randomChar = CHARACTERS.charAt(randomIndex);
+                sb.append(randomChar);
             }
-
-            messages.put(stringids[i],
-                    new TestVeryComplexObj(stringids[i], generateRandomString(20), generateRandomString(256),
-                            generateRandomString(256), generateRandomString(256), generateRandomString(256),
-                            generateRndInt(), generateRndInt(), generateRndInt(), generateRndInt(), hList,
-                            generateMillisTS()));
-
-            logger.info("Generated first message for {} ok.", stringids[i]);
+    
+            return sb.toString();
         }
-    }
-
-    public JsonVeryComplexProducer(String kafka_bootstrap_string, String pid, String topicname, int pause, int msgsize,
-            boolean first) {
-        super(kafka_bootstrap_string, pid, topicname, pause, msgsize);
-
+    
+        private int generateRndInt() {
+            return random.nextInt();
+        }
+    
+        private static String generateMillisTS() {
+            long milliseconds = System.currentTimeMillis();
+    
+            Date date = new Date(milliseconds);
+    
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+    
+            String formattedDate = sdf.format(date);
+    
+            return formattedDate;
+        }
+    
+        private void generateMessage() {
+            for (int i = 0; i < stringids.length; i++) {
+    
+                // choose 3 hobbies random
+                List<String> hList = new LinkedList<>();
+                for (int k = 0; k < 3; k++) {
+                    hList.add(hobbies[random.nextInt(hobbies.length)]);
+                }
+    
+                messages.put(stringids[i],
+                        new TestVeryComplexObj(stringids[i], generateRandomString(20), generateRandomString(256),
+                                generateRandomString(256), generateRandomString(256), generateRandomString(256),
+                                generateRndInt(), generateRndInt(), generateRndInt(), generateRndInt(), hList,
+                                generateMillisTS()));
+    
+                logger.info("Generated first message for {} ok.", stringids[i]);
+            }
+        }
+    
+        public JsonVeryComplexProducer(String kafka_bootstrap_string, String pid, String topicname, int pause, int msgsize,
+                boolean first, boolean addPrefix) {
+            super(kafka_bootstrap_string, pid, topicname, pause, msgsize);
+    
+            this.addPrefix = addPrefix;
         if (first) {
             generateMessage();
         }
@@ -146,6 +149,7 @@ public class JsonVeryComplexProducer extends BaseProducer {
             }
 
             while (goproduce) {
+                String prefix = addPrefix ? "PREFIX-" : "";
                 int index = random.nextInt(stringids.length);
                 String id = stringids[index];
 
@@ -168,7 +172,7 @@ public class JsonVeryComplexProducer extends BaseProducer {
                         message.setChanges(generateRandomString(20));
                         message.setFirstnumber(generateRndInt());
                     }
-                    message.setTimestamp(generateMillisTS());
+                    message.setTimestamp(prefix + generateMillisTS());
 
                     futurek = producer
                             .send(new ProducerRecord<String, TestVeryComplexObj>(ktopicname, message.id, message));

@@ -40,16 +40,16 @@ public class TestVeryComplexObj {
     public String fourthText;
 
     @JsonProperty
-    private int firstnumber;
+    public int firstnumber;
 
     @JsonProperty
-    private int secondNumber;
+    public int secondNumber;
 
     @JsonProperty
-    private int thirdNumber;
+    public int thirdNumber;
 
     @JsonProperty
-    private int fourthNumber;
+    public int fourthNumber;
 
     @JsonProperty
     private List<String> hobbies;

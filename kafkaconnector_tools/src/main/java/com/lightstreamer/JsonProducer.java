@@ -21,7 +21,10 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Properties;
 import java.util.Random;
+import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.Producer;
@@ -45,6 +48,8 @@ public class JsonProducer extends BaseProducer {
             "Dragonfruit", "Passionfruit", "Papaya", "Melon", "Lime",
             "Nectarine", "Persimmon", "Starfruit", "Tangerine", "Durian",
             "Kumquat", "Cranberry", "Rambutan", "Mangosteen", "Jackfruit" };
+
+    private String[] largeStrings = new String[strings.length];
 
     private static final Logger logger = LogManager.getLogger(JsonProducer.class);
 
@@ -78,10 +83,28 @@ public class JsonProducer extends BaseProducer {
         return formattedDate;
     }
 
-    public JsonProducer(String kafka_bootstrap_string, String pid, String topicname, int pause, int msgsize) {
-        super(kafka_bootstrap_string, pid, topicname, pause, msgsize);
+    private static String buildRepeatedString(String base, int totalLength) {
+        StringBuilder sb = new StringBuilder();
+        while (sb.length() < totalLength) {
+            sb.append(base);
+        }
+        return sb.length() > totalLength
+            ? sb.substring(0, totalLength)
+            : sb.toString();
+    }
 
-        logger.info("Json producer " + pid + " ok.");
+    private boolean addPrefix;
+    private boolean useLargeStrings;
+
+    public JsonProducer(String kafka_bootstrap_string, String pid, String topicname, int pause, int msgsize, boolean addPrefix, boolean useLargeStrings) {
+        super(kafka_bootstrap_string, pid, topicname, pause, msgsize);
+        this.addPrefix = addPrefix;
+        this.useLargeStrings = useLargeStrings;
+        logger.info("Json producer: " + pid + ", prefix: " + addPrefix + ", ok.");
+
+        for (int i = 0; i < strings.length; i++) {
+            largeStrings[i] = buildRepeatedString(strings[i], 500);
+        }
     }
 
     @Override
@@ -95,37 +118,44 @@ public class JsonProducer extends BaseProducer {
                 io.confluent.kafka.serializers.KafkaJsonSerializer.class);
 
         try {
-            Future<RecordMetadata> futurek;
-
             Producer<String, TestObj> producer = new KafkaProducer<>(props);
 
-            while (goproduce) {
-                int index = random.nextInt(strings.length);
-                String sndV = strings[index];
+            final long[] startTime = {System.currentTimeMillis()};
+            final int[] messageCount = {0};
 
-                TestObj message = new TestObj(generateMillisTS(), generateRandomString(512), sndV, generateRndInt());
+            ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
+            executor.scheduleAtFixedRate(() -> {
+                if (!goproduce) {
+                    executor.shutdown();
+                    producer.close();
+                    return;
+                }
+                String prefix = addPrefix ? "PREFIX-" : "";
+                String[] keyArray = useLargeStrings ? largeStrings : strings;
+                int index = random.nextInt(keyArray.length);
+                String sndV = keyArray[index];
 
-                logger.debug("New Message : " + message.sndValue);
+                TestObj message = new TestObj(prefix + generateMillisTS(), generateRandomString(512), sndV, generateRndInt());
+                logger.debug("New message for : " + message.sndValue);
 
-                futurek = producer
-                        .send(new ProducerRecord<String, TestObj>(ktopicname, sndV, message));
-
-                logger.debug("Sent message : " + futurek.isDone());
-
-                /*
-                 * RecordMetadata rmtdta = futurek.get();
-                 * 
-                 * logger.debug("Partition : " + rmtdta.partition() + ", " + rmtdta.offset());
-                 */
-
-                Thread.sleep(millisp);
-            }
-
-            producer.close();
-
+                try {
+                    Future<RecordMetadata> future = producer.send(new ProducerRecord<>(ktopicname, sndV, message));
+                    logger.debug("Sent message : {}", future.isDone());
+                } catch (Exception e) {
+                    logger.error("Error during sending message : " + e.getMessage());
+                }
+                
+                long currentTime = System.currentTimeMillis();
+                if (currentTime - startTime[0] >= 1000) {
+                    logger.info("Messages sent in the last second: " + messageCount[0]);
+                    messageCount[0] = 0;
+                    startTime[0] = currentTime;
+                } else {
+                    messageCount[0]++;
+                }
+            }, 0, millisp, TimeUnit.MILLISECONDS);
         } catch (Exception e) {
             logger.error("Error during producer loop: " + e.getMessage());
         }
     }
-
 }

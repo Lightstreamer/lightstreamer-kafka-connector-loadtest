@@ -64,18 +64,28 @@ public class MessageGenerator {
 
         String keyornot = args[5];
 
+        boolean additionalParam = false;
+        if (args.length > 6) {
+            additionalParam = Boolean.parseBoolean(args[6]);
+        }
+
+        boolean lastParamForJson = false;
+        if (args.length > 7) {
+            lastParamForJson = Boolean.parseBoolean(args[7]);
+        }
+
         BaseProducer[] producers = new BaseProducer[num_producers];
 
         if (keyornot.equals("keyed")) {
             for (int k = 0; k < num_producers; k++) {
-                producers[k] = new KeyProducer(kconnstring, "pid-" + k, topicname, pause_milis, msg_size);
+                producers[k] = new KeyProducer(kconnstring, "pid-" + k, topicname, pause_milis, msg_size, additionalParam);
                 producers[k].start();
 
                 logger.info("Key Producer pid-{} started.", k);
             }
         } else if (keyornot.equals("json")) {
             for (int k = 0; k < num_producers; k++) {
-                producers[k] = new JsonProducer(kconnstring, "pid-" + k, topicname, pause_milis, msg_size);
+                producers[k] = new JsonProducer(kconnstring, "pid-" + k, topicname, pause_milis, msg_size, additionalParam, lastParamForJson);
                 producers[k].start();
 
                 logger.info("Json Producer pid-{} started.", k);
@@ -97,7 +107,7 @@ public class MessageGenerator {
                 logger.info("Json Producer pid-{} started.", k);
             }
         } else if (keyornot.equals("verycomplex")) {
-            producers[0] = new JsonVeryComplexProducer(kconnstring, "pid-0", topicname, pause_milis, msg_size, true);
+            producers[0] = new JsonVeryComplexProducer(kconnstring, "pid-0", topicname, pause_milis, msg_size, true, additionalParam);
             producers[0].start();
             try {
                 Thread.sleep(200);
@@ -106,11 +116,27 @@ public class MessageGenerator {
             }
 
             for (int k = 1; k < num_producers; k++) {
-                producers[k] = new JsonVeryComplexProducer(kconnstring, "pid-" + k, topicname, pause_milis, msg_size,
-                        false);
+                producers[k] = new JsonVeryComplexProducer(kconnstring, "pid-" + k, topicname, pause_milis, msg_size, false, additionalParam);
                 producers[k].start();
 
-                logger.info("Json Producer (very) pid-{} started.", k);
+                logger.info("Json Complex Producer (very) pid-{} started.", k);
+            }
+        } else if (keyornot.equals("jsonkeyx")) {
+            producers[0] = new JsonVeryComplexProducerWithJsonKey(kconnstring, "pid-0", topicname, pause_milis, msg_size, true, additionalParam);
+            producers[0].start();
+
+            logger.info("Json Key Complex Producer (very) pid-{} started.", 0);
+            try {
+                Thread.sleep(200);
+            } catch (InterruptedException e) {
+                // .
+            }
+
+            for (int k = 1; k < num_producers; k++) {
+                producers[k] = new JsonVeryComplexProducerWithJsonKey(kconnstring, "pid-" + k, topicname, pause_milis, msg_size, false, additionalParam);
+                producers[k].start();
+
+                logger.info("Json Key Complex Producer (very) pid-{} started.", k);
             }
         } else {
             for (int k = 0; k < num_producers; k++) {

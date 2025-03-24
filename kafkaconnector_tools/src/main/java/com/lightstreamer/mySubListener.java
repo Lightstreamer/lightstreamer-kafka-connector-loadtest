@@ -19,8 +19,6 @@ package com.lightstreamer;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Iterator;
-import java.util.Map.Entry;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -28,22 +26,30 @@ import org.apache.logging.log4j.Logger;
 import com.lightstreamer.client.ItemUpdate;
 import com.lightstreamer.client.SubscriptionListener;
 
-public class mySubListener implements SubscriptionListener {
+public class MySubListener implements SubscriptionListener {
 
-    private static final Logger logger = LogManager.getLogger(mySubListener.class);
+    private static final Logger logger = LogManager.getLogger(MySubListener.class);
 
-    private StatisticsCalculator stats = new StatisticsCalculator(10000);
+    private StatisticsManager statsManager;
+    private boolean calculateLatencyStats;
+    private boolean kj;
+    
+        public MySubListener(boolean calculateLatencyStats, StatisticsManager statsManager, boolean kj) {
+            this.calculateLatencyStats = calculateLatencyStats;
+            this.statsManager = statsManager;
+            this.kj = kj;
+    }
 
     private int k = 0;
 
-    private long timediff(String timestampString) {
+    private int timediff(String timestampString) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS");
         LocalDateTime timestamp = LocalDateTime.parse(timestampString, formatter);
         LocalDateTime oraAttuale = LocalDateTime.now();
 
         long differenzaMillisecondi = Duration.between(timestamp, oraAttuale).toMillis();
 
-        return differenzaMillisecondi;
+        return (int) differenzaMillisecondi;
     }
     @Override
     public void onClearSnapshot(String itemName, int itemPos) {
@@ -87,26 +93,52 @@ public class mySubListener implements SubscriptionListener {
          * stats.addValue(diff);
          */
 
-        Iterator<Entry<String, String>> changedValues = update.getChangedFields().entrySet().iterator();
+        String updts = update.getValue("timestamp");
+        if (kj) {
+            logger.debug(" --> " + updts + " - " + update.getValue("secondText") + " - " + update.getValue("thirdNumber") + " - " + update.getValue("hobbie1"));
+            logger.debug(" key: " + update.getValue("key") + " - " + update.getValue("names775") + " - " + update.getValue("names1001"));
+        } else {
+            logger.debug(" --> " + updts + " - " + update.getValue("fstValue") + " - " + update.getValue("intNum") + " - " + update.getValue("sndValue"));
+            logger.debug(" key: " + update.getValue("key") );
+        }
+        
+        if (calculateLatencyStats && updts.startsWith("PREFIX-")) {
+            String tsmsg = updts.substring(7, 30); // Skip the "PREFIX-" part
+
+            int diff = timediff(tsmsg);
+            
+            this.statsManager.onData(diff);
+            logger.debug("------------------- " + diff);
+
+            if (k == 0) {
+                statsManager.generateReport();
+            }
+            if (++k == 10) k = 0;
+        }
+        /* 
+                 Iterator<Entry<String, String>> changedValues = update.getChangedFields().entrySet().iterator();
         while (changedValues.hasNext()) {
             Entry<String, String> field = changedValues.next();
-            logger.info("Field " + field.getKey() + " changed: " + field.getValue());
+            logger.debug("Field " + field.getKey() + " changed: " + field.getValue());
 
-            // String tsmsg = field.getValue().substring(0, 23);
+            if (calculateLatencyStats && field.getValue().startsWith("PREFIX-")) {
+                String tsmsg = field.getValue().substring(7, 30); // Skip the "PREFIX-" part
 
-        // long diff = timediff(tsmsg);
-        // stats.addValue(diff);
-        // logger.debug("Key: " + update.getValue("key") + ", Value: " +
-        // update.getValue("value"));
-        // logger.debug("------------------- " + diff);
-        // if (k == 0) {
-        // logger.info("Mean: " + stats.calculateMean() + ", Median = " +
-        // stats.calculateMedian()
-        // + ", confidence = " + stats.calculateConfidenceInterval(500));
-        // }
-        // if (++k == 100)
-        // k = 0;
-    }
+                long diff = timediff(tsmsg);
+                stats.addValue(diff);
+                logger.debug("------------------- " + diff);
+
+                if (k == 0) {
+                    logger.info("Mean: " + stats.calculateMean() + ", Median = " +
+                        stats.calculateMedian()
+                        + ", confidence = " + stats.calculateConfidenceInterval(500));
+                }
+                if (++k == 10) k = 0;
+            }
+        }
+         */
+
+
     }
 
     @Override

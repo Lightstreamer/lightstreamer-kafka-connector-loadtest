@@ -44,7 +44,7 @@
         <!-- FIELDS MAPPING SECTION -->
 
         <!-- Extraction of the record key mapped to the field "key". -->
-        <param name="field.key">#{KEY}</param>
+        <param name="field.key">#{KEY.nameId}</param>
 
         <!-- Extraction of the JSON record value mapped to the field "value". -->
         <param name="field.timestamp">#{VALUE.timestamp}</param>

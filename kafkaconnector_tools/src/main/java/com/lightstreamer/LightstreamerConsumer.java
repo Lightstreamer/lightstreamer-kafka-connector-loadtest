@@ -24,36 +24,51 @@ import com.lightstreamer.client.Subscription;
 
 public class LightstreamerConsumer {
 
+    private static StatisticsManager statsManager = null; 
+
     private static final Logger logger = LogManager.getLogger(LightstreamerConsumer.class);
     public static void main(String[] args) {
-        LightstreamerClient client = new LightstreamerClient(
-                "http://ec2-3-254-55-163.eu-west-1.compute.amazonaws.com:8080/", "KafkaConnector");
-        // "http://ec2-18-201-206-246.eu-west-1.compute.amazonaws.com:8080/",
-        // "KafkaConnector");
+        boolean calculateLatencyStats = false;
+        boolean isKJ = false;
+        boolean extkey = false;
+        String serverAddress = "http://localhost:8080/";
+
+        for (String arg : args) {
+            if (arg.equalsIgnoreCase("--calculate-latency-stats")) {
+                calculateLatencyStats = true;
+                statsManager = new StatisticsManager();
+            } else if (arg.startsWith("--server-address=")) {
+                serverAddress = arg.split("=", 2)[1];
+            } else if (arg.equalsIgnoreCase("--kj")) {
+                isKJ = true;
+            } else if (arg.equalsIgnoreCase("--extended-key")) {
+                extkey = true;
+            }
+        }
+
+        LightstreamerClient client = new LightstreamerClient(serverAddress, "KafkaConnector");
         client.addListener(new MyClientListener());
         client.connect();
 
-        logger.info("Subscribe to Kafka Topic.");
+        logger.info("Subscribe to Kafka Topic: " + (isKJ ? "KJ" : "LS") + " - " + (extkey ? "Extended Key" : "Simple Key"));
 
-        // String[] items = { "jsontest-<sndValue=Pineapple>" };
-        // String[] items = { "jsontest-<timestamp=Pineapple>" };
-        // String[] items = { "jsontest-[key=Charles]", "jsontest-[key=James]",
-        // "jsontest-[key=Michael]" };
-        String[] items = { "ltest-[key=Charles]", "ltest-[key=Larry]" };
+        
+        // String[] items = { "ltest-[key=Banana]" };
+        String item = extkey ? "ltest-[key=KiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwi]" : "ltest-[key=Banana]";
+        String[] items = { item };
+        String[] fields = { "key", "timestamp", "fstValue", "intNum", "sndValue" };
+        
+        String[] items_kj = { "ltest-[key=Timothy]" };
+        String[] fields_kj = { "key", "changes", "timestamp", "secondText", "thirdNumber", "hobbie1", "names10", "names18", "names42", "names100", "names775", "names889", "names1001" };
 
-        // String[] fields = { "key", "timestamp", "sndValue", "intNum", "ts",
-        // "partition" };
-        String[] fields = { "key", "value" };
+        String dataAdapterName = isKJ ? "LoadTest_KJ" : "LoadTest";
+        String[] selectedItems = isKJ ? items_kj : items;
+        String[] selectedFields = isKJ ? fields_kj : fields;
 
-        // String[] fields = { "key", "firstText", "secondText", "thirdText",
-        // "fourthText", "firstnumber",
-        // "secondNumber", "thirdNumber", "fourthNumber", "hobbies", "timestamp" };
-
-        Subscription sub = new Subscription("RAW", items, fields);
-        sub.setDataAdapter("QuickStart");
-        // sub.setDataAdapter("JsonStart-k");
-        // sub.setRequestedSnapshot("no");
-        sub.addListener(new mySubListener());
+        Subscription sub = new Subscription("DISTINCT", selectedItems, selectedFields);
+        sub.setDataAdapter(dataAdapterName);
+        sub.addListener(new MySubListener(calculateLatencyStats, statsManager, isKJ));
+        sub.setRequestedMaxFrequency("unfiltered");
         client.subscribe(sub);
 
         String input = System.console().readLine();

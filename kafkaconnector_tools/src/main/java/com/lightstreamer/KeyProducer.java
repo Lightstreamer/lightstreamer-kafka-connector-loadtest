@@ -71,8 +71,11 @@ public class KeyProducer extends BaseProducer {
         return formattedDate;
     }
 
-    public KeyProducer(String kafka_bootstrap_string, String pid, String topicname, int pause, int msgsize) {
+    private boolean addPrefix;
+
+    public KeyProducer(String kafka_bootstrap_string, String pid, String topicname, int pause, int msgsize, boolean addPrefix) {
         super(kafka_bootstrap_string, pid, topicname, pause, msgsize);
+        this.addPrefix = addPrefix;
     }
 
     @Override
@@ -86,29 +89,32 @@ public class KeyProducer extends BaseProducer {
         try {
             Future<RecordMetadata> futurek;
             Random random = new Random();
-
             Producer<String, String> producer = new KafkaProducer<>(props);
 
-            while (goproduce) {
-                String message = generateMillisTS() + "-" + this.producerid + "-" + generateRandomString(msg_size);
+            long startTime = System.currentTimeMillis();
+            int messageCount = 0;
 
+            while (goproduce) {
+                String prefix = addPrefix ? "PREFIX-" : "";
+                String message = prefix + generateMillisTS() + "-" + this.producerid + "-" + generateRandomString(msg_size);
                 int index = random.nextInt(strings.length);
                 String key = strings[index];
 
                 logger.debug("New Message : " + message + ", key: " + key);
 
-                futurek = producer
-                        .send(new ProducerRecord<String, String>(ktopicname, key, message));
+                futurek = producer.send(new ProducerRecord<String, String>(ktopicname, key, message));
+                messageCount++;
+
+                long currentTime = System.currentTimeMillis();
+                if (currentTime - startTime >= 1000) {
+                    logger.info("Messages sent in the last second: " + messageCount);
+                    messageCount = 0;
+                    startTime = currentTime;
+                }
 
                 logger.debug("Sent message : " + futurek.isDone());
 
-                /*
-                 * RecordMetadata rmtdta = futurek.get();
-                 * 
-                 * logger.debug("Partition : " + rmtdta.partition() + ", " + rmtdta.offset());
-                 */
-
-                Thread.sleep(millisp);
+                Thread.sleep(millisp); // Pause between messages
             }
 
             producer.close();
