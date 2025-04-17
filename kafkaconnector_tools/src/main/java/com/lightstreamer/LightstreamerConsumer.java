@@ -67,6 +67,7 @@ public class LightstreamerConsumer {
 
         Subscription sub = new Subscription("DISTINCT", selectedItems, selectedFields);
         sub.setDataAdapter(dataAdapterName);
+        sub.setRequestedSnapshot("no");
         sub.addListener(new MySubListener(calculateLatencyStats, statsManager, isKJ));
         sub.setRequestedMaxFrequency("unfiltered");
         client.subscribe(sub);
