@@ -18,19 +18,21 @@ package com.lightstreamer;
 
 import java.security.SecureRandom;
 import java.text.SimpleDateFormat;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.Date;
 import java.util.Properties;
 import java.util.Random;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
-import org.apache.kafka.clients.producer.RecordMetadata;
 import org.apache.kafka.common.serialization.Serializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -94,10 +96,12 @@ public class ProtobufProducer extends BaseProducer {
 
     private boolean addPrefix;
     private boolean useLargeStrings;
+    private AtomicLong globalMessageCount;
 
-    public ProtobufProducer(String kafka_bootstrap_string, String pid, String topicname, int pause, int msgsize,
+    public ProtobufProducer(AtomicLong globalMessageCount, String kafka_bootstrap_string, String pid, String topicname, int pause, int msgsize,
             boolean addPrefix, boolean useLargeStrings) {
         super(kafka_bootstrap_string, pid, topicname, pause, msgsize);
+        this.globalMessageCount = globalMessageCount;
         this.addPrefix = addPrefix;
         this.useLargeStrings = useLargeStrings;
         logger.info("Protobuf producer: " + pid + ", prefix: " + addPrefix + ", ok.");
@@ -120,8 +124,9 @@ public class ProtobufProducer extends BaseProducer {
         try {
             Producer<String, com.lightstreamer.proto.TestObj> producer = new KafkaProducer<>(props);
 
-            final long[] startTime = { System.currentTimeMillis() };
-            final int[] messageCount = { 0 };
+            // final AtomicLong startTime = new AtomicLong(System.currentTimeMillis());
+            final Instant starInstant = Instant.now();
+            // final AtomicInteger messageCount = new AtomicInteger(0);
 
             ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
             executor.scheduleAtFixedRate(() -> {
@@ -144,20 +149,31 @@ public class ProtobufProducer extends BaseProducer {
                 logger.debug("New message for : " + message.getSndValue());
 
                 try {
-                    Future<RecordMetadata> future = producer.send(new ProducerRecord<>(ktopicname, sndV, message));
-                    logger.debug("Sent message : {}", future.isDone());
+                    producer.send(new ProducerRecord<>(ktopicname, sndV, message),
+                            (metadata, exception) -> {
+                                if (exception != null) {
+                                    logger.error("Error while producing message to topic : " + metadata.topic(),
+                                            exception);
+                                    return;
+                                }
+
+                                Instant now = Instant.now();
+
+                                // long currentTime = System.currentTimeMillis();
+                                // if (currentTime - startTime.get() >= 1000) {
+                                //     logger.info("Messages sent in the last second: {}",  messageCount);
+                                //     messageCount.set(0);
+                                //     startTime.set(currentTime);
+                                // } else {
+                                //     messageCount.incrementAndGet();
+                                // }
+                                Duration elapsed = Duration.between(starInstant, now);
+                                logger.info("Sent {} in {} seconds", globalMessageCount.incrementAndGet(), elapsed.toSeconds());
+                            });
                 } catch (Exception e) {
                     logger.error("Error during sending message : " + e.getMessage());
                 }
 
-                long currentTime = System.currentTimeMillis();
-                if (currentTime - startTime[0] >= 1000) {
-                    logger.info("Messages sent in the last second: " + messageCount[0]);
-                    messageCount[0] = 0;
-                    startTime[0] = currentTime;
-                } else {
-                    messageCount[0]++;
-                }
             }, 0, millisp, TimeUnit.MILLISECONDS);
         } catch (Exception e) {
             logger.error("Error during producer loop", e);

@@ -16,6 +16,8 @@
 
 package com.lightstreamer;
 
+import java.util.concurrent.atomic.AtomicLong;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -93,8 +95,9 @@ public class MessageGenerator {
                 logger.info("Json Producer pid-{} started.", k);
             }
         } else if (keyornot.equals("protobuf")) {
+            AtomicLong globalMessageCount = new AtomicLong(0);
             for (int k = 0; k < num_producers; k++) {
-                producers[k] = new ProtobufProducer(kconnstring, "pid-" + k, topicname, pause_milis, msg_size,
+                producers[k] = new ProtobufProducer(globalMessageCount, kconnstring, "pid-" + k, topicname, pause_milis, msg_size,
                         additionalParam, lastParamForJson);
                 producers[k].start();
 
