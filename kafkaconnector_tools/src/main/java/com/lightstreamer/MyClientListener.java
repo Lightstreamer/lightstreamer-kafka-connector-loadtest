@@ -16,14 +16,15 @@
 
 package com.lightstreamer;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.lightstreamer.client.ClientListener;
 
 public class MyClientListener implements ClientListener {
 
-    private static final Logger logger = LogManager.getLogger(MyClientListener.class);
+    private static final Logger logger = LoggerFactory.getLogger(MyClientListener.class);
 
     @Override
     public void onListenEnd() {

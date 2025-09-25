@@ -31,10 +31,11 @@ import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.clients.producer.RecordMetadata;
+import org.apache.kafka.common.serialization.Serializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class JsonProducer extends BaseProducer {
+public class ProtobufProducer extends BaseProducer {
 
     private static final String CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 
@@ -49,7 +50,7 @@ public class JsonProducer extends BaseProducer {
 
     private String[] largeStrings = new String[strings.length];
 
-    private static final Logger logger = LoggerFactory.getLogger(JsonProducer.class);
+    private static final Logger logger = LoggerFactory.getLogger(ProtobufProducer.class);
 
     private static final Random random = new SecureRandom();
 
@@ -87,18 +88,19 @@ public class JsonProducer extends BaseProducer {
             sb.append(base);
         }
         return sb.length() > totalLength
-            ? sb.substring(0, totalLength)
-            : sb.toString();
+                ? sb.substring(0, totalLength)
+                : sb.toString();
     }
 
     private boolean addPrefix;
     private boolean useLargeStrings;
 
-    public JsonProducer(String kafka_bootstrap_string, String pid, String topicname, int pause, int msgsize, boolean addPrefix, boolean useLargeStrings) {
+    public ProtobufProducer(String kafka_bootstrap_string, String pid, String topicname, int pause, int msgsize,
+            boolean addPrefix, boolean useLargeStrings) {
         super(kafka_bootstrap_string, pid, topicname, pause, msgsize);
         this.addPrefix = addPrefix;
         this.useLargeStrings = useLargeStrings;
-        logger.info("Json producer: " + pid + ", prefix: " + addPrefix + ", ok.");
+        logger.info("Protobuf producer: " + pid + ", prefix: " + addPrefix + ", ok.");
 
         for (int i = 0; i < strings.length; i++) {
             largeStrings[i] = buildRepeatedString(strings[i], 500);
@@ -113,13 +115,13 @@ public class JsonProducer extends BaseProducer {
         props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG,
                 org.apache.kafka.common.serialization.StringSerializer.class);
         props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG,
-                io.confluent.kafka.serializers.KafkaJsonSerializer.class);
+                ProtoTestObjSerializer.class);
 
         try {
-            Producer<String, TestObj> producer = new KafkaProducer<>(props);
+            Producer<String, com.lightstreamer.proto.TestObj> producer = new KafkaProducer<>(props);
 
-            final long[] startTime = {System.currentTimeMillis()};
-            final int[] messageCount = {0};
+            final long[] startTime = { System.currentTimeMillis() };
+            final int[] messageCount = { 0 };
 
             ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
             executor.scheduleAtFixedRate(() -> {
@@ -133,8 +135,13 @@ public class JsonProducer extends BaseProducer {
                 int index = random.nextInt(keyArray.length);
                 String sndV = keyArray[index];
 
-                TestObj message = new TestObj(prefix + generateMillisTS(), generateRandomString(512), sndV, generateRndInt());
-                logger.debug("New message for : " + message.sndValue);
+                com.lightstreamer.proto.TestObj message = com.lightstreamer.proto.TestObj.newBuilder()
+                        .setTimestamp(prefix + generateMillisTS())
+                        .setFstValue(generateRandomString(512))
+                        .setSndValue(sndV)
+                        .setIntNum(generateRndInt())
+                        .build();
+                logger.debug("New message for : " + message.getSndValue());
 
                 try {
                     Future<RecordMetadata> future = producer.send(new ProducerRecord<>(ktopicname, sndV, message));
@@ -142,7 +149,7 @@ public class JsonProducer extends BaseProducer {
                 } catch (Exception e) {
                     logger.error("Error during sending message : " + e.getMessage());
                 }
-                
+
                 long currentTime = System.currentTimeMillis();
                 if (currentTime - startTime[0] >= 1000) {
                     logger.info("Messages sent in the last second: " + messageCount[0]);
@@ -153,7 +160,18 @@ public class JsonProducer extends BaseProducer {
                 }
             }, 0, millisp, TimeUnit.MILLISECONDS);
         } catch (Exception e) {
-            logger.error("Error during producer loop: " + e.getMessage());
+            logger.error("Error during producer loop", e);
+        }
+    }
+
+    public static class ProtoTestObjSerializer implements Serializer<com.lightstreamer.proto.TestObj> {
+
+        @Override
+        public byte[] serialize(String topic, com.lightstreamer.proto.TestObj data) {
+            if (data == null) {
+                return null;
+            }
+            return data.toByteArray();
         }
     }
 }

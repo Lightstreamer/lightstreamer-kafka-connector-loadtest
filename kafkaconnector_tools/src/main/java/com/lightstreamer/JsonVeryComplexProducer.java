@@ -19,7 +19,6 @@ package com.lightstreamer;
 import java.security.SecureRandom;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -33,8 +32,8 @@ import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.clients.producer.RecordMetadata;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class JsonVeryComplexProducer extends BaseProducer {
 
@@ -56,7 +55,7 @@ public class JsonVeryComplexProducer extends BaseProducer {
             "Collecting stamps", "Collecting coins", "Collecting comics", "Collecting antiques", "Model building",
             "Numismatics", "Philately", "Gaming", "DIY projects" };
 
-    private static final Logger logger = LogManager.getLogger(JsonProducer.class);
+    private static final Logger logger = LoggerFactory.getLogger(JsonProducer.class);
 
     private static ConcurrentHashMap<String, TestVeryComplexObj> messages = new ConcurrentHashMap<String, TestVeryComplexObj>();
 

@@ -27,12 +27,12 @@ import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.common.PartitionInfo;
 import org.apache.kafka.common.TopicPartition;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class StandaloneJsonConsumer extends BaseConsumer {
 
-    private static final Logger logger = LogManager.getLogger(StandaloneConsumer.class);
+    private static final Logger logger = LoggerFactory.getLogger(StandaloneJsonConsumer.class);
 
     public StandaloneJsonConsumer(String kafka_bootstrap_string, String topicname, boolean bc, StatisticsManager sts) {
 

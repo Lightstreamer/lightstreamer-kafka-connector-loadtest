@@ -23,12 +23,12 @@ import java.util.Properties;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class JsonConsumer extends BaseConsumer {
 
-    private static final Logger logger = LogManager.getLogger(JsonConsumer.class);
+    private static final Logger logger = LoggerFactory.getLogger(JsonConsumer.class);
     public JsonConsumer(String kafka_bootstrap_string, String kgroupid, String topicname, boolean bc,
             StatisticsManager sts) {
 

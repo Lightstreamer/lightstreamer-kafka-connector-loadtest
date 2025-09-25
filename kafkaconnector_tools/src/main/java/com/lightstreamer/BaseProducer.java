@@ -27,8 +27,8 @@ import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.clients.producer.RecordMetadata;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class BaseProducer extends Thread {
 
@@ -46,7 +46,7 @@ public class BaseProducer extends Thread {
 
     private static final String CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 
-    private static final Logger logger = LogManager.getLogger(BaseProducer.class);
+    private static final Logger logger = LoggerFactory.getLogger(BaseProducer.class);
 
     private static final Random random = new SecureRandom();
 

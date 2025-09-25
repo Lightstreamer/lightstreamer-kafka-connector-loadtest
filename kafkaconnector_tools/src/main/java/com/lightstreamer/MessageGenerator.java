@@ -16,12 +16,12 @@
 
 package com.lightstreamer;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class MessageGenerator {
 
-    private static final Logger logger = LogManager.getLogger(MessageGenerator.class);
+    private static final Logger logger = LoggerFactory.getLogger(MessageGenerator.class);
 
     public static void main(String[] args) {
         int num_producers = 1;
@@ -78,17 +78,27 @@ public class MessageGenerator {
 
         if (keyornot.equals("keyed")) {
             for (int k = 0; k < num_producers; k++) {
-                producers[k] = new KeyProducer(kconnstring, "pid-" + k, topicname, pause_milis, msg_size, additionalParam);
+                producers[k] = new KeyProducer(kconnstring, "pid-" + k, topicname, pause_milis, msg_size,
+                        additionalParam);
                 producers[k].start();
 
                 logger.info("Key Producer pid-{} started.", k);
             }
         } else if (keyornot.equals("json")) {
             for (int k = 0; k < num_producers; k++) {
-                producers[k] = new JsonProducer(kconnstring, "pid-" + k, topicname, pause_milis, msg_size, additionalParam, lastParamForJson);
+                producers[k] = new JsonProducer(kconnstring, "pid-" + k, topicname, pause_milis, msg_size,
+                        additionalParam, lastParamForJson);
                 producers[k].start();
 
                 logger.info("Json Producer pid-{} started.", k);
+            }
+        } else if (keyornot.equals("protobuf")) {
+            for (int k = 0; k < num_producers; k++) {
+                producers[k] = new ProtobufProducer(kconnstring, "pid-" + k, topicname, pause_milis, msg_size,
+                        additionalParam, lastParamForJson);
+                producers[k].start();
+
+                logger.info("Protobuf Producer pid-{} started.", k);
             }
         } else if (keyornot.equals("complex")) {
             producers[0] = new JsonComplexProducer(kconnstring, "pid-0", topicname, pause_milis, msg_size, true);
@@ -107,7 +117,8 @@ public class MessageGenerator {
                 logger.info("Json Producer pid-{} started.", k);
             }
         } else if (keyornot.equals("verycomplex")) {
-            producers[0] = new JsonVeryComplexProducer(kconnstring, "pid-0", topicname, pause_milis, msg_size, true, additionalParam);
+            producers[0] = new JsonVeryComplexProducer(kconnstring, "pid-0", topicname, pause_milis, msg_size, true,
+                    additionalParam);
             producers[0].start();
             try {
                 Thread.sleep(200);
@@ -116,13 +127,15 @@ public class MessageGenerator {
             }
 
             for (int k = 1; k < num_producers; k++) {
-                producers[k] = new JsonVeryComplexProducer(kconnstring, "pid-" + k, topicname, pause_milis, msg_size, false, additionalParam);
+                producers[k] = new JsonVeryComplexProducer(kconnstring, "pid-" + k, topicname, pause_milis, msg_size,
+                        false, additionalParam);
                 producers[k].start();
 
                 logger.info("Json Complex Producer (very) pid-{} started.", k);
             }
         } else if (keyornot.equals("jsonkeyx")) {
-            producers[0] = new JsonVeryComplexProducerWithJsonKey(kconnstring, "pid-0", topicname, pause_milis, msg_size, true, additionalParam);
+            producers[0] = new JsonVeryComplexProducerWithJsonKey(kconnstring, "pid-0", topicname, pause_milis,
+                    msg_size, true, additionalParam);
             producers[0].start();
 
             logger.info("Json Key Complex Producer (very) pid-{} started.", 0);
@@ -133,7 +146,8 @@ public class MessageGenerator {
             }
 
             for (int k = 1; k < num_producers; k++) {
-                producers[k] = new JsonVeryComplexProducerWithJsonKey(kconnstring, "pid-" + k, topicname, pause_milis, msg_size, false, additionalParam);
+                producers[k] = new JsonVeryComplexProducerWithJsonKey(kconnstring, "pid-" + k, topicname, pause_milis,
+                        msg_size, false, additionalParam);
                 producers[k].start();
 
                 logger.info("Json Key Complex Producer (very) pid-{} started.", k);

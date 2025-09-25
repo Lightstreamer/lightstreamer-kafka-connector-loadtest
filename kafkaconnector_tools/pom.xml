@@ -37,6 +37,31 @@
               <mainClass>com.lightstreamer.ConfluentClient</mainClass>
             </configuration>
           </plugin>
+          <plugin>
+            <groupId>com.github.os72</groupId>
+            <artifactId>protoc-jar-maven-plugin</artifactId>
+            <version>3.11.4</version>
+            <executions>
+              <execution>
+                <phase>generate-sources</phase>
+                <goals>
+                  <goal>run</goal>
+                </goals>
+                <configuration>
+                  <inputDirectories>
+                    <include>src/main/resources/</include>
+                  </inputDirectories>
+                  <outputTargets>
+                    <outputTarget>
+                      <type>java</type>
+                      <addSources>none</addSources>
+                      <outputDirectory>src/main/java/</outputDirectory>
+                    </outputTarget>
+                  </outputTargets>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
         </plugins>
     </build>
 
@@ -45,12 +70,6 @@
       <repository>
           <id>confluent</id>
           <url>https://packages.confluent.io/maven</url>
-      </repository>
-
-      <!-- Repository Maven di default (central) -->
-      <repository>
-          <id>central</id>
-          <url>https://repo.maven.apache.org/maven2</url>
       </repository>
     </repositories>
 
@@ -64,7 +83,12 @@
         <dependency>
           <groupId>org.slf4j</groupId>
           <artifactId>slf4j-api</artifactId>
-          <version>2.0.1</version>
+          <version>2.0.10</version>
+        </dependency>
+        <dependency>
+          <groupId>org.slf4j</groupId>
+          <artifactId>slf4j-reload4j</artifactId>
+          <version>2.0.10</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-math3 -->
         <dependency>
@@ -78,7 +102,7 @@
           <artifactId>ls-javase-client</artifactId>
           <version>5.1.0</version>
         </dependency>
-        <dependency>
+        <!-- <dependency>
           <groupId>org.apache.logging.log4j</groupId>
           <artifactId>log4j-api</artifactId>
           <version>2.17.2</version>
@@ -87,11 +111,17 @@
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-core</artifactId>
             <version>2.17.2</version>
-        </dependency>
+        </dependency> -->
         <dependency>
           <groupId>io.confluent</groupId>
           <artifactId>kafka-json-serializer</artifactId>
-          <version>7.5.0</version>
+          <version>7.7.0</version>
+          <scope>provided</scope>
+        </dependency>
+        <dependency>
+          <groupId>io.confluent</groupId>
+          <artifactId>kafka-protobuf-serializer</artifactId>
+          <version>7.7.0</version>
           <scope>provided</scope>
         </dependency>
     </dependencies>

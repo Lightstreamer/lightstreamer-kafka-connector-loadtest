@@ -16,8 +16,8 @@
 
 package com.lightstreamer;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.lightstreamer.client.LightstreamerClient;
 import com.lightstreamer.client.Subscription;
@@ -26,7 +26,7 @@ public class LightstreamerConsumer {
 
     private static StatisticsManager statsManager = null; 
 
-    private static final Logger logger = LogManager.getLogger(LightstreamerConsumer.class);
+    private static final Logger logger = LoggerFactory.getLogger(LightstreamerConsumer.class);
     public static void main(String[] args) {
         boolean calculateLatencyStats = false;
         boolean isKJ = false;

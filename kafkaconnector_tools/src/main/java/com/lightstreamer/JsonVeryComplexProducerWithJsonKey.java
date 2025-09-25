@@ -19,15 +19,14 @@ package com.lightstreamer;
 import java.security.SecureRandom;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.Future;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
@@ -36,8 +35,8 @@ import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.clients.producer.RecordMetadata;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class JsonVeryComplexProducerWithJsonKey extends BaseProducer {
 
@@ -59,7 +58,7 @@ public class JsonVeryComplexProducerWithJsonKey extends BaseProducer {
             "Collecting stamps", "Collecting coins", "Collecting comics", "Collecting antiques", "Model building",
             "Numismatics", "Philately", "Gaming", "DIY projects" };
 
-    private static final Logger logger = LogManager.getLogger(JsonVeryComplexProducerWithJsonKey.class);
+    private static final Logger logger = LoggerFactory.getLogger(JsonVeryComplexProducerWithJsonKey.class);
 
     private static ConcurrentHashMap<String, TestVeryComplexObj> messages = new ConcurrentHashMap<String, TestVeryComplexObj>();
 
@@ -125,7 +124,6 @@ public class JsonVeryComplexProducerWithJsonKey extends BaseProducer {
             }    
         } catch (Exception e) {
             logger.error(e.getMessage());
-            logger.debug(e.getStackTrace());
         }
         
         logger.info("Json key complex producer {} ok.", pid);

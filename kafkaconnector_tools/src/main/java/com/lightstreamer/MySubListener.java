@@ -20,15 +20,15 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.lightstreamer.client.ItemUpdate;
 import com.lightstreamer.client.SubscriptionListener;
 
 public class MySubListener implements SubscriptionListener {
 
-    private static final Logger logger = LogManager.getLogger(MySubListener.class);
+    private static final Logger logger = LoggerFactory.getLogger(MySubListener.class);
 
     private StatisticsManager statsManager;
     private boolean calculateLatencyStats;

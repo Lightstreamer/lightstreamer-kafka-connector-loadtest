@@ -22,12 +22,13 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 
 public class StatisticsManager {
 
-    private Logger latencyLogger = LogManager.getLogger(StatisticsManager.class);
+    private Logger latencyLogger = LoggerFactory.getLogger(StatisticsManager.class);
 
     private ScheduledThreadPoolExecutor scheduledThreadPoolExecutor = new ScheduledThreadPoolExecutor(1,
             new ThreadFactory() {
@@ -265,7 +266,7 @@ public class StatisticsManager {
         // print the zoomed graph
         appendGraph(graphStepP, stepsCountP, maxValueForStepsP, percResults[ninetyIndex], "90th percentile", results);
 
-        latencyLogger.info(results);
+        latencyLogger.info(results.toString());
 
         if (latencyLogger.isDebugEnabled()) {
             long endGenerationTime = TimeConversion.getTimeMillis();

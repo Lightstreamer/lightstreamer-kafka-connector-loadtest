@@ -25,9 +25,9 @@ import java.util.Properties;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 public class BaseConsumer extends Thread {
 
@@ -41,7 +41,7 @@ public class BaseConsumer extends Thread {
 
     protected boolean iamblackcanary;
 
-    private static final Logger logger = LogManager.getLogger(BaseConsumer.class);
+    private static final Logger logger = LoggerFactory.getLogger(BaseConsumer.class);
 
     protected StatisticsManager stats;
 
