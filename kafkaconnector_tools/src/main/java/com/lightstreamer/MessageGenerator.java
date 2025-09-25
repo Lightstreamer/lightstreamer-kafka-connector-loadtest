@@ -16,6 +16,9 @@
 
 package com.lightstreamer;
 
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.slf4j.Logger;
@@ -96,10 +99,19 @@ public class MessageGenerator {
             }
         } else if (keyornot.equals("protobuf")) {
             AtomicLong globalMessageCount = new AtomicLong(0);
+            AtomicInteger threadId = new AtomicInteger(0);
+            ExecutorService pool = Executors.newFixedThreadPool(num_producers, r -> {
+                Thread t = new Thread(r);
+                t.setName("Protobuf Publisher thread - " + threadId.incrementAndGet());
+                return t;
+            });
+
             for (int k = 0; k < num_producers; k++) {
-                producers[k] = new ProtobufProducer(globalMessageCount, kconnstring, "pid-" + k, topicname, pause_milis, msg_size,
+                final int kk = k;
+                producers[k] = new ProtobufProducer(kk, globalMessageCount, kconnstring, "pid-" + k, topicname, pause_milis, msg_size,
                         additionalParam, lastParamForJson);
-                producers[k].start();
+                pool.submit(producers[k]);
+                // producers[k].start();
 
                 logger.info("Protobuf Producer pid-{} started.", k);
             }

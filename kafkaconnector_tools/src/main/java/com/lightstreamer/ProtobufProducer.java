@@ -23,11 +23,14 @@ import java.time.Instant;
 import java.util.Date;
 import java.util.Properties;
 import java.util.Random;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
+
+import javax.management.RuntimeErrorException;
 
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.Producer;
@@ -97,10 +100,14 @@ public class ProtobufProducer extends BaseProducer {
     private boolean addPrefix;
     private boolean useLargeStrings;
     private AtomicLong globalMessageCount;
+    private int producerId;
 
-    public ProtobufProducer(AtomicLong globalMessageCount, String kafka_bootstrap_string, String pid, String topicname, int pause, int msgsize,
+    public ProtobufProducer(int producerId, AtomicLong globalMessageCount, String kafka_bootstrap_string, String pid,
+            String topicname,
+            int pause, int msgsize,
             boolean addPrefix, boolean useLargeStrings) {
         super(kafka_bootstrap_string, pid, topicname, pause, msgsize);
+        this.producerId = producerId;
         this.globalMessageCount = globalMessageCount;
         this.addPrefix = addPrefix;
         this.useLargeStrings = useLargeStrings;
@@ -121,63 +128,55 @@ public class ProtobufProducer extends BaseProducer {
         props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG,
                 ProtoTestObjSerializer.class);
 
-        try {
-            Producer<String, com.lightstreamer.proto.TestObj> producer = new KafkaProducer<>(props);
+        Producer<String, com.lightstreamer.proto.TestObj> producer = new KafkaProducer<>(props);
+        // ExecutorService pool = Executors.newSingleThreadExecutor();
+        // pool.submit(() -> publish(producer));
+        publish(producer);
+    }
 
-            // final AtomicLong startTime = new AtomicLong(System.currentTimeMillis());
-            final Instant starInstant = Instant.now();
-            // final AtomicInteger messageCount = new AtomicInteger(0);
+    private void publish(Producer<String, com.lightstreamer.proto.TestObj> producer) {
+        Instant starInstant = Instant.now();
+        while (true) {
+            String prefix = addPrefix ? "PREFIX-" : "";
+            String[] keyArray = useLargeStrings ? largeStrings : strings;
+            int index = random.nextInt(keyArray.length);
+            String sndV = keyArray[index];
 
-            ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
-            executor.scheduleAtFixedRate(() -> {
-                if (!goproduce) {
-                    executor.shutdown();
-                    producer.close();
-                    return;
-                }
-                String prefix = addPrefix ? "PREFIX-" : "";
-                String[] keyArray = useLargeStrings ? largeStrings : strings;
-                int index = random.nextInt(keyArray.length);
-                String sndV = keyArray[index];
+            com.lightstreamer.proto.TestObj message = com.lightstreamer.proto.TestObj.newBuilder()
+                    .setTimestamp(prefix + generateMillisTS())
+                    .setFstValue(generateRandomString(512))
+                    .setSndValue(sndV)
+                    .setIntNum(generateRndInt())
+                    .build();
+            logger.debug("ProducerId - {}, New message for :{}",producerId, message.getSndValue());
+            try {
+                producer.send(new ProducerRecord<>(ktopicname, sndV, message),
+                        (metadata, exception) -> {
+                            if (exception != null) {
+                                logger.error("Error while producing message to topic : " + metadata.topic(),
+                                        exception);
+                                return;
+                            }
 
-                com.lightstreamer.proto.TestObj message = com.lightstreamer.proto.TestObj.newBuilder()
-                        .setTimestamp(prefix + generateMillisTS())
-                        .setFstValue(generateRandomString(512))
-                        .setSndValue(sndV)
-                        .setIntNum(generateRndInt())
-                        .build();
-                logger.debug("New message for : " + message.getSndValue());
+                            Instant now = Instant.now();
 
-                try {
-                    producer.send(new ProducerRecord<>(ktopicname, sndV, message),
-                            (metadata, exception) -> {
-                                if (exception != null) {
-                                    logger.error("Error while producing message to topic : " + metadata.topic(),
-                                            exception);
-                                    return;
-                                }
-
-                                Instant now = Instant.now();
-
-                                // long currentTime = System.currentTimeMillis();
-                                // if (currentTime - startTime.get() >= 1000) {
-                                //     logger.info("Messages sent in the last second: {}",  messageCount);
-                                //     messageCount.set(0);
-                                //     startTime.set(currentTime);
-                                // } else {
-                                //     messageCount.incrementAndGet();
-                                // }
-                                Duration elapsed = Duration.between(starInstant, now);
-                                logger.info("Sent {} in {} seconds", globalMessageCount.incrementAndGet(), elapsed.toSeconds());
-                            });
-                } catch (Exception e) {
-                    logger.error("Error during sending message : " + e.getMessage());
-                }
-
-            }, 0, millisp, TimeUnit.MILLISECONDS);
-        } catch (Exception e) {
-            logger.error("Error during producer loop", e);
+                            // long currentTime = System.currentTimeMillis();
+                            // if (currentTime - startTime.get() >= 1000) {
+                            // logger.info("Messages sent in the last second: {}", messageCount);
+                            // messageCount.set(0);
+                            // startTime.set(currentTime);
+                            // } else {
+                            // messageCount.incrementAndGet();
+                            // }
+                            Duration elapsed = Duration.between(starInstant, now);
+                            logger.info("ProducerId - {} - Sent {} in {} seconds", producerId, globalMessageCount.incrementAndGet(), elapsed.toSeconds());
+                        });
+            } catch (Exception e) {
+                logger.error("Error during sending message : " + e.getMessage());
+                throw new RuntimeException(e);
+            }
         }
+
     }
 
     public static class ProtoTestObjSerializer implements Serializer<com.lightstreamer.proto.TestObj> {
