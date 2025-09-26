@@ -58,6 +58,7 @@ public class LightstreamerConsumer {
 
         
         String[] items = { "ltest-[key=Banana]" };
+        
         String[] fields = { "timestamp", "fstValue", "sndValue", "intNum"};
 
         String dataAdapterName = "QuickStart";
