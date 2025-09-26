@@ -122,15 +122,13 @@ public class ProtobufProducer extends BaseProducer {
     public void run() {
         Properties props = new Properties();
         props.put("bootstrap.servers", kafkabootstrapstring);
-        props.put("linger.ms", 1);
+        props.put("linger.ms", 50);
         props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG,
                 org.apache.kafka.common.serialization.StringSerializer.class);
         props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG,
                 ProtoTestObjSerializer.class);
 
         Producer<String, com.lightstreamer.proto.TestObj> producer = new KafkaProducer<>(props);
-        // ExecutorService pool = Executors.newSingleThreadExecutor();
-        // pool.submit(() -> publish(producer));
         publish(producer);
     }
 
@@ -159,15 +157,6 @@ public class ProtobufProducer extends BaseProducer {
                             }
 
                             Instant now = Instant.now();
-
-                            // long currentTime = System.currentTimeMillis();
-                            // if (currentTime - startTime.get() >= 1000) {
-                            // logger.info("Messages sent in the last second: {}", messageCount);
-                            // messageCount.set(0);
-                            // startTime.set(currentTime);
-                            // } else {
-                            // messageCount.incrementAndGet();
-                            // }
                             Duration elapsed = Duration.between(starInstant, now);
                             logger.info("ProducerId - {} - Sent {} in {} seconds", producerId, globalMessageCount.incrementAndGet(), elapsed.toSeconds());
                         });
