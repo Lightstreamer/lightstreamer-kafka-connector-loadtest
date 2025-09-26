@@ -94,16 +94,17 @@ public class MySubListener implements SubscriptionListener {
          */
 
         String updts = update.getValue("timestamp");
-        if (kj) {
-            logger.debug(" --> " + updts + " - " + update.getValue("secondText") + " - " + update.getValue("thirdNumber") + " - " + update.getValue("hobbie1"));
-            logger.debug(" key: " + update.getValue("key") + " - " + update.getValue("names775") + " - " + update.getValue("names1001"));
-        } else {
+        logger.debug("Received update for item {}", update);
+        // if (kj) {
+        //     logger.debug(" --> " + updts + " - " + update.getValue("secondText") + " - " + update.getValue("thirdNumber") + " - " + update.getValue("hobbie1"));
+        //     logger.debug(" key: " + update.getValue("key") + " - " + update.getValue("names775") + " - " + update.getValue("names1001"));
+        // } else {
             logger.debug(" --> " + updts + " - " + update.getValue("fstValue") + " - " + update.getValue("intNum") + " - " + update.getValue("sndValue"));
             logger.debug(" key: " + update.getValue("key") );
-        }
+        // }
         
-        if (calculateLatencyStats && updts.startsWith("PREFIX-")) {
-            String tsmsg = updts.substring(7, 30); // Skip the "PREFIX-" part
+        if (calculateLatencyStats) {
+            String tsmsg = updts;
 
             int diff = timediff(tsmsg);
             

@@ -147,7 +147,7 @@ public class ProtobufProducer extends BaseProducer {
                     .setSndValue(sndV)
                     .setIntNum(generateRndInt())
                     .build();
-            logger.debug("ProducerId - {}, New message for :{}",producerId, message.getSndValue());
+            logger.debug("ProducerId - {}, New message for :{}",producerId, message.toString());
             try {
                 producer.send(new ProducerRecord<>(ktopicname, sndV, message),
                         (metadata, exception) -> {

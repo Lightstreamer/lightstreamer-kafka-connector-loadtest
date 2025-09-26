@@ -16,6 +16,8 @@
 
 package com.lightstreamer;
 
+import java.util.Arrays;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,6 +34,8 @@ public class LightstreamerConsumer {
         boolean isKJ = false;
         boolean extkey = false;
         String serverAddress = "http://localhost:8080/";
+
+        logger.info("Args: {} ...", Arrays.toString(args));
 
         for (String arg : args) {
             if (arg.equalsIgnoreCase("--calculate-latency-stats")) {
@@ -53,19 +57,12 @@ public class LightstreamerConsumer {
         logger.info("Subscribe to Kafka Topic: " + (isKJ ? "KJ" : "LS") + " - " + (extkey ? "Extended Key" : "Simple Key"));
 
         
-        // String[] items = { "ltest-[key=Banana]" };
-        String item = extkey ? "ltest-[key=KiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwiKiwi]" : "ltest-[key=Banana]";
-        String[] items = { item };
-        String[] fields = { "key", "timestamp", "fstValue", "intNum", "sndValue" };
-        
-        String[] items_kj = { "ltest-[key=Timothy]" };
-        String[] fields_kj = { "key", "changes", "timestamp", "secondText", "thirdNumber", "hobbie1", "names10", "names18", "names42", "names100", "names775", "names889", "names1001" };
+        String[] items = { "ltest-[key=Banana]" };
+        String[] fields = { "timestamp", "fstValue", "sndValue", "intNum"};
 
-        String dataAdapterName = isKJ ? "LoadTest_KJ" : "LoadTest";
-        String[] selectedItems = isKJ ? items_kj : items;
-        String[] selectedFields = isKJ ? fields_kj : fields;
+        String dataAdapterName = "QuickStart";
 
-        Subscription sub = new Subscription("DISTINCT", selectedItems, selectedFields);
+        Subscription sub = new Subscription("DISTINCT", items, fields);
         sub.setDataAdapter(dataAdapterName);
         sub.setRequestedSnapshot("no");
         sub.addListener(new MySubListener(calculateLatencyStats, statsManager, isKJ));
