@@ -17,10 +17,8 @@
 package com.lightstreamer;
 
 import java.security.SecureRandom;
-import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.Date;
 import java.util.Properties;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicLong;
@@ -69,7 +67,7 @@ public class ProtobufProducer extends BaseProducer {
     }
 
     private static String generateMillisTS() {
-        long milliseconds = System.currentTimeMillis();
+        long milliseconds = Instant.now().toEpochMilli();
 
         // Date date = new Date(milliseconds);
 
