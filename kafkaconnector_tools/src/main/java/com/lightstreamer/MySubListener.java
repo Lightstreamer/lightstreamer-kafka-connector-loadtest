@@ -90,7 +90,6 @@ public class MySubListener implements SubscriptionListener {
              */
 
             String updts = update.getValue("timestamp");
-            logger.info("Received update for item {}", update);
             // if (kj) {
             // logger.debug(" --> " + updts + " - " + update.getValue("secondText") + " - "
             // + update.getValue("thirdNumber") + " - " + update.getValue("hobbie1"));

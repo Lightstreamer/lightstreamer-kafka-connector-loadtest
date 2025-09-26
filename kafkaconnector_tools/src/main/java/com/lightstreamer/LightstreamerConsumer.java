@@ -26,9 +26,10 @@ import com.lightstreamer.client.Subscription;
 
 public class LightstreamerConsumer {
 
-    private static StatisticsManager statsManager = null; 
+    private static StatisticsManager statsManager = null;
 
     private static final Logger logger = LoggerFactory.getLogger(LightstreamerConsumer.class);
+
     public static void main(String[] args) {
         boolean calculateLatencyStats = false;
         boolean isKJ = false;
@@ -54,17 +55,11 @@ public class LightstreamerConsumer {
         client.addListener(new MyClientListener());
         client.connect();
 
-        logger.info("Subscribe to Kafka Topic: " + (isKJ ? "KJ" : "LS") + " - " + (extkey ? "Extended Key" : "Simple Key"));
-
-        
         String[] items = { "ltest-[key=Banana]" };
-        
-        String[] fields = { "timestamp", "fstValue", "sndValue", "intNum"};
-
-        String dataAdapterName = "QuickStart";
+        String[] fields = { "timestamp", "fstValue", "sndValue", "intNum" };
 
         Subscription sub = new Subscription("DISTINCT", items, fields);
-        sub.setDataAdapter(dataAdapterName);
+        sub.setDataAdapter("QuickStart");
         sub.setRequestedSnapshot("no");
         sub.addListener(new MySubListener(calculateLatencyStats, statsManager, isKJ));
         sub.setRequestedMaxFrequency("unfiltered");
