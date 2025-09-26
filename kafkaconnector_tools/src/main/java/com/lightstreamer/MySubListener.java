@@ -17,8 +17,7 @@
 package com.lightstreamer;
 
 import java.time.Duration;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
+import java.time.Instant;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,24 +32,20 @@ public class MySubListener implements SubscriptionListener {
     private StatisticsManager statsManager;
     private boolean calculateLatencyStats;
     private boolean kj;
-    
-        public MySubListener(boolean calculateLatencyStats, StatisticsManager statsManager, boolean kj) {
-            this.calculateLatencyStats = calculateLatencyStats;
-            this.statsManager = statsManager;
-            this.kj = kj;
+
+    public MySubListener(boolean calculateLatencyStats, StatisticsManager statsManager, boolean kj) {
+        this.calculateLatencyStats = calculateLatencyStats;
+        this.statsManager = statsManager;
+        this.kj = kj;
     }
 
     private int k = 0;
 
     private int timediff(String timestampString) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS");
-        LocalDateTime timestamp = LocalDateTime.parse(timestampString, formatter);
-        LocalDateTime oraAttuale = LocalDateTime.now();
-
-        long differenzaMillisecondi = Duration.between(timestamp, oraAttuale).toMillis();
-
-        return (int) differenzaMillisecondi;
+        return (int) Duration.between(Instant.now(),
+                Instant.ofEpochMilli(Long.parseLong(timestampString))).toMillis();
     }
+
     @Override
     public void onClearSnapshot(String itemName, int itemPos) {
         logger.info("Server has cleared the current status of the chat");
@@ -78,67 +73,75 @@ public class MySubListener implements SubscriptionListener {
 
     @Override
     public void onItemUpdate(ItemUpdate update) {
+        try {
 
-        /*
-         * String tsmsg = update.getValue("timestamp");
-         * long diff = timediff(tsmsg);
-         * stats.addValue(diff);
-         * logger.debug("2ndValue: " + update.getValue("sndValue"));
-         * logger.debug("------------------- " + diff);
-         */
-        /*
-         * logger.info("Value: " + update.getValue("value"));
-         * String tsmsg = update.getValue("value").substring(0, 23);
-         * long diff = timediff(tsmsg);
-         * stats.addValue(diff);
-         */
+            /*
+             * String tsmsg = update.getValue("timestamp");
+             * long diff = timediff(tsmsg);
+             * stats.addValue(diff);
+             * logger.debug("2ndValue: " + update.getValue("sndValue"));
+             * logger.debug("------------------- " + diff);
+             */
+            /*
+             * logger.info("Value: " + update.getValue("value"));
+             * String tsmsg = update.getValue("value").substring(0, 23);
+             * long diff = timediff(tsmsg);
+             * stats.addValue(diff);
+             */
 
-        String updts = update.getValue("timestamp");
-        logger.debug("Received update for item {}", update);
-        // if (kj) {
-        //     logger.debug(" --> " + updts + " - " + update.getValue("secondText") + " - " + update.getValue("thirdNumber") + " - " + update.getValue("hobbie1"));
-        //     logger.debug(" key: " + update.getValue("key") + " - " + update.getValue("names775") + " - " + update.getValue("names1001"));
-        // } else {
-            logger.debug(" --> " + updts + " - " + update.getValue("fstValue") + " - " + update.getValue("intNum") + " - " + update.getValue("sndValue"));
-            logger.debug(" key: " + update.getValue("key") );
-        // }
-        
-        if (calculateLatencyStats) {
-            String tsmsg = updts;
+            String updts = update.getValue("timestamp");
+            logger.info("Received update for item {}", update);
+            // if (kj) {
+            // logger.debug(" --> " + updts + " - " + update.getValue("secondText") + " - "
+            // + update.getValue("thirdNumber") + " - " + update.getValue("hobbie1"));
+            // logger.debug(" key: " + update.getValue("key") + " - " +
+            // update.getValue("names775") + " - " + update.getValue("names1001"));
+            // } else {
+            logger.debug(" --> " + updts + " - " + update.getValue("fstValue") + " - " + update.getValue("intNum")
+                    + " - " + update.getValue("sndValue"));
+            // }
 
-            int diff = timediff(tsmsg);
-            
-            this.statsManager.onData(diff);
-            logger.debug("------------------- " + diff);
+            if (calculateLatencyStats) {
+                System.out.println("CALCULATE LATENCY STATS");
+                String tsmsg = updts;
 
-            if (k == 0) {
-                statsManager.generateReport();
-            }
-            if (++k == 10) k = 0;
-        }
-        /* 
-                 Iterator<Entry<String, String>> changedValues = update.getChangedFields().entrySet().iterator();
-        while (changedValues.hasNext()) {
-            Entry<String, String> field = changedValues.next();
-            logger.debug("Field " + field.getKey() + " changed: " + field.getValue());
+                int diff = timediff(tsmsg);
 
-            if (calculateLatencyStats && field.getValue().startsWith("PREFIX-")) {
-                String tsmsg = field.getValue().substring(7, 30); // Skip the "PREFIX-" part
-
-                long diff = timediff(tsmsg);
-                stats.addValue(diff);
+                this.statsManager.onData(diff);
                 logger.debug("------------------- " + diff);
 
                 if (k == 0) {
-                    logger.info("Mean: " + stats.calculateMean() + ", Median = " +
-                        stats.calculateMedian()
-                        + ", confidence = " + stats.calculateConfidenceInterval(500));
+                    statsManager.generateReport();
                 }
-                if (++k == 10) k = 0;
+                if (++k == 10)
+                    k = 0;
             }
+            /*
+             * Iterator<Entry<String, String>> changedValues =
+             * update.getChangedFields().entrySet().iterator();
+             * while (changedValues.hasNext()) {
+             * Entry<String, String> field = changedValues.next();
+             * logger.debug("Field " + field.getKey() + " changed: " + field.getValue());
+             * 
+             * if (calculateLatencyStats && field.getValue().startsWith("PREFIX-")) {
+             * String tsmsg = field.getValue().substring(7, 30); // Skip the "PREFIX-" part
+             * 
+             * long diff = timediff(tsmsg);
+             * stats.addValue(diff);
+             * logger.debug("------------------- " + diff);
+             * 
+             * if (k == 0) {
+             * logger.info("Mean: " + stats.calculateMean() + ", Median = " +
+             * stats.calculateMedian()
+             * + ", confidence = " + stats.calculateConfidenceInterval(500));
+             * }
+             * if (++k == 10) k = 0;
+             * }
+             * }
+             */
+        } catch (Exception e) {
+            logger.error("Error in onItemUpdate", e);
         }
-         */
-
 
     }
 
