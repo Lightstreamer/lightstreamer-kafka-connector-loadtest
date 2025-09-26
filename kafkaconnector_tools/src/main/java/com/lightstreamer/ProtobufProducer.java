@@ -79,7 +79,6 @@ public class ProtobufProducer extends BaseProducer {
         return String.valueOf(milliseconds);
     }
 
-
     private static String buildRepeatedString(String base, int totalLength) {
         StringBuilder sb = new StringBuilder();
         while (sb.length() < totalLength) {
@@ -140,7 +139,7 @@ public class ProtobufProducer extends BaseProducer {
                     .setSndValue(sndV)
                     .setIntNum(generateRndInt())
                     .build();
-            logger.debug("ProducerId - {}, New message for :{}",producerId, message.toString());
+            logger.debug("ProducerId - {}, New message for :{}", producerId, message.toString());
             try {
                 producer.send(new ProducerRecord<>(ktopicname, sndV, message),
                         (metadata, exception) -> {
@@ -152,7 +151,8 @@ public class ProtobufProducer extends BaseProducer {
 
                             Instant now = Instant.now();
                             Duration elapsed = Duration.between(starInstant, now);
-                            logger.info("ProducerId - {} - Sent {} in {} seconds", producerId, globalMessageCount.incrementAndGet(), elapsed.toSeconds());
+                            logger.info("ProducerId - {} - Sent {} in {} seconds", producerId,
+                                    globalMessageCount.incrementAndGet(), elapsed.toSeconds());
                         });
             } catch (Exception e) {
                 logger.error("Error during sending message : " + e.getMessage());
