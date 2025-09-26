@@ -115,6 +115,24 @@ public class MessageGenerator {
 
                 logger.info("Protobuf Producer pid-{} started.", k);
             }
+        } else if (keyornot.equals("json2")) {
+            AtomicLong globalMessageCount = new AtomicLong(0);
+            AtomicInteger threadId = new AtomicInteger(0);
+            ExecutorService pool = Executors.newFixedThreadPool(num_producers, r -> {
+                Thread t = new Thread(r);
+                t.setName("Json Publisher thread - " + threadId.incrementAndGet());
+                return t;
+            });
+
+            for (int k = 0; k < num_producers; k++) {
+                final int kk = k;
+                producers[k] = new JsonProducer2(kk, globalMessageCount, kconnstring, "pid-" + k, topicname, pause_milis, msg_size,
+                        additionalParam, lastParamForJson);
+                pool.submit(producers[k]);
+                // producers[k].start();
+
+                logger.info("Json Producer pid-{} started.", k);
+            }            
         } else if (keyornot.equals("complex")) {
             producers[0] = new JsonComplexProducer(kconnstring, "pid-0", topicname, pause_milis, msg_size, true);
             producers[0].start();
