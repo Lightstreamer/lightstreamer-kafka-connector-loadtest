@@ -123,6 +123,7 @@ public class ProtobufProducer extends BaseProducer {
         Properties props = new Properties();
         props.put("bootstrap.servers", kafkabootstrapstring);
         props.put("linger.ms", 50);
+        props.put("acks", "0");
         props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG,
                 org.apache.kafka.common.serialization.StringSerializer.class);
         props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG,
