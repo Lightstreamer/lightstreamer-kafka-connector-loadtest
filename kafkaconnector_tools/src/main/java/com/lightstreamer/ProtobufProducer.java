@@ -23,14 +23,7 @@ import java.time.Instant;
 import java.util.Date;
 import java.util.Properties;
 import java.util.Random;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
-
-import javax.management.RuntimeErrorException;
 
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.Producer;
@@ -78,14 +71,16 @@ public class ProtobufProducer extends BaseProducer {
     private static String generateMillisTS() {
         long milliseconds = System.currentTimeMillis();
 
-        Date date = new Date(milliseconds);
+        // Date date = new Date(milliseconds);
 
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+        // SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
 
-        String formattedDate = sdf.format(date);
+        // String formattedDate = sdf.format(date);
 
-        return formattedDate;
+        // return formattedDate;
+        return String.valueOf(milliseconds);
     }
+
 
     private static String buildRepeatedString(String base, int totalLength) {
         StringBuilder sb = new StringBuilder();
