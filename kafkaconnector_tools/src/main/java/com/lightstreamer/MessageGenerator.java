@@ -107,8 +107,7 @@ public class MessageGenerator {
             });
 
             for (int k = 0; k < num_producers; k++) {
-                final int kk = k;
-                producers[k] = new ProtobufProducer(kk, globalMessageCount, kconnstring, "pid-" + k, topicname, pause_milis, msg_size,
+                producers[k] = new ProtobufProducer(globalMessageCount, kconnstring, "pid-" + k, topicname, pause_milis, msg_size,
                         additionalParam, lastParamForJson);
                 pool.submit(producers[k]);
                 // producers[k].start();
