@@ -42,8 +42,12 @@ public class MySubListener implements SubscriptionListener {
     private int k = 0;
 
     private int timediff(String timestampString) {
-        return (int) Duration.between(Instant.now(),
-                Instant.ofEpochMilli(Long.parseLong(timestampString))).toMillis();
+        Instant current = Instant.now();
+        Instant received = Instant.parse(timestampString);
+
+        logger.debug("Received timestamp: {}, Current timestamp {}", received, current);
+
+        return (int) Duration.between(received, current).toMillis();
     }
 
     @Override
@@ -105,7 +109,6 @@ public class MySubListener implements SubscriptionListener {
                 String tsmsg = updts;
 
                 int diff = timediff(tsmsg);
-
                 this.statsManager.onData(diff);
                 logger.debug("------------------- " + diff);
 
