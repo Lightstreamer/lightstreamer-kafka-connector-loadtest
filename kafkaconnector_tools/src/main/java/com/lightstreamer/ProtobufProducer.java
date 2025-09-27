@@ -67,16 +67,7 @@ public class ProtobufProducer extends BaseProducer {
     }
 
     private static String generateMillisTS() {
-        long milliseconds = Instant.now().toEpochMilli();
-
-        // Date date = new Date(milliseconds);
-
-        // SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
-
-        // String formattedDate = sdf.format(date);
-
-        // return formattedDate;
-        return String.valueOf(milliseconds);
+        return Instant.now().toString();
     }
 
     private static String buildRepeatedString(String base, int totalLength) {
@@ -92,14 +83,12 @@ public class ProtobufProducer extends BaseProducer {
     private boolean addPrefix;
     private boolean useLargeStrings;
     private AtomicLong globalMessageCount;
-    private int producerId;
 
-    public ProtobufProducer(int producerId, AtomicLong globalMessageCount, String kafka_bootstrap_string, String pid,
+    public ProtobufProducer(AtomicLong globalMessageCount, String kafka_bootstrap_string, String pid,
             String topicname,
             int pause, int msgsize,
             boolean addPrefix, boolean useLargeStrings) {
         super(kafka_bootstrap_string, pid, topicname, pause, msgsize);
-        this.producerId = producerId;
         this.globalMessageCount = globalMessageCount;
         this.addPrefix = addPrefix;
         this.useLargeStrings = useLargeStrings;
@@ -139,7 +128,7 @@ public class ProtobufProducer extends BaseProducer {
                     .setSndValue(sndV)
                     .setIntNum(generateRndInt())
                     .build();
-            logger.debug("ProducerId - {}, New message for :{}", producerId, message.toString());
+            logger.debug("ProducerId - {}, New message for :{}", producerid, message.toString());
             try {
                 producer.send(new ProducerRecord<>(ktopicname, sndV, message),
                         (metadata, exception) -> {
@@ -151,7 +140,7 @@ public class ProtobufProducer extends BaseProducer {
 
                             Instant now = Instant.now();
                             Duration elapsed = Duration.between(starInstant, now);
-                            logger.info("ProducerId - {} - Sent {} in {} seconds", producerId,
+                            logger.info("ProducerId - {} - Sent {} in {} seconds", producerid,
                                     globalMessageCount.incrementAndGet(), elapsed.toSeconds());
                         });
             } catch (Exception e) {
