@@ -94,7 +94,8 @@ public class LightstreamerConsumer {
                 // "ltest-[key=Tangerine]",
                 // "ltest-[key=Cranberry]"
         };
-        String[] fields = { "timestamp", "fstValue", "sndValue", "intNum" };
+        // String[] fields = { "timestamp", "fstValue", "sndValue", "intNum" };
+        String[] fields = { "timestamp" };
 
         Subscription sub = new Subscription("DISTINCT", items, fields);
         sub.setDataAdapter("QuickStart");
