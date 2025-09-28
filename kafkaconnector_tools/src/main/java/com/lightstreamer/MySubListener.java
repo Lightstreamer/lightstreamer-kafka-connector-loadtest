@@ -94,14 +94,15 @@ public class MySubListener implements SubscriptionListener {
              */
 
             String updts = update.getValue("timestamp");
+            // logger.info(updts);
             // if (kj) {
             // logger.debug(" --> " + updts + " - " + update.getValue("secondText") + " - "
             // + update.getValue("thirdNumber") + " - " + update.getValue("hobbie1"));
             // logger.debug(" key: " + update.getValue("key") + " - " +
             // update.getValue("names775") + " - " + update.getValue("names1001"));
             // } else {
-            logger.debug(" --> " + updts + " - " + update.getValue("fstValue") + " - " + update.getValue("intNum")
-                    + " - " + update.getValue("sndValue"));
+            // logger.debug(" --> " + updts + " - " + update.getValue("fstValue") + " - " + update.getValue("intNum")
+            //         + " - " + update.getValue("sndValue"));
             // }
 
             if (calculateLatencyStats) {
