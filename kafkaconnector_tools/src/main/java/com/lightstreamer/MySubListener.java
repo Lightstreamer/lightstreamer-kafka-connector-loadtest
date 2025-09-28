@@ -105,10 +105,7 @@ public class MySubListener implements SubscriptionListener {
             // }
 
             if (calculateLatencyStats) {
-                System.out.println("CALCULATE LATENCY STATS");
-                String tsmsg = updts;
-
-                int diff = timediff(tsmsg);
+                int diff = timediff(updts);
                 this.statsManager.onData(diff);
                 logger.debug("------------------- " + diff);
 
