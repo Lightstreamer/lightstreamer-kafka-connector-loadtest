@@ -56,7 +56,7 @@ public class LightstreamerConsumer {
         client.connect();
 
         // String[] items = { "ltest-[key=Banana]" };
-        String[] items = { "letst"
+        String[] items = { "ltest"
                 // "ltest-[key=Apple]",
                 // "ltest-[key=Lime]",
                 // "ltest-[key=Starfruit]",
