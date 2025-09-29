@@ -84,8 +84,8 @@ public class SimpleConsumer extends BaseConsumer {
 
                         if (k == 0) {
                             logger.debug("Offset = " + record.offset() + ", message = " + message);
+                            stats.generateReport();
 
-                            // logger.info("------------------- " + diff);
                         }
                         if (++k == 1000)
                             k = 0;
