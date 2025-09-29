@@ -119,6 +119,7 @@ public class SimpleProducer extends BaseProducer {
 
     private void publish(Producer<String, String> producer) {
         Instant starInstant = Instant.now();
+        int k = 0;
         while (true) {
             String prefix = addPrefix ? "PREFIX-" : "";
             String[] keyArray = useLargeStrings ? largeStrings : strings;
@@ -128,19 +129,28 @@ public class SimpleProducer extends BaseProducer {
             String message = generateMillisTS();
             logger.debug("ProducerId - {}, New message for :{}", producerid, message.toString());
             try {
-                producer.send(new ProducerRecord<>(ktopicname, sndV, message),
-                        (metadata, exception) -> {
-                            if (exception != null) {
-                                logger.error("Error while producing message to topic : " + metadata.topic(),
-                                        exception);
-                                return;
-                            }
+                // producer.send(new ProducerRecord<>(ktopicname, sndV, message),
+                //         (metadata, exception) -> {
+                //             if (exception != null) {
+                //                 logger.error("Error while producing message to topic : " + metadata.topic(),
+                //                         exception);
+                //                 return;
+                //             }
 
-                            Instant now = Instant.now();
-                            Duration elapsed = Duration.between(starInstant, now);
-                            logger.info("ProducerId - {} - Sent {} in {} seconds", producerid,
-                                    globalMessageCount.incrementAndGet(), elapsed.toSeconds());
-                        });
+                //             Instant now = Instant.now();
+                //             Duration elapsed = Duration.between(starInstant, now);
+                //             logger.info("ProducerId - {} - Sent {} in {} seconds", producerid,
+                //                     globalMessageCount.incrementAndGet(), elapsed.toSeconds());
+                //         });
+                k++;
+                producer.send(new ProducerRecord<>(ktopicname, sndV, message));
+                if (k == 1000_000) {
+                    producer.flush();
+                    System.out.printf("Published %d messages", k);
+                    k = 0;
+                }
+                
+
             } catch (Exception e) {
                 logger.error("Error during sending message : " + e.getMessage());
                 throw new RuntimeException(e);
