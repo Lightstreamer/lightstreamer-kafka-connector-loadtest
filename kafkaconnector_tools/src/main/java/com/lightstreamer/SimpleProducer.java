@@ -150,6 +150,7 @@ public class SimpleProducer extends BaseProducer {
     }
 
     public void publishMessages(Producer<String, String> producer, int numMessages) {
+        while (true) {
         long startTime = System.nanoTime();
         for (int i = 0; i < numMessages; i++) {
             String[] keyArray = useLargeStrings ? largeStrings : strings;
@@ -163,10 +164,11 @@ public class SimpleProducer extends BaseProducer {
         producer.flush();
         long endTime = System.nanoTime();
         double seconds = (endTime - startTime) / 1e9;
-        System.out.printf("Producer - inviati %d messaggi in %.2f s (%.2f msg/s)%n",
+        System.out.printf("Published %d messages in %.2f s (%.2f msg/s)%n",
                 numMessages, seconds, numMessages / seconds);
+        }
 
-        producer.close();
+        // producer.close();
     }
 
     public static class ProtoTestObjSerializer implements Serializer<com.lightstreamer.proto.TestObj> {
