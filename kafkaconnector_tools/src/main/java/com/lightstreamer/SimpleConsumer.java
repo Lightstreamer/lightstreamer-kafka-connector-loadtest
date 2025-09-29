@@ -17,11 +17,10 @@
 package com.lightstreamer;
 
 import java.time.Duration;
-import java.time.Instant;
 import java.util.Arrays;
 import java.util.Properties;
-import java.util.concurrent.TimeUnit;
 
+import org.HdrHistogram.Histogram;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
@@ -54,6 +53,7 @@ public class SimpleConsumer extends BaseConsumer {
 
     @Override
     public void run() {
+        Histogram histogram = new Histogram(3_600_000_000L, 3); // fino a 1h, 3 cifre
         Properties props = new Properties();
         props.setProperty("bootstrap.servers", kafkabootstrapstring);
         props.setProperty("group.id", kafkaconsumergroupid);
@@ -81,15 +81,18 @@ public class SimpleConsumer extends BaseConsumer {
                     if (iamblackcanary) {
                         String tsmsg = message;
                         // int diff = timediff(tsmsg);
-                        int diff = (int)((System.nanoTime() - Long.parseLong(tsmsg)) / 1e6);
-                        // logger.info("Diff: {} ms", diff);
+                        // int diff = (int)((System.nanoTime() - Long.parseLong(tsmsg)) / 1e6);
+                        long latency = System.nanoTime() - Long.parseLong(tsmsg);
 
-                        stats.onData(diff);
+                        // stats.onData(diff);
+                        histogram.recordValue(latency);
 
                         if (k == 0) {
                             logger.debug("Offset = " + record.offset() + ", message = " + message);
-                            stats.generateReport();
-
+                            // stats.generateReport();
+                            System.out.printf("Latency p50: %.3f ms%n", histogram.getValueAtPercentile(50) / 1_000_000.0);
+                            System.out.printf("Latency p95: %.3f ms%n", histogram.getValueAtPercentile(95) / 1_000_000.0);
+                            System.out.printf("Latency p99: %.3f ms%n", histogram.getValueAtPercentile(99) / 1_000_000.0);
                         }
                         if (++k == 1000)
                             k = 0;
