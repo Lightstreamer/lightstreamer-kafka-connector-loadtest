@@ -75,17 +75,17 @@ public class SimpleConsumer extends BaseConsumer {
                 for (ConsumerRecord<String, String> record : records) {
                     String message = record.value();
 
-                    logger.debug("Message: {}", message);
+                    // logger.debug("Message: {}", message);
                     if (iamblackcanary) {
                         String tsmsg = message;
                         int diff = timediff(tsmsg);
 
-                        // stats.onData(diff);
+                        stats.onData(diff);
 
                         if (k == 0) {
                             logger.debug("Offset = " + record.offset() + ", message = " + message);
 
-                            logger.info("------------------- " + diff);
+                            // logger.info("------------------- " + diff);
                         }
                         if (++k == 1000)
                             k = 0;
