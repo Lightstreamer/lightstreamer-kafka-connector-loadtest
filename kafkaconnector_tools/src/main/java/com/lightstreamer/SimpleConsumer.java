@@ -69,11 +69,11 @@ public class SimpleConsumer extends BaseConsumer {
             while (goconsume) {
                 ConsumerRecords<String, String> records = consumer.poll(Duration.ofMillis(500));
 
-                logger.debug("polled {} messages.", records.count());
+                logger.info("polled {} messages.", records.count());
                 for (ConsumerRecord<String, String> record : records) {
                     String message = record.value();
 
-                    logger.info("Message: {}", message);
+                    logger.debug("Message: {}", message);
                     if (iamblackcanary) {
                         String tsmsg = message;
                         int diff = timediff(tsmsg);
