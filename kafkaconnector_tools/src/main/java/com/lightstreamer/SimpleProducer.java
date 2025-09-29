@@ -16,6 +16,7 @@
 
 package com.lightstreamer;
 
+import java.io.FileInputStream;
 import java.security.SecureRandom;
 import java.time.Duration;
 import java.time.Instant;
@@ -104,6 +105,12 @@ public class SimpleProducer extends BaseProducer {
     @Override
     public void run() {
         Properties props = new Properties();
+        try (FileInputStream fis = new FileInputStream("publisher.properties")) {
+            props.load(fis);
+        } catch (Exception e) {
+            logger.error("Error loading publisher properties file: " + e.getMessage());
+            throw new RuntimeException(e);
+        }
         props.put("bootstrap.servers", kafkabootstrapstring);
         props.put("linger.ms", 50);
         props.put("acks", "0");
@@ -114,7 +121,7 @@ public class SimpleProducer extends BaseProducer {
 
         Producer<String, String> producer = new KafkaProducer<>(props);
         // publish(producer);
-        publishMessages(producer, 1_000_000);
+        publishMessages(producer, Integer.parseInt(props.getProperty("messages", "100000")));
     }
 
     private void publish(Producer<String, String> producer) {
