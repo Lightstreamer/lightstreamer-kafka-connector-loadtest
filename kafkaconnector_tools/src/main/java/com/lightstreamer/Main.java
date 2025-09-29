@@ -19,7 +19,6 @@ package com.lightstreamer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 public class Main {
 
     private static String kconnstring = "";
@@ -164,6 +163,33 @@ public class Main {
 
             for (int j = 0; j < num_consumers; j++)
                 consumers[j].stopconsuming();
+        } else if (kconsumergroupid.startsWith("simple")) {
+            SimpleConsumer[] consumers;
+            consumers = new SimpleConsumer[num_consumers];
+
+            for (int k = 0; k < num_consumers; k++) {
+                consumers[k] = new SimpleConsumer(kconnstring, kconsumergroupid + k, ktopicname, flag, statsManager);
+                consumers[k].start();
+
+                logger.info("Simple consumer n. {} started.", k);
+
+                try {
+                    Thread.sleep(5);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            String input = System.console().readLine();
+            while (!input.equalsIgnoreCase("stop")) {
+                input = System.console().readLine();
+                if (input == null)
+                    input = "";
+            }
+
+            for (int j = 0; j < num_consumers; j++)
+                consumers[j].stopconsuming();
+
         } else {
             BaseConsumer[] consumers;
             consumers = new BaseConsumer[num_consumers];
