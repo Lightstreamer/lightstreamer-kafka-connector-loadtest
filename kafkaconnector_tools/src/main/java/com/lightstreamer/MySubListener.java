@@ -40,7 +40,7 @@ public class MySubListener implements SubscriptionListener {
         this.calculateLatencyStats = calculateLatencyStats;
         this.statsManager = statsManager;
         this.kj = kj;
-        this.histogram = new Histogram(60_000_000_000L, 3); // fino a 1h, 3 cifre
+        this.histogram = new Histogram(3_600_000_000_000L, 3); // fino a 1h, 3 cifre
     }
 
     private int k = 0;
