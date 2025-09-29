@@ -106,9 +106,8 @@ public class MySubListener implements SubscriptionListener {
             // }
 
             if (calculateLatencyStats) {
-                int diff = timediff(updts);
-                this.statsManager.onData(diff);
-                logger.debug("------------------- " + diff);
+                long latency = System.nanoTime() - Long.parseLong(updts);
+                this.statsManager.onData((int)(latency / 1_000_000.0));
 
                 if (k == 0) {
                     statsManager.generateReport();
