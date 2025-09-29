@@ -68,7 +68,8 @@ public class SimpleProducer extends BaseProducer {
     }
 
     private static String generateMillisTS() {
-        return Instant.now().toString();
+        // return Instant.now().toString();
+        return System.nanoTime() + "";
     }
 
     private static String buildRepeatedString(String base, int totalLength) {

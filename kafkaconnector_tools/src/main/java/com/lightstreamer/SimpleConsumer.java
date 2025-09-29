@@ -40,15 +40,17 @@ public class SimpleConsumer extends BaseConsumer {
         logger.info("Simple consumer {} go!", kgroupid);
     }
 
-    @Override
-    protected int timediff(String timestampString) {
-        Instant current = Instant.now();
-        Instant received = Instant.parse(timestampString);
+    // @Override
+    // protected int timediff(String timestampString) {
+    //     Instant current = Instant.now();
+    //     Instant received = Instant.parse(timestampString);
 
-        logger.debug("Received timestamp: {}, Current timestamp {}", received, current);
+    //     logger.debug("Received timestamp: {}, Current timestamp {}", received, current);
 
-        return (int) Duration.between(received, current).toMillis();
-    }
+    //     return (int) Duration.between(received, current).toMillis();
+    // }
+
+
 
     @Override
     public void run() {
@@ -78,7 +80,8 @@ public class SimpleConsumer extends BaseConsumer {
                     // logger.debug("Message: {}", message);
                     if (iamblackcanary) {
                         String tsmsg = message;
-                        int diff = timediff(tsmsg);
+                        // int diff = timediff(tsmsg);
+                        int diff = (int)(System.nanoTime() - Long.parseLong(tsmsg) / 1e6);
 
                         stats.onData(diff);
 
