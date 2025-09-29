@@ -20,6 +20,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.Properties;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
@@ -54,6 +55,7 @@ public class SimpleConsumer extends BaseConsumer {
         Properties props = new Properties();
         props.setProperty("bootstrap.servers", kafkabootstrapstring);
         props.setProperty("group.id", kafkaconsumergroupid);
+        props.setProperty("max.poll.records", "5000");
         props.setProperty("enable.auto.commit", "true");
         props.setProperty("auto.commit.interval.ms", "1000");
         props.put("key.deserializer", org.apache.kafka.common.serialization.StringDeserializer.class);
@@ -67,7 +69,7 @@ public class SimpleConsumer extends BaseConsumer {
 
             int k = -1;
             while (goconsume) {
-                ConsumerRecords<String, String> records = consumer.poll(Duration.ofMillis(500));
+                ConsumerRecords<String, String> records = consumer.poll(Duration.ofMillis(Long.MAX_VALUE));
 
                 logger.info("polled {} messages.", records.count());
                 for (ConsumerRecord<String, String> record : records) {
@@ -78,12 +80,12 @@ public class SimpleConsumer extends BaseConsumer {
                         String tsmsg = message;
                         int diff = timediff(tsmsg);
 
-                        stats.onData(diff);
+                        // stats.onData(diff);
 
                         if (k == 0) {
-                            logger.info("Offset = " + record.offset() + ", message = " + message);
+                            logger.debug("Offset = " + record.offset() + ", message = " + message);
 
-                            logger.debug("------------------- " + diff);
+                            logger.info("------------------- " + diff);
                         }
                         if (++k == 1000)
                             k = 0;
