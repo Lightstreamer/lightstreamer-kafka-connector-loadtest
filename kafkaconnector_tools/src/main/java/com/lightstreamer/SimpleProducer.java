@@ -120,6 +120,7 @@ public class SimpleProducer extends BaseProducer {
     private void publish(Producer<String, String> producer) {
         Instant starInstant = Instant.now();
         int k = 0;
+        int kk = 0;
         while (true) {
             String prefix = addPrefix ? "PREFIX-" : "";
             String[] keyArray = useLargeStrings ? largeStrings : strings;
@@ -145,8 +146,9 @@ public class SimpleProducer extends BaseProducer {
                 k++;
                 producer.send(new ProducerRecord<>(ktopicname, sndV, message));
                 if (k == 1000_000) {
+                    kk += k;
                     producer.flush();
-                    System.out.printf("Published %d messages%n", k);
+                    System.out.printf("Published %d messages%n", kk);
                     k = 0;
                 }
                 
