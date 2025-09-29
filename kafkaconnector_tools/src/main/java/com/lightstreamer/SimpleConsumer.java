@@ -92,7 +92,7 @@ public class SimpleConsumer extends BaseConsumer {
                         if (k == 1000_000) {
                             kk += k;
                             logger.debug("Offset = " + record.offset() + ", message = " + message);
-                            logger.info("Received {} messages", k+);
+                            logger.info("Received {} messages", kk);
                             // stats.generateReport();
                             // System.out.printf("Latency p50: %.3f ms%n", histogram.getValueAtPercentile(50) / 1_000_000.0);
                             // System.out.printf("Latency p95: %.3f ms%n", histogram.getValueAtPercentile(95) / 1_000_000.0);
