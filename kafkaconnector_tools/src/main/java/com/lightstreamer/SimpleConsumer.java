@@ -57,7 +57,7 @@ public class SimpleConsumer extends BaseConsumer {
         Properties props = new Properties();
         props.setProperty("bootstrap.servers", kafkabootstrapstring);
         props.setProperty("group.id", kafkaconsumergroupid);
-        props.setProperty("max.poll.records", "5000");
+        props.setProperty("max.poll.records", "500000");
         props.setProperty("enable.auto.commit", "true");
         props.setProperty("auto.commit.interval.ms", "1000");
         props.put("key.deserializer", org.apache.kafka.common.serialization.StringDeserializer.class);
@@ -86,7 +86,7 @@ public class SimpleConsumer extends BaseConsumer {
                         long latency = System.nanoTime() - Long.parseLong(tsmsg);
 
                         // stats.onData((int)(latency / 1_000_000.0));
-                        histogram.recordValue(latency);
+                        // histogram.recordValue(latency);
 
                         k++;
                         if (k == 1_000_000) {
