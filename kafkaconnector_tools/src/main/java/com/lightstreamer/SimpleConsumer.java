@@ -92,9 +92,11 @@ public class SimpleConsumer extends BaseConsumer {
                             // stats.generateReport();
                             System.out.printf("Latency p50: %.3f ms%n", histogram.getValueAtPercentile(50) / 1_000_000.0);
                             System.out.printf("Latency p95: %.3f ms%n", histogram.getValueAtPercentile(95) / 1_000_000.0);
+                            System.out.printf("Latency p98: %.3f ms%n", histogram.getValueAtPercentile(98) / 1_000_000.0);
                             System.out.printf("Latency p99: %.3f ms%n", histogram.getValueAtPercentile(99) / 1_000_000.0);
+                            System.out.printf("Latency max: %.3f ms%n", histogram.getMaxValue() / 1_000_000.0);
                         }
-                        if (++k == 1000)
+                        if (++k == 10000)
                             k = 0;
                     } else {
                         msg_counter++;

@@ -113,7 +113,8 @@ public class SimpleProducer extends BaseProducer {
                 org.apache.kafka.common.serialization.StringSerializer.class);
 
         Producer<String, String> producer = new KafkaProducer<>(props);
-        publish(producer);
+        // publish(producer);
+        publishMessages(producer, 1000_000);
     }
 
     private void publish(Producer<String, String> producer) {
@@ -146,6 +147,26 @@ public class SimpleProducer extends BaseProducer {
             }
         }
 
+    }
+
+    public void publishMessages(Producer<String, String> producer, int numMessages) {
+        long startTime = System.nanoTime();
+        for (int i = 0; i < numMessages; i++) {
+            String[] keyArray = useLargeStrings ? largeStrings : strings;
+            int index = random.nextInt(keyArray.length);
+            String sndV = keyArray[index];
+            long now = System.nanoTime();
+            String value = String.valueOf(now);
+            producer.send(new ProducerRecord<>(ktopicname, sndV, value));
+        }
+
+        producer.flush();
+        long endTime = System.nanoTime();
+        double seconds = (endTime - startTime) / 1e9;
+        System.out.printf("Producer - inviati %d messaggi in %.2f s (%.2f msg/s)%n",
+                numMessages, seconds, numMessages / seconds);
+
+        producer.close();
     }
 
     public static class ProtoTestObjSerializer implements Serializer<com.lightstreamer.proto.TestObj> {
