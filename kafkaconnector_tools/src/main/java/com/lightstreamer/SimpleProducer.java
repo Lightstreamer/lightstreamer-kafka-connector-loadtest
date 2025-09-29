@@ -113,15 +113,15 @@ public class SimpleProducer extends BaseProducer {
                 org.apache.kafka.common.serialization.StringSerializer.class);
 
         Producer<String, String> producer = new KafkaProducer<>(props);
-        publish(producer);
-        // publishMessages(producer, 1000_000);
+        // publish(producer);
+        publishMessages(producer, 1_000_000);
     }
 
     private void publish(Producer<String, String> producer) {
         Instant starInstant = Instant.now();
         int k = 0;
         int kk = 0;
-        while (true) {
+        // while (true) {
             String prefix = addPrefix ? "PREFIX-" : "";
             String[] keyArray = useLargeStrings ? largeStrings : strings;
             int index = random.nextInt(keyArray.length);
@@ -157,7 +157,7 @@ public class SimpleProducer extends BaseProducer {
                 logger.error("Error during sending message : " + e.getMessage());
                 throw new RuntimeException(e);
             }
-        }
+        // }
 
     }
 
@@ -181,16 +181,5 @@ public class SimpleProducer extends BaseProducer {
         }
 
         // producer.close();
-    }
-
-    public static class ProtoTestObjSerializer implements Serializer<com.lightstreamer.proto.TestObj> {
-
-        @Override
-        public byte[] serialize(String topic, com.lightstreamer.proto.TestObj data) {
-            if (data == null) {
-                return null;
-            }
-            return data.toByteArray();
-        }
     }
 }
