@@ -53,7 +53,7 @@ public class SimpleConsumer extends BaseConsumer {
 
     @Override
     public void run() {
-        Histogram histogram = new Histogram(3_600_000_000L, 3); // fino a 1h, 3 cifre
+        Histogram histogram = new Histogram(60_000_000_000L, 3); // fino a 1h, 3 cifre
         Properties props = new Properties();
         props.setProperty("bootstrap.servers", kafkabootstrapstring);
         props.setProperty("group.id", kafkaconsumergroupid);
