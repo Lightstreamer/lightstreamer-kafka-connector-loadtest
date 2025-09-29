@@ -89,7 +89,7 @@ public class SimpleConsumer extends BaseConsumer {
                         histogram.recordValue(latency);
 
                         k++;
-                        if (k == 1000_000) {
+                        if (k == 1_000_000) {
                             kk += k;
                             logger.debug("Offset = " + record.offset() + ", message = " + message);
                             logger.info("Received {} messages", kk);
