@@ -146,7 +146,7 @@ public class SimpleProducer extends BaseProducer {
                 producer.send(new ProducerRecord<>(ktopicname, sndV, message));
                 if (k == 1000_000) {
                     producer.flush();
-                    System.out.printf("Published %d messages", k);
+                    System.out.printf("Published %d messages%n", k);
                     k = 0;
                 }
                 
