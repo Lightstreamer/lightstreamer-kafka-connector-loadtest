@@ -93,7 +93,7 @@ public class SimpleProducer extends BaseProducer {
         this.globalMessageCount = globalMessageCount;
         this.addPrefix = addPrefix;
         this.useLargeStrings = useLargeStrings;
-        logger.info("Protobuf producer: " + pid + ", prefix: " + addPrefix + ", ok.");
+        logger.info("Simple producer: " + pid + ", prefix: " + addPrefix + ", ok.");
 
         for (int i = 0; i < strings.length; i++) {
             largeStrings[i] = buildRepeatedString(strings[i], 500);
