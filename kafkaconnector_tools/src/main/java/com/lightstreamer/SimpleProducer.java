@@ -121,7 +121,7 @@ public class SimpleProducer extends BaseProducer {
 
         Producer<String, String> producer = new KafkaProducer<>(props);
         // publish(producer);
-        publishMessages(producer, Integer.parseInt(props.getProperty("messages", "100000")));
+        publishMessages(producer, Integer.parseInt(props.getProperty("rate", "100000")));
     }
 
     private void publish(Producer<String, String> producer) {
@@ -129,63 +129,83 @@ public class SimpleProducer extends BaseProducer {
         int k = 0;
         int kk = 0;
         // while (true) {
-            String prefix = addPrefix ? "PREFIX-" : "";
-            String[] keyArray = useLargeStrings ? largeStrings : strings;
-            int index = random.nextInt(keyArray.length);
-            String sndV = keyArray[index];
+        String prefix = addPrefix ? "PREFIX-" : "";
+        String[] keyArray = useLargeStrings ? largeStrings : strings;
+        int index = random.nextInt(keyArray.length);
+        String sndV = keyArray[index];
 
-            String message = generateMillisTS();
-            logger.debug("ProducerId - {}, New message for :{}", producerid, message.toString());
-            try {
-                // producer.send(new ProducerRecord<>(ktopicname, sndV, message),
-                //         (metadata, exception) -> {
-                //             if (exception != null) {
-                //                 logger.error("Error while producing message to topic : " + metadata.topic(),
-                //                         exception);
-                //                 return;
-                //             }
+        String message = generateMillisTS();
+        logger.debug("ProducerId - {}, New message for :{}", producerid, message.toString());
+        try {
+            // producer.send(new ProducerRecord<>(ktopicname, sndV, message),
+            // (metadata, exception) -> {
+            // if (exception != null) {
+            // logger.error("Error while producing message to topic : " + metadata.topic(),
+            // exception);
+            // return;
+            // }
 
-                //             Instant now = Instant.now();
-                //             Duration elapsed = Duration.between(starInstant, now);
-                //             logger.info("ProducerId - {} - Sent {} in {} seconds", producerid,
-                //                     globalMessageCount.incrementAndGet(), elapsed.toSeconds());
-                //         });
-                k++;
-                producer.send(new ProducerRecord<>(ktopicname, sndV, message));
-                if (k == 1_000_000) {
-                    kk += k;
-                    producer.flush();
-                    System.out.printf("Published %d messages%n", kk);
-                    k = 0;
-                }
-                
-
-            } catch (Exception e) {
-                logger.error("Error during sending message : " + e.getMessage());
-                throw new RuntimeException(e);
+            // Instant now = Instant.now();
+            // Duration elapsed = Duration.between(starInstant, now);
+            // logger.info("ProducerId - {} - Sent {} in {} seconds", producerid,
+            // globalMessageCount.incrementAndGet(), elapsed.toSeconds());
+            // });
+            k++;
+            producer.send(new ProducerRecord<>(ktopicname, sndV, message));
+            if (k == 1_000_000) {
+                kk += k;
+                producer.flush();
+                System.out.printf("Published %d messages%n", kk);
+                k = 0;
             }
+
+        } catch (Exception e) {
+            logger.error("Error during sending message : " + e.getMessage());
+            throw new RuntimeException(e);
+        }
         // }
 
     }
 
-    public void publishMessages(Producer<String, String> producer, int numMessages) {
-        // while (true) {
-            long startTime = System.nanoTime();
-            for (int i = 0; i < numMessages; i++) {
-                String[] keyArray = useLargeStrings ? largeStrings : strings;
-                int index = random.nextInt(keyArray.length);
-                String sndV = keyArray[index];
-                long now = System.nanoTime();
-                String value = String.valueOf(now);
-                producer.send(new ProducerRecord<>(ktopicname, sndV, value));
+    public void publishMessages(Producer<String, String> producer, int targetRate) {
+        long nanosPerMessage = 1_000_000_000L / targetRate;
+
+        long nextSendTime = System.nanoTime();
+        long start = System.nanoTime();
+        String[] keyArray = useLargeStrings ? largeStrings : strings;
+        long sentMessages = 0;
+        while (true) {
+            int index = random.nextInt(keyArray.length);
+            String sndV = keyArray[index];
+            String payload = String.valueOf(System.nanoTime());
+            producer.send(new ProducerRecord<>(ktopicname, sndV, payload));
+            sentMessages++;
+
+            // calcola quando dovrebbe partire il prossimo
+            nextSendTime += nanosPerMessage;
+            long sleepTime = nextSendTime - System.nanoTime();
+            if (sleepTime > 0) {
+                try {
+                    Thread.sleep(sleepTime / 1_000_000, (int) (sleepTime % 1_000_000));
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
             }
 
-            producer.flush();
-            long endTime = System.nanoTime();
-            double seconds = (endTime - startTime) / 1e9;
-            System.out.printf("Published %d messages in %.2f s (%.2f msg/s)%n",
-                    numMessages, seconds, numMessages / seconds);
-        // }
+            // log ogni 5 secondi
+            if (sentMessages % (targetRate * 5) == 0) {
+                long now = System.nanoTime();
+                double elapsedSec = (now - start) / 1e9;
+                double achievedRate = sentMessages / elapsedSec;
+                System.out.printf("Inviati %,d messaggi in %.2f s (target=%d msg/s, ottenuto=%.2f msg/s)%n",
+                        sentMessages, elapsedSec, targetRate, achievedRate);
+            }
+        }
+
+        // long endTime = System.nanoTime();
+        // double seconds = (endTime - startTime) / 1e9;
+        // System.out.printf("Published %d messages in %.2f s (%.2f msg/s)%n",
+        // targetRate, seconds, targetRate / seconds);
 
         // producer.close();
     }
