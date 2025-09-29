@@ -84,20 +84,20 @@ public class SimpleConsumer extends BaseConsumer {
                         // int diff = (int)((System.nanoTime() - Long.parseLong(tsmsg)) / 1e6);
                         long latency = System.nanoTime() - Long.parseLong(tsmsg);
 
-                        // stats.onData(diff);
+                        stats.onData((int)(latency / 1_000_000.0));
                         histogram.recordValue(latency);
 
-                        if (k == 0) {
+                        k++;
+                        if (k == 1000_000) {
                             logger.debug("Offset = " + record.offset() + ", message = " + message);
-                            // stats.generateReport();
+                            stats.generateReport();
                             System.out.printf("Latency p50: %.3f ms%n", histogram.getValueAtPercentile(50) / 1_000_000.0);
                             System.out.printf("Latency p95: %.3f ms%n", histogram.getValueAtPercentile(95) / 1_000_000.0);
                             System.out.printf("Latency p98: %.3f ms%n", histogram.getValueAtPercentile(98) / 1_000_000.0);
                             System.out.printf("Latency p99: %.3f ms%n", histogram.getValueAtPercentile(99) / 1_000_000.0);
                             System.out.printf("Latency max: %.3f ms%n", histogram.getMaxValue() / 1_000_000.0);
-                        }
-                        if (++k == 10000)
                             k = 0;
+                        }
                     } else {
                         msg_counter++;
                         if ((msg_counter % 50000) == 0) {
