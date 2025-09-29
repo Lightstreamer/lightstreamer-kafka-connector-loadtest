@@ -81,7 +81,7 @@ public class SimpleConsumer extends BaseConsumer {
                     if (iamblackcanary) {
                         String tsmsg = message;
                         // int diff = timediff(tsmsg);
-                        int diff = (int)(System.nanoTime() - Long.parseLong(tsmsg) / 1e6);
+                        int diff = (int)((System.nanoTime() - Long.parseLong(tsmsg)) / 1e6);
                         logger.info("Diff: {} ms", diff);
 
                         // stats.onData(diff);
