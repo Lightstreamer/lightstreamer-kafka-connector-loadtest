@@ -16,6 +16,7 @@
 
 package com.lightstreamer;
 
+import java.io.FileInputStream;
 import java.time.Duration;
 import java.util.Arrays;
 import java.util.Properties;
@@ -55,11 +56,15 @@ public class SimpleConsumer extends BaseConsumer {
     public void run() {
         Histogram histogram = new Histogram(3_600_000_000_000L, 3); // fino a 1h, 3 cifre
         Properties props = new Properties();
+        try (FileInputStream fis = new FileInputStream("consumer.properties")) {
+            props.load(fis);
+        } catch (Exception e) {
+            logger.error("Error loading consumer properties file: " + e.getMessage());
+            throw new RuntimeException(e);
+        }
         props.setProperty("bootstrap.servers", kafkabootstrapstring);
         props.setProperty("group.id", kafkaconsumergroupid);
-        props.setProperty("max.poll.records", "500000");
-        props.setProperty("enable.auto.commit", "true");
-        props.setProperty("auto.commit.interval.ms", "1000");
+        
         props.put("key.deserializer", org.apache.kafka.common.serialization.StringDeserializer.class);
         props.put("value.deserializer", org.apache.kafka.common.serialization.StringDeserializer.class);
 
