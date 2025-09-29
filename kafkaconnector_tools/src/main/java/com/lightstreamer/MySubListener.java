@@ -19,6 +19,7 @@ package com.lightstreamer;
 import java.time.Duration;
 import java.time.Instant;
 
+import org.HdrHistogram.Histogram;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,10 +34,13 @@ public class MySubListener implements SubscriptionListener {
     private boolean calculateLatencyStats;
     private boolean kj;
 
+    private Histogram histogram;
+
     public MySubListener(boolean calculateLatencyStats, StatisticsManager statsManager, boolean kj) {
         this.calculateLatencyStats = calculateLatencyStats;
         this.statsManager = statsManager;
         this.kj = kj;
+        this.histogram = new Histogram(60_000_000_000L, 3); // fino a 1h, 3 cifre
     }
 
     private int k = 0;
@@ -101,19 +105,26 @@ public class MySubListener implements SubscriptionListener {
             // logger.debug(" key: " + update.getValue("key") + " - " +
             // update.getValue("names775") + " - " + update.getValue("names1001"));
             // } else {
-            // logger.debug(" --> " + updts + " - " + update.getValue("fstValue") + " - " + update.getValue("intNum")
-            //         + " - " + update.getValue("sndValue"));
+            // logger.debug(" --> " + updts + " - " + update.getValue("fstValue") + " - " +
+            // update.getValue("intNum")
+            // + " - " + update.getValue("sndValue"));
             // }
 
             if (calculateLatencyStats) {
                 long latency = System.nanoTime() - Long.parseLong(updts);
-                this.statsManager.onData((int)(latency / 1_000_000.0));
+                histogram.recordValue(latency);
+                // this.statsManager.onData((int)(latency / 1_000_000.0));
 
-                if (k == 0) {
-                    statsManager.generateReport();
-                }
-                if (++k == 10)
+                k++;
+                if (k == 10_000) {
+                    // statsManager.generateReport();
+                    System.out.printf("Latency p50: %.3f ms%n", histogram.getValueAtPercentile(50) / 1_000_000.0);
+                    System.out.printf("Latency p95: %.3f ms%n", histogram.getValueAtPercentile(95) / 1_000_000.0);
+                    System.out.printf("Latency p98: %.3f ms%n", histogram.getValueAtPercentile(98) / 1_000_000.0);
+                    System.out.printf("Latency p99: %.3f ms%n", histogram.getValueAtPercentile(99) / 1_000_000.0);
+                    System.out.printf("Latency max: %.3f ms%n", histogram.getMaxValue() / 1_000_000.0);
                     k = 0;
+                }
             }
             /*
              * Iterator<Entry<String, String>> changedValues =
