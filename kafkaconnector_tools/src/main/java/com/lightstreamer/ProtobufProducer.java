@@ -16,6 +16,7 @@
 
 package com.lightstreamer;
 
+import java.io.FileInputStream;
 import java.security.SecureRandom;
 import java.time.Duration;
 import java.time.Instant;
@@ -30,6 +31,8 @@ import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.serialization.Serializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.lightstreamer.proto.TestObj;
 
 public class ProtobufProducer extends BaseProducer {
 
@@ -102,6 +105,12 @@ public class ProtobufProducer extends BaseProducer {
     @Override
     public void run() {
         Properties props = new Properties();
+        try (FileInputStream fis = new FileInputStream("publisher.properties")) {
+            props.load(fis);
+        } catch (Exception e) {
+            logger.error("Error loading publisher properties file: " + e.getMessage());
+            throw new RuntimeException(e);
+        }
         props.put("bootstrap.servers", kafkabootstrapstring);
         props.put("linger.ms", 50);
         props.put("acks", "0");
@@ -111,7 +120,8 @@ public class ProtobufProducer extends BaseProducer {
                 ProtoTestObjSerializer.class);
 
         Producer<String, com.lightstreamer.proto.TestObj> producer = new KafkaProducer<>(props);
-        publish(producer);
+        // publish(producer);
+        publishMessages(producer, Integer.parseInt(props.getProperty("rate", "100000")));
     }
 
     private void publish(Producer<String, com.lightstreamer.proto.TestObj> producer) {
@@ -149,6 +159,55 @@ public class ProtobufProducer extends BaseProducer {
             }
         }
 
+    }
+
+    public void publishMessages(Producer<String, TestObj> producer, int targetRate) {
+        long nanosPerMessage = 1_000_000_000L / targetRate;
+
+        long nextSendTime = System.nanoTime();
+        long start = System.nanoTime();
+        String[] keyArray = useLargeStrings ? largeStrings : strings;
+        long sentMessages = 0;
+        while (true) {
+            int index = random.nextInt(keyArray.length);
+            String sndV = keyArray[index];
+
+            com.lightstreamer.proto.TestObj payload = com.lightstreamer.proto.TestObj.newBuilder()
+                    .setTimestamp(String.valueOf(System.nanoTime()))
+                    .setFstValue(generateRandomString(512))
+                    .setSndValue(sndV)
+                    .setIntNum(generateRndInt())
+                    .build();
+            producer.send(new ProducerRecord<>(ktopicname, sndV, payload));
+            sentMessages++;
+
+            // calcola quando dovrebbe partire il prossimo
+            nextSendTime += nanosPerMessage;
+            long sleepTime = nextSendTime - System.nanoTime();
+            if (sleepTime > 0) {
+                try {
+                    Thread.sleep(sleepTime / 1_000_000, (int) (sleepTime % 1_000_000));
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            // log ogni 5 secondi
+            if (sentMessages % (targetRate * 5) == 0) {
+                long now = System.nanoTime();
+                double elapsedSec = (now - start) / 1e9;
+                double achievedRate = sentMessages / elapsedSec;
+                System.out.printf("Inviati %,d messaggi in %.2f s (target=%d msg/s, ottenuto=%.2f msg/s)%n",
+                        sentMessages, elapsedSec, targetRate, achievedRate);
+            }
+        }
+
+        // long endTime = System.nanoTime();
+        // double seconds = (endTime - startTime) / 1e9;
+        // System.out.printf("Published %d messages in %.2f s (%.2f msg/s)%n",
+        // targetRate, seconds, targetRate / seconds);
+
+        // producer.close();
     }
 
     public static class ProtoTestObjSerializer implements Serializer<com.lightstreamer.proto.TestObj> {
