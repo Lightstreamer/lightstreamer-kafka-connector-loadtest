@@ -67,6 +67,7 @@ public class SimpleConsumer extends BaseConsumer {
         
         props.put("key.deserializer", org.apache.kafka.common.serialization.StringDeserializer.class);
         props.put("value.deserializer", org.apache.kafka.common.serialization.StringDeserializer.class);
+        int logRecordCount = Integer.parseInt(props.getProperty("log.record.count", "1000"));
 
         try {
             KafkaConsumer<String, String> consumer = new KafkaConsumer<>(props);
@@ -94,7 +95,7 @@ public class SimpleConsumer extends BaseConsumer {
                         // histogram.recordValue(latency);
 
                         k++;
-                        if (k == 1_000_000) {
+                        if (k == logRecordCount) {
                             kk += k;
                             logger.debug("Offset = " + record.offset() + ", message = " + message);
                             logger.info("Received {} messages", kk);
