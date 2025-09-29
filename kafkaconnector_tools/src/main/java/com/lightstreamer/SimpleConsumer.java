@@ -82,8 +82,9 @@ public class SimpleConsumer extends BaseConsumer {
                         String tsmsg = message;
                         // int diff = timediff(tsmsg);
                         int diff = (int)(System.nanoTime() - Long.parseLong(tsmsg) / 1e6);
+                        logger.info("Diff: {} ms", diff);
 
-                        stats.onData(diff);
+                        // stats.onData(diff);
 
                         if (k == 0) {
                             logger.debug("Offset = " + record.offset() + ", message = " + message);
