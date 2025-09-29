@@ -73,7 +73,7 @@ public class SimpleConsumer extends BaseConsumer {
             while (goconsume) {
                 ConsumerRecords<String, String> records = consumer.poll(Duration.ofMillis(Long.MAX_VALUE));
 
-                logger.info("polled {} messages.", records.count());
+                logger.debug("polled {} messages.", records.count());
                 for (ConsumerRecord<String, String> record : records) {
                     String message = record.value();
 
