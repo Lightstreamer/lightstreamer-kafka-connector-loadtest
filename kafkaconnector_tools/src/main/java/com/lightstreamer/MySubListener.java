@@ -38,6 +38,7 @@ public class MySubListener implements SubscriptionListener {
 
     public MySubListener(boolean calculateLatencyStats, StatisticsManager statsManager, boolean kj) {
         this.calculateLatencyStats = calculateLatencyStats;
+
         this.statsManager = statsManager;
         this.kj = kj;
         this.histogram = new Histogram(3_600_000_000_000L, 3); // fino a 1h, 3 cifre
@@ -97,7 +98,7 @@ public class MySubListener implements SubscriptionListener {
              * stats.addValue(diff);
              */
 
-            String updts = update.getValue("timestamp");
+            String updts = update.getValue("tradetime");
             // logger.info(updts);
             // if (kj) {
             // logger.debug(" --> " + updts + " - " + update.getValue("secondText") + " - "
