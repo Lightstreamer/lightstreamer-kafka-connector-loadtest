@@ -100,26 +100,15 @@ public class MySubListener implements SubscriptionListener {
 
             logger.debug("Message: {}", update);
             String updts = update.getValue("tradetime");
-            // logger.info(updts);
-            // if (kj) {
-            // logger.debug(" --> " + updts + " - " + update.getValue("secondText") + " - "
-            // + update.getValue("thirdNumber") + " - " + update.getValue("hobbie1"));
-            // logger.debug(" key: " + update.getValue("key") + " - " +
-            // update.getValue("names775") + " - " + update.getValue("names1001"));
-            // } else {
-            // logger.debug(" --> " + updts + " - " + update.getValue("fstValue") + " - " +
-            // update.getValue("intNum")
-            // + " - " + update.getValue("sndValue"));
-            // }
 
             if (calculateLatencyStats) {
                 long latency = System.nanoTime() - Long.parseLong(updts);
                 histogram.recordValue(latency);
-                // this.statsManager.onData((int)(latency / 1_000_000.0));
+                this.statsManager.onData((int) (latency / 1_000_000.0));
 
                 k++;
                 if (k == 10_000) {
-                    // statsManager.generateReport();
+                    statsManager.generateReport();
                     System.out.println("---- Latency report ----");
                     System.out.printf("Latency p50: %.3f ms%n", histogram.getValueAtPercentile(50) / 1_000_000.0);
                     System.out.printf("Latency p95: %.3f ms%n", histogram.getValueAtPercentile(95) / 1_000_000.0);
