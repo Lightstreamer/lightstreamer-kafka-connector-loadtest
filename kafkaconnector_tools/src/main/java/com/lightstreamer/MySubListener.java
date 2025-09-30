@@ -98,7 +98,7 @@ public class MySubListener implements SubscriptionListener {
              * stats.addValue(diff);
              */
 
-             logger.info("Message: {}", update);
+            logger.debug("Message: {}", update);
             String updts = update.getValue("tradetime");
             // logger.info(updts);
             // if (kj) {
