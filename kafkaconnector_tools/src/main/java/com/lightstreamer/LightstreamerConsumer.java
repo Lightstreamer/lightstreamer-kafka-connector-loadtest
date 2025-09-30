@@ -65,8 +65,6 @@ public class LightstreamerConsumer {
 
     private static class LatencyDumper implements SubscriptionListener {
 
-        private static final Logger logger = LoggerFactory.getLogger(LatencyDumper.class);
-
         private final Histogram histogram;
         private int messageCounter = 0;
 
