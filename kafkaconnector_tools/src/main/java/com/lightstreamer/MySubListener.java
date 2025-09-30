@@ -16,9 +16,6 @@
 
 package com.lightstreamer;
 
-import java.time.Duration;
-import java.time.Instant;
-
 import org.HdrHistogram.Histogram;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,29 +27,11 @@ public class MySubListener implements SubscriptionListener {
 
     private static final Logger logger = LoggerFactory.getLogger(MySubListener.class);
 
-    private StatisticsManager statsManager;
-    private boolean calculateLatencyStats;
-    private boolean kj;
+    private final Histogram histogram;
+    private int messageCounter = 0;
 
-    private Histogram histogram;
-
-    public MySubListener(boolean calculateLatencyStats, StatisticsManager statsManager, boolean kj) {
-        this.calculateLatencyStats = calculateLatencyStats;
-
-        this.statsManager = statsManager;
-        this.kj = kj;
-        this.histogram = new Histogram(3_600_000_000_000L, 3); // fino a 1h, 3 cifre
-    }
-
-    private int k = 0;
-
-    private int timediff(String timestampString) {
-        Instant current = Instant.now();
-        Instant received = Instant.parse(timestampString);
-
-        logger.debug("Received timestamp: {}, Current timestamp {}", received, current);
-
-        return (int) Duration.between(received, current).toMillis();
+    public MySubListener() {
+        this.histogram = new Histogram(3_600_000_000_000L, 3); // up to 1h, 3 digits
     }
 
     @Override
@@ -77,71 +56,31 @@ public class MySubListener implements SubscriptionListener {
 
     @Override
     public void onItemLostUpdates(String itemName, int itemPos, int lostUpdates) {
-        logger.info(lostUpdates + " messages were lost");
+        logger.info("{} lostUpdates messages were lost", lostUpdates);
     }
 
     @Override
     public void onItemUpdate(ItemUpdate update) {
         try {
-
-            /*
-             * String tsmsg = update.getValue("timestamp");
-             * long diff = timediff(tsmsg);
-             * stats.addValue(diff);
-             * logger.debug("2ndValue: " + update.getValue("sndValue"));
-             * logger.debug("------------------- " + diff);
-             */
-            /*
-             * logger.info("Value: " + update.getValue("value"));
-             * String tsmsg = update.getValue("value").substring(0, 23);
-             * long diff = timediff(tsmsg);
-             * stats.addValue(diff);
-             */
-
             logger.debug("Message: {}", update);
-            String updts = update.getValue("tradetime");
+            long latency = System.nanoTime() - Long.parseLong(update.getValue("tradetime"));
+            histogram.recordValue(latency);
 
-            if (calculateLatencyStats) {
-                long latency = System.nanoTime() - Long.parseLong(updts);
-                histogram.recordValue(latency);
-                this.statsManager.onData((int) (latency / 1_000_000.0));
-
-                k++;
-                if (k == 10_000) {
-                    statsManager.generateReport();
-                    System.out.println("---- Latency report ----");
-                    System.out.printf("Latency p50: %.3f ms%n", histogram.getValueAtPercentile(50) / 1_000_000.0);
-                    System.out.printf("Latency p95: %.3f ms%n", histogram.getValueAtPercentile(95) / 1_000_000.0);
-                    System.out.printf("Latency p98: %.3f ms%n", histogram.getValueAtPercentile(98) / 1_000_000.0);
-                    System.out.printf("Latency p99: %.3f ms%n", histogram.getValueAtPercentile(99) / 1_000_000.0);
-                    System.out.printf("Latency max: %.3f ms%n", histogram.getMaxValue() / 1_000_000.0);
-                    System.out.println("------------------------");
-                    k = 0;
-                }
+            messageCounter++;
+            if (messageCounter == 10_000) {
+                logger.info("---- Latency report ----");
+                logger.info("Latency p50: {} ms",
+                        String.format("%.3f", histogram.getValueAtPercentile(50) / 1_000_000.0));
+                logger.info("Latency p95: {} ms",
+                        String.format("%.3f", histogram.getValueAtPercentile(95) / 1_000_000.0));
+                logger.info("Latency p98: {} ms",
+                        String.format("%.3f", histogram.getValueAtPercentile(98) / 1_000_000.0));
+                logger.info("Latency p99: {} ms",
+                        String.format("%.3f", histogram.getValueAtPercentile(99) / 1_000_000.0));
+                logger.info("Latency max: {} ms", String.format("%.3f", histogram.getMaxValue() / 1_000_000.0));
+                logger.info("------------------------");
+                messageCounter = 0;
             }
-            /*
-             * Iterator<Entry<String, String>> changedValues =
-             * update.getChangedFields().entrySet().iterator();
-             * while (changedValues.hasNext()) {
-             * Entry<String, String> field = changedValues.next();
-             * logger.debug("Field " + field.getKey() + " changed: " + field.getValue());
-             * 
-             * if (calculateLatencyStats && field.getValue().startsWith("PREFIX-")) {
-             * String tsmsg = field.getValue().substring(7, 30); // Skip the "PREFIX-" part
-             * 
-             * long diff = timediff(tsmsg);
-             * stats.addValue(diff);
-             * logger.debug("------------------- " + diff);
-             * 
-             * if (k == 0) {
-             * logger.info("Mean: " + stats.calculateMean() + ", Median = " +
-             * stats.calculateMedian()
-             * + ", confidence = " + stats.calculateConfidenceInterval(500));
-             * }
-             * if (++k == 10) k = 0;
-             * }
-             * }
-             */
         } catch (Exception e) {
             logger.error("Error in onItemUpdate", e);
         }

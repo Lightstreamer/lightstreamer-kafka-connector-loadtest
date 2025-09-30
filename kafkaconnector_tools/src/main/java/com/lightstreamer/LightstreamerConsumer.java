@@ -17,105 +17,145 @@
 package com.lightstreamer;
 
 import java.util.Arrays;
+import java.util.stream.IntStream;
 
+import org.HdrHistogram.Histogram;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.lightstreamer.client.ItemUpdate;
 import com.lightstreamer.client.LightstreamerClient;
 import com.lightstreamer.client.Subscription;
+import com.lightstreamer.client.SubscriptionListener;
 
 public class LightstreamerConsumer {
-
-    private static StatisticsManager statsManager = null;
 
     private static final Logger logger = LoggerFactory.getLogger(LightstreamerConsumer.class);
 
     public static void main(String[] args) {
-        boolean calculateLatencyStats = false;
-        boolean isKJ = false;
-        boolean extkey = false;
-        String serverAddress = "http://localhost:8080/";
-
-        logger.info("Args: {} ...", Arrays.toString(args));
-
-        for (String arg : args) {
-            if (arg.equalsIgnoreCase("--calculate-latency-stats")) {
-                calculateLatencyStats = true;
-                statsManager = new StatisticsManager();
-            } else if (arg.startsWith("--server-address=")) {
-                serverAddress = arg.split("=", 2)[1];
-            } else if (arg.equalsIgnoreCase("--kj")) {
-                isKJ = true;
-            } else if (arg.equalsIgnoreCase("--extended-key")) {
-                extkey = true;
-            }
+        if (args.length == 0) {
+            logger.error("Server hostname is required as first argument");
+            System.exit(1);
         }
+        String serverAddress = args[0];
 
         LightstreamerClient client = new LightstreamerClient(serverAddress, "KafkaConnector");
         client.addListener(new MyClientListener());
         client.connect();
 
-        // String[] items = { "ltest-[key=Banana]" };
-
-        String[] items = {
-                "ltest-[key=META250801P00680000]",
-                "ltest-[key=META250801P00680001]",
-                "ltest-[key=META250801P00680002]",
-                "ltest-[key=META250801P00680003]",
-                "ltest-[key=META250801P00680004]",
-                "ltest-[key=META250801P00680005]",
-                "ltest-[key=META250801P00680006]",
-                "ltest-[key=META250801P00680007]",
-                "ltest-[key=META250801P00680008]",
-                "ltest-[key=META250801P00680009]",
-                "ltest-[key=META250801P00680010]",
-                "ltest-[key=META250801P00680011]",
-                "ltest-[key=META250801P00680012]",
-                "ltest-[key=META250801P00680013]",
-                "ltest-[key=META250801P00680014]",
-                "ltest-[key=META250801P00680015]",
-                "ltest-[key=META250801P00680016]",
-                "ltest-[key=META250801P00680017]",
-                "ltest-[key=META250801P00680018]",
-                "ltest-[key=META250801P00680019]",
-                "ltest-[key=META250801P00680020]",
-                "ltest-[key=META250801P00680021]",
-                "ltest-[key=META250801P00680022]",
-                "ltest-[key=META250801P00680023]",
-                "ltest-[key=META250801P00680024]",
-                "ltest-[key=META250801P00680025]",
-                "ltest-[key=META250801P00680026]",
-                "ltest-[key=META250801P00680027]",
-                "ltest-[key=META250801P00680028]",
-                "ltest-[key=META250801P00680029]",
-                "ltest-[key=META250801P00680030]",
-                "ltest-[key=META250801P00680031]",
-                "ltest-[key=META250801P00680032]",
-                "ltest-[key=META250801P00680033]",
-                "ltest-[key=META250801P00680034]",
-                "ltest-[key=META250801P00680035]",
-                "ltest-[key=META250801P00680036]",
-                "ltest-[key=META250801P00680037]",
-                "ltest-[key=META250801P00680038]",
-                "ltest-[key=META250801P00680039]"
-        };
-        // String[] fields = { "timestamp", "fstValue", "sndValue", "intNum" };
+        /**
+         * Creates an array of 40 item names for testing purposes.
+         * Each item follows the pattern "ltest-[key=META250801P00680XXX]" where XXX is a 
+         * zero-padded 3-digit number starting from 000 to 039.
+         * 
+         * @return String array containing formatted item names for load testing
+         */
+        String[] items = IntStream.range(0, 40)
+            .mapToObj(i -> String.format("ltest-[key=META250801P00680%03d]", i))
+            .toArray(String[]::new);
         String[] fields = { "volume", "high", "partition", "last", "offset", "low", "sym", "ask", "bid", "tradetime" };
 
         Subscription sub = new Subscription("DISTINCT", items, fields);
         sub.setDataAdapter("QuickStart");
         sub.setRequestedSnapshot("no");
-        sub.addListener(new MySubListener(calculateLatencyStats, statsManager, isKJ));
+        sub.addListener(new LatencyDumper());
         sub.setRequestedMaxFrequency("unfiltered");
         client.subscribe(sub);
+    }
 
-        String input = System.console().readLine();
-        while (!input.equalsIgnoreCase("stop")) {
-            input = System.console().readLine();
-            if (input == null)
-                input = "";
+    private static class LatencyDumper implements SubscriptionListener {
+
+        private static final Logger logger = LoggerFactory.getLogger(LatencyDumper.class);
+
+        private final Histogram histogram;
+        private int messageCounter = 0;
+
+        public LatencyDumper() {
+            this.histogram = new Histogram(3_600_000_000_000L, 3); // up to 1h, 3 digits
         }
 
-        return;
+        @Override
+        public void onClearSnapshot(String itemName, int itemPos) {
+            logger.info("Server has cleared the current status of the chat");
+        }
+
+        @Override
+        public void onCommandSecondLevelItemLostUpdates(int lostUpdates, String key) {
+            // not on this subscription
+        }
+
+        @Override
+        public void onCommandSecondLevelSubscriptionError(int code, String message, String key) {
+            // not on this subscription
+        }
+
+        @Override
+        public void onEndOfSnapshot(String arg0, int arg1) {
+            logger.info("Snapshot is now fully received, from now on only real-time messages will be received");
+        }
+
+        @Override
+        public void onItemLostUpdates(String itemName, int itemPos, int lostUpdates) {
+            logger.info("{} lostUpdates messages were lost", lostUpdates);
+        }
+
+        @Override
+        public void onItemUpdate(ItemUpdate update) {
+            try {
+                logger.debug("Message: {}", update);
+                long latency = System.nanoTime() - Long.parseLong(update.getValue("tradetime"));
+                histogram.recordValue(latency);
+
+                messageCounter++;
+                if (messageCounter == 10_000) {
+                    logger.info("---- Latency report ----");
+                    logger.info("Latency p50: {} ms",
+                            String.format("%.3f", histogram.getValueAtPercentile(50) / 1_000_000.0));
+                    logger.info("Latency p95: {} ms",
+                            String.format("%.3f", histogram.getValueAtPercentile(95) / 1_000_000.0));
+                    logger.info("Latency p98: {} ms",
+                            String.format("%.3f", histogram.getValueAtPercentile(98) / 1_000_000.0));
+                    logger.info("Latency p99: {} ms",
+                            String.format("%.3f", histogram.getValueAtPercentile(99) / 1_000_000.0));
+                    logger.info("Latency max: {} ms", String.format("%.3f", histogram.getMaxValue() / 1_000_000.0));
+                    logger.info("------------------------");
+                    messageCounter = 0;
+                }
+            } catch (Exception e) {
+                logger.error("Error in onItemUpdate", e);
+            }
+
+        }
+
+        @Override
+        public void onListenEnd() {
+            logger.info("Stop listeneing to subscription events");
+        }
+
+        @Override
+        public void onListenStart() {
+            logger.info("Start listeneing to subscription events");
+        }
+
+        @Override
+        public void onSubscription() {
+            logger.info("Now subscribed to the chat item, messages will now start coming in");
+        }
+
+        @Override
+        public void onSubscriptionError(int code, String message) {
+            logger.info("Cannot subscribe because of error " + code + ": " + message);
+        }
+
+        @Override
+        public void onUnsubscription() {
+            logger.info("Now unsubscribed from chat item, no more messages will be received");
+        }
+
+        @Override
+        public void onRealMaxFrequency(String frequency) {
+            logger.info("Frequency is " + frequency);
+        }
     }
+
 }
