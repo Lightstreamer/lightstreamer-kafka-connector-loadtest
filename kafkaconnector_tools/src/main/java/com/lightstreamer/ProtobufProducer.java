@@ -18,7 +18,6 @@ package com.lightstreamer;
 
 import java.io.FileInputStream;
 import java.security.SecureRandom;
-import java.time.Duration;
 import java.time.Instant;
 import java.util.Properties;
 import java.util.Random;
@@ -32,20 +31,54 @@ import org.apache.kafka.common.serialization.Serializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.lightstreamer.proto.TestObj;
+import com.lightstreamer.proto.PriceInfo;
 
 public class ProtobufProducer extends BaseProducer {
 
     private static final String CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 
-    String[] strings = { "Apple", "Banana", "Orange", "Grape", "Pineapple",
-            "Strawberry", "Watermelon", "Mango", "Kiwi", "Lemon",
-            "Peach", "Cherry", "Blueberry", "Raspberry", "Blackberry",
-            "Coconut", "Pomegranate", "Cantaloupe", "Apricot", "Fig",
-            "Plum", "Pear", "Avocado", "Lychee", "Guava",
-            "Dragonfruit", "Passionfruit", "Papaya", "Melon", "Lime",
-            "Nectarine", "Persimmon", "Starfruit", "Tangerine", "Durian",
-            "Kumquat", "Cranberry", "Rambutan", "Mangosteen", "Jackfruit" };
+    String[] strings = {
+            "META250801P00680000",
+            "META250801P00680001",
+            "META250801P00680002",
+            "META250801P00680003",
+            "META250801P00680004",
+            "META250801P00680005",
+            "META250801P00680006",
+            "META250801P00680007",
+            "META250801P00680008",
+            "META250801P00680009",
+            "META250801P00680010",
+            "META250801P00680011",
+            "META250801P00680012",
+            "META250801P00680013",
+            "META250801P00680014",
+            "META250801P00680015",
+            "META250801P00680016",
+            "META250801P00680017",
+            "META250801P00680018",
+            "META250801P00680019",
+            "META250801P00680020",
+            "META250801P00680021",
+            "META250801P00680022",
+            "META250801P00680023",
+            "META250801P00680024",
+            "META250801P00680025",
+            "META250801P00680026",
+            "META250801P00680027",
+            "META250801P00680028",
+            "META250801P00680029",
+            "META250801P00680030",
+            "META250801P00680031",
+            "META250801P00680032",
+            "META250801P00680033",
+            "META250801P00680034",
+            "META250801P00680035",
+            "META250801P00680036",
+            "META250801P00680037",
+            "META250801P00680038",
+            "META250801P00680039",
+    };
 
     private String[] largeStrings = new String[strings.length];
 
@@ -119,66 +152,69 @@ public class ProtobufProducer extends BaseProducer {
         props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG,
                 ProtoTestObjSerializer.class);
 
-        Producer<String, com.lightstreamer.proto.TestObj> producer = new KafkaProducer<>(props);
+        Producer<String, com.lightstreamer.proto.PriceInfo> producer = new KafkaProducer<>(props);
         // publish(producer);
         publishMessages(producer, Integer.parseInt(props.getProperty("rate", "100000")));
     }
 
-    private void publish(Producer<String, com.lightstreamer.proto.TestObj> producer) {
-        Instant starInstant = Instant.now();
-        while (true) {
-            String prefix = addPrefix ? "PREFIX-" : "";
-            String[] keyArray = useLargeStrings ? largeStrings : strings;
-            int index = random.nextInt(keyArray.length);
-            String sndV = keyArray[index];
+    // private void publish(Producer<String, com.lightstreamer.proto.TestObj> producer) {
+    //     Instant starInstant = Instant.now();
+    //     while (true) {
+    //         String[] keyArray = useLargeStrings ? largeStrings : strings;
+    //         int index = random.nextInt(keyArray.length);
+    //         String sndV = keyArray[index];
 
-            com.lightstreamer.proto.TestObj message = com.lightstreamer.proto.TestObj.newBuilder()
-                    .setTimestamp(prefix + generateMillisTS())
-                    .setFstValue(generateRandomString(512))
-                    .setSndValue(sndV)
-                    .setIntNum(generateRndInt())
-                    .build();
-            logger.debug("ProducerId - {}, New message for :{}", producerid, message.toString());
-            try {
-                producer.send(new ProducerRecord<>(ktopicname, sndV, message),
-                        (metadata, exception) -> {
-                            if (exception != null) {
-                                logger.error("Error while producing message to topic : " + metadata.topic(),
-                                        exception);
-                                return;
-                            }
+    //         com.lightstreamer.proto.TestObj message = com.lightstreamer.proto.TestObj.newBuilder()
+    //                 .setTimestamp(prefix + generateMillisTS())
+    //                 .setFstValue(generateRandomString(512))
+    //                 .setSndValue(sndV)
+    //                 .setIntNum(generateRndInt())
+    //                 .build();
+    //         logger.debug("ProducerId - {}, New message for :{}", producerid, message.toString());
+    //         try {
+    //             producer.send(new ProducerRecord<>(ktopicname, sndV, message),
+    //                     (metadata, exception) -> {
+    //                         if (exception != null) {
+    //                             logger.error("Error while producing message to topic : " + metadata.topic(),
+    //                                     exception);
+    //                             return;
+    //                         }
 
-                            Instant now = Instant.now();
-                            Duration elapsed = Duration.between(starInstant, now);
-                            logger.info("ProducerId - {} - Sent {} in {} seconds", producerid,
-                                    globalMessageCount.incrementAndGet(), elapsed.toSeconds());
-                        });
-            } catch (Exception e) {
-                logger.error("Error during sending message : " + e.getMessage());
-                throw new RuntimeException(e);
-            }
-        }
+    //                         Instant now = Instant.now();
+    //                         Duration elapsed = Duration.between(starInstant, now);
+    //                         logger.info("ProducerId - {} - Sent {} in {} seconds", producerid,
+    //                                 globalMessageCount.incrementAndGet(), elapsed.toSeconds());
+    //                     });
+    //         } catch (Exception e) {
+    //             logger.error("Error during sending message : " + e.getMessage());
+    //             throw new RuntimeException(e);
+    //         }
+    //     }
 
-    }
+    // }
 
-    public void publishMessages(Producer<String, TestObj> producer, int targetRate) {
+    public void publishMessages(Producer<String, PriceInfo> producer, int targetRate) {
         long nanosPerMessage = 1_000_000_000L / targetRate;
 
         long nextSendTime = System.nanoTime();
         long start = System.nanoTime();
         String[] keyArray = useLargeStrings ? largeStrings : strings;
         long sentMessages = 0;
+        Random rnd = new Random();
         while (true) {
-            int index = random.nextInt(keyArray.length);
-            String sndV = keyArray[index];
+            int index = rnd.nextInt(keyArray.length);
+            String key = keyArray[index];
 
-            com.lightstreamer.proto.TestObj payload = com.lightstreamer.proto.TestObj.newBuilder()
-                    .setTimestamp(String.valueOf(System.nanoTime()))
-                    .setFstValue(generateRandomString(512))
-                    .setSndValue(sndV)
-                    .setIntNum(generateRndInt())
+            com.lightstreamer.proto.PriceInfo payload = com.lightstreamer.proto.PriceInfo.newBuilder()
+                    .setSymbol(key)
+                    .setHigh(rnd.nextFloat() * 100.0f)
+                    .setLS(rnd.nextFloat() * 100.0f)
+                    .setLow(rnd.nextFloat() * 100.0f)
+                    .setAsk(rnd.nextFloat() * 100.0f)
+                    .setBid(rnd.nextFloat() * 100.0f)
+                    .setCurrTime(String.valueOf(System.nanoTime()))
                     .build();
-            producer.send(new ProducerRecord<>(ktopicname, sndV, payload));
+            producer.send(new ProducerRecord<>(ktopicname, key, payload));
             sentMessages++;
 
             // calcola quando dovrebbe partire il prossimo
@@ -210,10 +246,10 @@ public class ProtobufProducer extends BaseProducer {
         // producer.close();
     }
 
-    public static class ProtoTestObjSerializer implements Serializer<com.lightstreamer.proto.TestObj> {
+    public static class ProtoTestObjSerializer implements Serializer<com.lightstreamer.proto.PriceInfo> {
 
         @Override
-        public byte[] serialize(String topic, com.lightstreamer.proto.TestObj data) {
+        public byte[] serialize(String topic, com.lightstreamer.proto.PriceInfo data) {
             if (data == null) {
                 return null;
             }
