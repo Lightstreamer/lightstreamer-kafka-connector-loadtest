@@ -153,7 +153,7 @@ public class LightstreamerConsumer {
 
         @Override
         public void onSubscription() {
-            logger.info("Now subscribed to the chat item, messages will now start coming in");
+            logger.info("Now subscribed to items, messages will now start coming in");
         }
 
         @Override
@@ -163,7 +163,7 @@ public class LightstreamerConsumer {
 
         @Override
         public void onUnsubscription() {
-            logger.info("Now unsubscribed from chat item, no more messages will be received");
+            logger.info("Now unsubscribed from items, no more messages will be received");
         }
 
         @Override
