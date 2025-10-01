@@ -17,11 +17,9 @@
 package com.lightstreamer;
 
 import java.io.FileInputStream;
-import java.security.SecureRandom;
-import java.time.Instant;
 import java.util.Properties;
 import java.util.Random;
-import java.util.concurrent.atomic.AtomicLong;
+import java.util.stream.IntStream;
 
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.Producer;
@@ -35,104 +33,18 @@ import com.lightstreamer.proto.PriceInfo;
 
 public class ProtobufProducer extends BaseProducer {
 
-    private static final String CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-
-    String[] strings = {
-            "META250801P00680000",
-            "META250801P00680001",
-            "META250801P00680002",
-            "META250801P00680003",
-            "META250801P00680004",
-            "META250801P00680005",
-            "META250801P00680006",
-            "META250801P00680007",
-            "META250801P00680008",
-            "META250801P00680009",
-            "META250801P00680010",
-            "META250801P00680011",
-            "META250801P00680012",
-            "META250801P00680013",
-            "META250801P00680014",
-            "META250801P00680015",
-            "META250801P00680016",
-            "META250801P00680017",
-            "META250801P00680018",
-            "META250801P00680019",
-            "META250801P00680020",
-            "META250801P00680021",
-            "META250801P00680022",
-            "META250801P00680023",
-            "META250801P00680024",
-            "META250801P00680025",
-            "META250801P00680026",
-            "META250801P00680027",
-            "META250801P00680028",
-            "META250801P00680029",
-            "META250801P00680030",
-            "META250801P00680031",
-            "META250801P00680032",
-            "META250801P00680033",
-            "META250801P00680034",
-            "META250801P00680035",
-            "META250801P00680036",
-            "META250801P00680037",
-            "META250801P00680038",
-            "META250801P00680039",
-    };
-
-    private String[] largeStrings = new String[strings.length];
-
     private static final Logger logger = LoggerFactory.getLogger(ProtobufProducer.class);
 
-    private static final Random random = new SecureRandom();
+    private final String[] keys;
 
-    private static String generateRandomString(int length) {
-        StringBuilder sb = new StringBuilder(length);
+    public ProtobufProducer(String kafka_bootstrap_string, String pid,
+            String topicName) {
+        super(kafka_bootstrap_string, pid, topicName, 0, 0);
 
-        for (int i = 0; i < length; i++) {
-            int randomIndex = random.nextInt(CHARACTERS.length());
-            char randomChar = CHARACTERS.charAt(randomIndex);
-            sb.append(randomChar);
-        }
-
-        return sb.toString();
-    }
-
-    private int generateRndInt() {
-        return random.nextInt();
-    }
-
-    private static String generateMillisTS() {
-        return Instant.now().toString();
-    }
-
-    private static String buildRepeatedString(String base, int totalLength) {
-        StringBuilder sb = new StringBuilder();
-        while (sb.length() < totalLength) {
-            sb.append(base);
-        }
-        return sb.length() > totalLength
-                ? sb.substring(0, totalLength)
-                : sb.toString();
-    }
-
-    private boolean addPrefix;
-    private boolean useLargeStrings;
-    private AtomicLong globalMessageCount;
-
-    public ProtobufProducer(AtomicLong globalMessageCount, String kafka_bootstrap_string, String pid,
-            String topicname,
-            int pause, int msgsize,
-            boolean addPrefix, boolean useLargeStrings) {
-        super(kafka_bootstrap_string, pid, topicname, pause, msgsize);
-        this.globalMessageCount = globalMessageCount;
-        this.addPrefix = addPrefix;
-        this.useLargeStrings = useLargeStrings;
-        logger.info("Protobuf producer: " + pid + ", prefix: " + addPrefix + ", ok.");
-
-        for (int i = 0; i < strings.length; i++) {
-            largeStrings[i] = buildRepeatedString(strings[i], 500);
-        }
+        this.keys = IntStream.range(0, 40)
+                .mapToObj(i -> String.format("META250801P00680%03d", i))
+                .toArray(String[]::new);
+        logger.info("Protobuf producer {}", pid);
     }
 
     @Override
@@ -145,66 +57,26 @@ public class ProtobufProducer extends BaseProducer {
             throw new RuntimeException(e);
         }
         props.put("bootstrap.servers", kafkabootstrapstring);
-        props.put("linger.ms", 50);
-        props.put("acks", "0");
         props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG,
                 org.apache.kafka.common.serialization.StringSerializer.class);
         props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG,
                 ProtoTestObjSerializer.class);
 
         Producer<String, com.lightstreamer.proto.PriceInfo> producer = new KafkaProducer<>(props);
-        // publish(producer);
         publishMessages(producer, Integer.parseInt(props.getProperty("rate", "100000")));
     }
 
-    // private void publish(Producer<String, com.lightstreamer.proto.TestObj> producer) {
-    //     Instant starInstant = Instant.now();
-    //     while (true) {
-    //         String[] keyArray = useLargeStrings ? largeStrings : strings;
-    //         int index = random.nextInt(keyArray.length);
-    //         String sndV = keyArray[index];
-
-    //         com.lightstreamer.proto.TestObj message = com.lightstreamer.proto.TestObj.newBuilder()
-    //                 .setTimestamp(prefix + generateMillisTS())
-    //                 .setFstValue(generateRandomString(512))
-    //                 .setSndValue(sndV)
-    //                 .setIntNum(generateRndInt())
-    //                 .build();
-    //         logger.debug("ProducerId - {}, New message for :{}", producerid, message.toString());
-    //         try {
-    //             producer.send(new ProducerRecord<>(ktopicname, sndV, message),
-    //                     (metadata, exception) -> {
-    //                         if (exception != null) {
-    //                             logger.error("Error while producing message to topic : " + metadata.topic(),
-    //                                     exception);
-    //                             return;
-    //                         }
-
-    //                         Instant now = Instant.now();
-    //                         Duration elapsed = Duration.between(starInstant, now);
-    //                         logger.info("ProducerId - {} - Sent {} in {} seconds", producerid,
-    //                                 globalMessageCount.incrementAndGet(), elapsed.toSeconds());
-    //                     });
-    //         } catch (Exception e) {
-    //             logger.error("Error during sending message : " + e.getMessage());
-    //             throw new RuntimeException(e);
-    //         }
-    //     }
-
-    // }
-
     public void publishMessages(Producer<String, PriceInfo> producer, int targetRate) {
         long nanosPerMessage = 1_000_000_000L / targetRate;
-
         long nextSendTime = System.nanoTime();
         long start = System.nanoTime();
-        String[] keyArray = useLargeStrings ? largeStrings : strings;
         long sentMessages = 0;
         Random rnd = new Random();
         while (true) {
-            int index = rnd.nextInt(keyArray.length);
-            String key = keyArray[index];
+            // Select a random key from the predefined list
+            String key = keys[rnd.nextInt(keys.length)];
 
+            // Build and send the message
             com.lightstreamer.proto.PriceInfo payload = com.lightstreamer.proto.PriceInfo.newBuilder()
                     .setSymbol(key)
                     .setHigh(rnd.nextFloat() * 100.0f)
@@ -214,10 +86,10 @@ public class ProtobufProducer extends BaseProducer {
                     .setBid(rnd.nextFloat() * 100.0f)
                     .setCurrTime(String.valueOf(System.nanoTime()))
                     .build();
-            producer.send(new ProducerRecord<>(ktopicname, key, payload));
+            producer.send(new ProducerRecord<>(topicName, key, payload));
             sentMessages++;
 
-            // calcola quando dovrebbe partire il prossimo
+            // Determines when the next message should be sent
             nextSendTime += nanosPerMessage;
             long sleepTime = nextSendTime - System.nanoTime();
             if (sleepTime > 0) {
@@ -228,7 +100,7 @@ public class ProtobufProducer extends BaseProducer {
                 }
             }
 
-            // log ogni 5 secondi
+            // Every 5 seconds, print the achieved rate
             if (sentMessages % (targetRate * 5) == 0) {
                 long now = System.nanoTime();
                 double elapsedSec = (now - start) / 1e9;
@@ -237,13 +109,6 @@ public class ProtobufProducer extends BaseProducer {
                         sentMessages, elapsedSec, targetRate, achievedRate);
             }
         }
-
-        // long endTime = System.nanoTime();
-        // double seconds = (endTime - startTime) / 1e9;
-        // System.out.printf("Published %d messages in %.2f s (%.2f msg/s)%n",
-        // targetRate, seconds, targetRate / seconds);
-
-        // producer.close();
     }
 
     public static class ProtoTestObjSerializer implements Serializer<com.lightstreamer.proto.PriceInfo> {
