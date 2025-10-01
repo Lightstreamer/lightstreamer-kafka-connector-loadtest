@@ -51,8 +51,8 @@ public abstract class RateLimitedKafkaProducer<T> extends BaseProducer {
         try (FileInputStream fis = new FileInputStream("publisher.properties")) {
             props.load(fis);
         } catch (Exception e) {
-            logger.error("Error loading publisher properties file: " + e.getMessage());
-            throw new RuntimeException(e);
+            logger.warn("Error loading publisher properties file: " + e.getMessage());
+            // throw new RuntimeException(e);
         }
         props.put("bootstrap.servers", kafkabootstrapstring);
         props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG,
@@ -60,8 +60,12 @@ public abstract class RateLimitedKafkaProducer<T> extends BaseProducer {
         props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG,
                 valueSerializeClass);
 
-        Producer<String, T> producer = new KafkaProducer<>(props);
-        publishMessages(producer, Integer.parseInt(props.getProperty("rate", "100000")));
+        try {
+            Producer<String, T> producer = new KafkaProducer<>(props);
+            publishMessages(producer, Integer.parseInt(props.getProperty("rate", "100000")));
+        } catch (Exception e) {
+            logger.error("Error occurred while publishing messages: ", e);
+        }
     }
 
     abstract T makePayload(Random rnd, String key);
@@ -77,6 +81,7 @@ public abstract class RateLimitedKafkaProducer<T> extends BaseProducer {
             String key = keys[rnd.nextInt(keys.length)];
 
             // Build and send the message
+            logger.debug("Producing message with key: {}", key);
             producer.send(new ProducerRecord<>(topicName, key, makePayload(rnd, key)));
             sentMessages++;
 
