@@ -16,34 +16,37 @@
 
 package com.lightstreamer;
 
-import java.nio.ByteBuffer;
 import java.util.Random;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadLocalRandom;
 
-public class SimpleProducer extends RateLimitedKafkaProducer<ByteBuffer> {
+public class SimpleProducer extends RateLimitedKafkaProducer<byte[]> {
 
+    private static final int PAYLOAD_SIZE = 66;
     private static final byte[] ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
             .getBytes();
-
-    private ByteBuffer messageBuffer = ByteBuffer.allocateDirect(256);
 
     public SimpleProducer(String kafka_bootstrap_string, String pid,
             String topicName) {
         super(kafka_bootstrap_string, pid, topicName,
-                org.apache.kafka.common.serialization.ByteBufferDeserializer.class);
+                org.apache.kafka.common.serialization.ByteArraySerializer.class);
     }
 
     @Override
-    ByteBuffer makePayload(Random rnd, String key) {
-        return randomString(256);
+    byte[] makePayload(Random rnd, String key) {
+        byte[] messageBuffer = new byte[PAYLOAD_SIZE];  // Create new array each time
+        for (int i = 0; i < PAYLOAD_SIZE; i++) {
+            messageBuffer[i] = ALPHABET[ThreadLocalRandom.current().nextInt(ALPHABET.length)];
+        }
+        return messageBuffer;
     }
 
-    public ByteBuffer randomString(int length) {
-        for (int i = 0; i < length; i++) {
-            messageBuffer.put(ALPHABET[ThreadLocalRandom.current().nextInt(ALPHABET.length)]);
-        }
-        messageBuffer.flip();
-        return messageBuffer;
+    public static void main(String[] args) {
+        SimpleProducer p = new SimpleProducer("ec2-18-201-235-33.eu-west-1.compute.amazonaws.com:9092", "pid-0",
+                "LTest");
+        ExecutorService pool = Executors.newFixedThreadPool(1);
+        pool.submit(p);
     }
 
 }
