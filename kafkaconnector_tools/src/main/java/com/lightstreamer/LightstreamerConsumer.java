@@ -33,7 +33,6 @@ public class LightstreamerConsumer {
 
     private static final Logger logger = LoggerFactory.getLogger(LightstreamerConsumer.class);
 
-
     public static void main(String[] args) {
         if (args.length == 0) {
             logger.error("Server hostname is required as first argument");
@@ -47,15 +46,17 @@ public class LightstreamerConsumer {
 
         /**
          * Creates an array of 40 item names for testing purposes.
-         * Each item follows the pattern "ltest-[key=META250801P00680XXX]" where XXX is a 
+         * Each item follows the pattern "ltest-[key=META250801P00680XXX]" where XXX is
+         * a
          * zero-padded 3-digit number starting from 000 to 039.
          * 
          * @return String array containing formatted item names for load testing
          */
         String[] items = IntStream.range(0, 40)
-            .mapToObj(i -> String.format("ltest-[key=META250801P00680%03d]", i))
-            .toArray(String[]::new);
-        String[] fields = { "volume", "high", "partition", "last", "offset", "low", "sym", "ask", "bid", "tradetime", "timestamp" };
+                .mapToObj(i -> String.format("ltest-[key=META250801P00680%03d]", i))
+                .toArray(String[]::new);
+        String[] fields = { "volume", "high", "partition", "last", "offset", "low", "sym", "ask", "bid", "tradetime",
+                "timestamp" };
 
         Subscription sub = new Subscription("DISTINCT", items, fields);
         sub.setDataAdapter("QuickStart");
@@ -67,14 +68,13 @@ public class LightstreamerConsumer {
 
     private static class LatencyDumper implements SubscriptionListener {
 
+        private static final int REPORT_INTERVAL_MESSAGE_COUNT = 10_000;
+
         private final Histogram histogram;
-        private final StatisticsManager sm ;
-        private int messageCounter = 0;
+        private int intervalMessageCounter = 0;
 
         public LatencyDumper() {
             this.histogram = new Histogram(3_600_000_000_000L, 3); // up to 1h, 3 digits
-            this.sm = new StatisticsManager();
-            
         }
 
         @Override
@@ -105,24 +105,16 @@ public class LightstreamerConsumer {
         @Override
         public void onItemUpdate(ItemUpdate update) {
             try {
-                long n1 = System.currentTimeMillis();
-                logger.debug("Message: {}", update);
+                long currentTimestamp = System.currentTimeMillis();
                 // long latency = System.nanoTime() - Long.parseLong(update.getValue("tradetime"));
-                long ts = Long.parseLong(update.getValue("timestamp"));
-                long latency = n1 - ts;
-                logger.debug("Timestamps: now={} - msg={} => latency={} ms",
-                        Instant.ofEpochMilli(n1),
-                        Instant.ofEpochMilli(ts),
-                        latency);
-                logger.debug("Diff: {} ms",  latency);
-                // sm.onData((int)latency);
+                long receivedTimestamp = Long.parseLong(update.getValue("timestamp"));
+                long latency = currentTimestamp - receivedTimestamp;
                 histogram.recordValue(latency);
 
-                messageCounter++;
-                if (messageCounter == 10000) {
+                intervalMessageCounter++;
+                if (intervalMessageCounter == REPORT_INTERVAL_MESSAGE_COUNT) {
                     latencyReport();
-                    // sm.generateReport();
-                    messageCounter = 0;
+                    intervalMessageCounter = 0;
                 }
             } catch (Exception e) {
                 logger.error("Error in onItemUpdate", e);
@@ -137,7 +129,6 @@ public class LightstreamerConsumer {
             printLatency(98);
             printLatency(99);
             printLatencyMax();
-            logger.info("------------------------");
         }
 
         private void printLatency(int percentile) {
@@ -147,18 +138,18 @@ public class LightstreamerConsumer {
         }
 
         private void printLatencyMax() {
-            logger.info("Latency max: {} ms",
+            logger.info("Latency max: {} ms\n",
                     String.format("%d", histogram.getMaxValue()));
         }
 
         @Override
         public void onListenEnd() {
-            logger.info("Stop listeneing to subscription events");
+            logger.info("Stop listening to subscription events");
         }
 
         @Override
         public void onListenStart() {
-            logger.info("Start listeneing to subscription events");
+            logger.info("Start listening to subscription events");
         }
 
         @Override
@@ -183,4 +174,3 @@ public class LightstreamerConsumer {
     }
 
 }
-
