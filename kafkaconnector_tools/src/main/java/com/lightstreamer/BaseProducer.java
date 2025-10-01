@@ -50,7 +50,7 @@ public class BaseProducer extends Thread {
 
     private static final Random random = new SecureRandom();
 
-    private static String generateRandomString(int length) {
+    protected static String generateRandomString(int length) {
         StringBuilder sb = new StringBuilder(length);
 
         for (int i = 0; i < length; i++) {

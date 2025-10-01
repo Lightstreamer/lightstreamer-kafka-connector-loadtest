@@ -51,18 +51,6 @@ public class JsonProducer2 extends BaseProducer {
 
     private static final Random random = new SecureRandom();
 
-    private static String generateRandomString(int length) {
-        StringBuilder sb = new StringBuilder(length);
-
-        for (int i = 0; i < length; i++) {
-            int randomIndex = random.nextInt(CHARACTERS.length());
-            char randomChar = CHARACTERS.charAt(randomIndex);
-            sb.append(randomChar);
-        }
-
-        return sb.toString();
-    }
-
     private int generateRndInt() {
         return random.nextInt();
     }
@@ -132,8 +120,9 @@ public class JsonProducer2 extends BaseProducer {
             int index = random.nextInt(keyArray.length);
             String sndV = keyArray[index];
 
-            TestObj message = new TestObj(prefix + generateMillisTS(), generateRandomString(512), sndV, generateRndInt());
-            logger.debug("ProducerId - {}, New message for :{}",producerId, message.sndValue);
+            TestObj message = new TestObj(prefix + generateMillisTS(), generateRandomString(512), sndV,
+                    generateRndInt());
+            logger.debug("ProducerId - {}, New message for :{}", producerId, message.sndValue);
             try {
                 producer.send(new ProducerRecord<>(topicName, sndV, message),
                         (metadata, exception) -> {
@@ -145,7 +134,8 @@ public class JsonProducer2 extends BaseProducer {
 
                             Instant now = Instant.now();
                             Duration elapsed = Duration.between(starInstant, now);
-                            logger.info("ProducerId - {} - Sent {} in {} seconds", producerId, globalMessageCount.incrementAndGet(), elapsed.toSeconds());
+                            logger.info("ProducerId - {} - Sent {} in {} seconds", producerId,
+                                    globalMessageCount.incrementAndGet(), elapsed.toSeconds());
                         });
             } catch (Exception e) {
                 logger.error("Error during sending message : " + e.getMessage());

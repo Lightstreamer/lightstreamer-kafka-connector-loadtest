@@ -47,18 +47,6 @@ public class KeyProducer extends BaseProducer {
 
     private static final Random random = new SecureRandom();
 
-    private static String generateRandomString(int length) {
-        StringBuilder sb = new StringBuilder(length);
-
-        for (int i = 0; i < length; i++) {
-            int randomIndex = random.nextInt(CHARACTERS.length());
-            char randomChar = CHARACTERS.charAt(randomIndex);
-            sb.append(randomChar);
-        }
-
-        return sb.toString();
-    }
-
     private static String generateMillisTS() {
         long milliseconds = System.currentTimeMillis();
 
@@ -73,7 +61,8 @@ public class KeyProducer extends BaseProducer {
 
     private boolean addPrefix;
 
-    public KeyProducer(String kafka_bootstrap_string, String pid, String topicname, int pause, int msgsize, boolean addPrefix) {
+    public KeyProducer(String kafka_bootstrap_string, String pid, String topicname, int pause, int msgsize,
+            boolean addPrefix) {
         super(kafka_bootstrap_string, pid, topicname, pause, msgsize);
         this.addPrefix = addPrefix;
     }
@@ -96,7 +85,8 @@ public class KeyProducer extends BaseProducer {
 
             while (goproduce) {
                 String prefix = addPrefix ? "PREFIX-" : "";
-                String message = prefix + generateMillisTS() + "-" + this.producerid + "-" + generateRandomString(msg_size);
+                String message = prefix + generateMillisTS() + "-" + this.producerid + "-"
+                        + generateRandomString(msg_size);
                 int index = random.nextInt(strings.length);
                 String key = strings[index];
 
