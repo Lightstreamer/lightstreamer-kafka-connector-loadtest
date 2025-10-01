@@ -98,7 +98,6 @@ public class MessageGenerator {
                 logger.info("Json Producer pid-{} started.", k);
             }
         } else if (keyornot.equals("protobuf")) {
-            AtomicLong globalMessageCount = new AtomicLong(0);
             AtomicInteger threadId = new AtomicInteger(0);
             ExecutorService pool = Executors.newFixedThreadPool(num_producers, r -> {
                 Thread t = new Thread(r);
@@ -107,12 +106,8 @@ public class MessageGenerator {
             });
 
             for (int k = 0; k < num_producers; k++) {
-                producers[k] = new ProtobufProducer(globalMessageCount, kconnstring, "pid-" + k, topicname, pause_milis,
-                        msg_size,
-                        additionalParam, lastParamForJson);
+                producers[k] = new ProtobufProducer(kconnstring, "pid-" + k, topicname);
                 pool.submit(producers[k]);
-                // producers[k].start();
-
                 logger.info("Protobuf Producer pid-{} started.", k);
             }
         } else if (keyornot.equals("simple")) {
