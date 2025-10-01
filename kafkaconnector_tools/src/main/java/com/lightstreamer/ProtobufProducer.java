@@ -233,7 +233,7 @@ public class ProtobufProducer extends BaseProducer {
                 long now = System.nanoTime();
                 double elapsedSec = (now - start) / 1e9;
                 double achievedRate = sentMessages / elapsedSec;
-                System.out.printf("Inviati %,d messaggi in %.2f s (target=%d msg/s, ottenuto=%.2f msg/s)%n",
+                System.out.printf("Sent %,d messages in %.2f s (target=%d msg/s, got=%.2f msg/s)%n",
                         sentMessages, elapsedSec, targetRate, achievedRate);
             }
         }
