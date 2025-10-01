@@ -16,10 +16,8 @@
 
 package com.lightstreamer;
 
-import java.time.Clock;
-import java.time.Duration;
 import java.time.Instant;
-import java.util.Arrays;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.IntStream;
 
 import org.HdrHistogram.Histogram;
@@ -34,6 +32,7 @@ import com.lightstreamer.client.SubscriptionListener;
 public class LightstreamerConsumer {
 
     private static final Logger logger = LoggerFactory.getLogger(LightstreamerConsumer.class);
+
 
     public static void main(String[] args) {
         if (args.length == 0) {
@@ -69,10 +68,13 @@ public class LightstreamerConsumer {
     private static class LatencyDumper implements SubscriptionListener {
 
         private final Histogram histogram;
+        private final StatisticsManager sm ;
         private int messageCounter = 0;
 
         public LatencyDumper() {
             this.histogram = new Histogram(3_600_000_000_000L, 3); // up to 1h, 3 digits
+            this.sm = new StatisticsManager();
+            
         }
 
         @Override
@@ -102,19 +104,24 @@ public class LightstreamerConsumer {
 
         @Override
         public void onItemUpdate(ItemUpdate update) {
-            Clock clock = Clock.systemUTC();
             try {
+                long n1 = System.currentTimeMillis();
                 logger.debug("Message: {}", update);
                 // long latency = System.nanoTime() - Long.parseLong(update.getValue("tradetime"));
-                long n1 = System.currentTimeMillis();
                 long ts = Long.parseLong(update.getValue("timestamp"));
                 long latency = n1 - ts;
+                logger.debug("Timestamps: now={} - msg={} => latency={} ms",
+                        Instant.ofEpochMilli(n1),
+                        Instant.ofEpochMilli(ts),
+                        latency);
                 logger.debug("Diff: {} ms",  latency);
+                // sm.onData((int)latency);
                 histogram.recordValue(latency);
 
                 messageCounter++;
                 if (messageCounter == 10000) {
                     latencyReport();
+                    // sm.generateReport();
                     messageCounter = 0;
                 }
             } catch (Exception e) {
@@ -136,12 +143,12 @@ public class LightstreamerConsumer {
         private void printLatency(int percentile) {
             logger.info("Latency p{}: {} ms",
                     percentile,
-                    String.format("%.3f", histogram.getValueAtPercentile(percentile) / 1_000.0));
+                    String.format("%d", histogram.getValueAtPercentile(percentile)));
         }
 
         private void printLatencyMax() {
             logger.info("Latency max: {} ms",
-                    String.format("%.3f", histogram.getMaxValue() / 1_000.0));
+                    String.format("%d", histogram.getMaxValue()));
         }
 
         @Override
