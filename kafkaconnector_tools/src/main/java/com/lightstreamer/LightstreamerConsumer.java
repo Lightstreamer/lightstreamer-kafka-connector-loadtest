@@ -17,6 +17,8 @@
 package com.lightstreamer;
 
 import java.time.Clock;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.Arrays;
 import java.util.stream.IntStream;
 
@@ -100,33 +102,46 @@ public class LightstreamerConsumer {
 
         @Override
         public void onItemUpdate(ItemUpdate update) {
-            Clock clock = Clock.systemDefaultZone();
+            Clock clock = Clock.systemUTC();
             try {
                 logger.debug("Message: {}", update);
                 // long latency = System.nanoTime() - Long.parseLong(update.getValue("tradetime"));
-                long latency = clock.millis() - Long.parseLong(update.getValue("timestamp"));
-
+                long n1 = System.currentTimeMillis();
+                long ts = Long.parseLong(update.getValue("timestamp"));
+                long latency = n1 - ts;
+                logger.debug("Diff: {} ms",  latency);
                 histogram.recordValue(latency);
 
                 messageCounter++;
-                if (messageCounter == 10_000) {
-                    logger.info("---- Latency report ----");
-                    logger.info("Latency p50: {} ms",
-                            String.format("%.3f", histogram.getValueAtPercentile(50) / 1_000_000.0));
-                    logger.info("Latency p95: {} ms",
-                            String.format("%.3f", histogram.getValueAtPercentile(95) / 1_000_000.0));
-                    logger.info("Latency p98: {} ms",
-                            String.format("%.3f", histogram.getValueAtPercentile(98) / 1_000_000.0));
-                    logger.info("Latency p99: {} ms",
-                            String.format("%.3f", histogram.getValueAtPercentile(99) / 1_000_000.0));
-                    logger.info("Latency max: {} ms", String.format("%.3f", histogram.getMaxValue() / 1_000_000.0));
-                    logger.info("------------------------");
+                if (messageCounter == 10000) {
+                    latencyReport();
                     messageCounter = 0;
                 }
             } catch (Exception e) {
                 logger.error("Error in onItemUpdate", e);
             }
+        }
 
+        private void latencyReport() {
+            logger.info("---- Latency report ----");
+            logger.info("Number of samples: {}", histogram.getTotalCount());
+            printLatency(50);
+            printLatency(95);
+            printLatency(98);
+            printLatency(99);
+            printLatencyMax();
+            logger.info("------------------------");
+        }
+
+        private void printLatency(int percentile) {
+            logger.info("Latency p{}: {} ms",
+                    percentile,
+                    String.format("%.3f", histogram.getValueAtPercentile(percentile) / 1_000.0));
+        }
+
+        private void printLatencyMax() {
+            logger.info("Latency max: {} ms",
+                    String.format("%.3f", histogram.getMaxValue() / 1_000.0));
         }
 
         @Override
