@@ -151,7 +151,7 @@ public class SimpleProducer extends BaseProducer {
             // globalMessageCount.incrementAndGet(), elapsed.toSeconds());
             // });
             k++;
-            producer.send(new ProducerRecord<>(ktopicname, sndV, message));
+            producer.send(new ProducerRecord<>(topicName, sndV, message));
             if (k == 1_000_000) {
                 kk += k;
                 producer.flush();
@@ -178,7 +178,7 @@ public class SimpleProducer extends BaseProducer {
             int index = random.nextInt(keyArray.length);
             String sndV = keyArray[index];
             String payload = String.valueOf(System.nanoTime());
-            producer.send(new ProducerRecord<>(ktopicname, sndV, payload));
+            producer.send(new ProducerRecord<>(topicName, sndV, payload));
             sentMessages++;
 
             // calcola quando dovrebbe partire il prossimo
