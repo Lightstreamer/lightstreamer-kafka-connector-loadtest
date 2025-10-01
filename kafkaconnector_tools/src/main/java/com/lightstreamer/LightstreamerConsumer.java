@@ -16,6 +16,7 @@
 
 package com.lightstreamer;
 
+import java.time.Clock;
 import java.util.Arrays;
 import java.util.stream.IntStream;
 
@@ -53,7 +54,7 @@ public class LightstreamerConsumer {
         String[] items = IntStream.range(0, 40)
             .mapToObj(i -> String.format("ltest-[key=META250801P00680%03d]", i))
             .toArray(String[]::new);
-        String[] fields = { "volume", "high", "partition", "last", "offset", "low", "sym", "ask", "bid", "tradetime" };
+        String[] fields = { "volume", "high", "partition", "last", "offset", "low", "sym", "ask", "bid", "tradetime", "timestamp" };
 
         Subscription sub = new Subscription("DISTINCT", items, fields);
         sub.setDataAdapter("QuickStart");
@@ -99,9 +100,12 @@ public class LightstreamerConsumer {
 
         @Override
         public void onItemUpdate(ItemUpdate update) {
+            Clock clock = Clock.systemDefaultZone();
             try {
                 logger.debug("Message: {}", update);
-                long latency = System.nanoTime() - Long.parseLong(update.getValue("tradetime"));
+                // long latency = System.nanoTime() - Long.parseLong(update.getValue("tradetime"));
+                long latency = clock.millis() - Long.parseLong(update.getValue("timestamp"));
+
                 histogram.recordValue(latency);
 
                 messageCounter++;
@@ -157,3 +161,4 @@ public class LightstreamerConsumer {
     }
 
 }
+
