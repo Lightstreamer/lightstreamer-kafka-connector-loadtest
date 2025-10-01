@@ -16,8 +16,6 @@
 
 package com.lightstreamer;
 
-import java.time.Instant;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.IntStream;
 
 import org.HdrHistogram.Histogram;
