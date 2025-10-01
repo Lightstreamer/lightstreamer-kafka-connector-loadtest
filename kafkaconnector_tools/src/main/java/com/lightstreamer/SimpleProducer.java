@@ -16,17 +16,34 @@
 
 package com.lightstreamer;
 
+import java.nio.ByteBuffer;
 import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 
-public class SimpleProducer extends RateLimitedKafkaProducer<String> {
+public class SimpleProducer extends RateLimitedKafkaProducer<ByteBuffer> {
+
+    private static final byte[] ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
+            .getBytes();
+
+    private ByteBuffer messageBuffer = ByteBuffer.allocateDirect(256);
 
     public SimpleProducer(String kafka_bootstrap_string, String pid,
             String topicName) {
-        super(kafka_bootstrap_string, pid, topicName, org.apache.kafka.common.serialization.StringSerializer.class);
+        super(kafka_bootstrap_string, pid, topicName,
+                org.apache.kafka.common.serialization.ByteBufferDeserializer.class);
     }
 
     @Override
-    String makePayload(Random rnd, String key) {
-        return generateRandomString(256);
+    ByteBuffer makePayload(Random rnd, String key) {
+        return randomString(256);
     }
+
+    public ByteBuffer randomString(int length) {
+        for (int i = 0; i < length; i++) {
+            messageBuffer.put(ALPHABET[ThreadLocalRandom.current().nextInt(ALPHABET.length)]);
+        }
+        messageBuffer.flip();
+        return messageBuffer;
+    }
+
 }
