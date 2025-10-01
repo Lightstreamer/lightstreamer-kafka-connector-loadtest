@@ -104,6 +104,7 @@ public class LightstreamerConsumer {
         @Override
         public void onItemUpdate(ItemUpdate update) {
             try {
+                logger.debug("Msg received: {}", update);
                 long currentTimestamp = System.currentTimeMillis();
                 // long latency = System.nanoTime() - Long.parseLong(update.getValue("tradetime"));
                 long receivedTimestamp = Long.parseLong(update.getValue("timestamp"));
