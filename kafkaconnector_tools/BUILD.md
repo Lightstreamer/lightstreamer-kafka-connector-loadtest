@@ -45,8 +45,8 @@ After building, you'll find these JAR files in the `target/` directory:
 | JAR File | Main Class | Purpose |
 |----------|------------|---------|
 | `jmh-benchmarks.jar` | `org.openjdk.jmh.Main` | JMH performance benchmarks |
-| `kafkaconnector-tools-ls-consumer.jar` | `com.lightstreamer.LightstreamerConsumer` | Lightstreamer Consumer |
-| `kafkaconnector-tools-message-generator.jar` | `com.lightstreamer.MessageGenerator` | Message Generator |
+| `ls-consumer.jar` | `com.lightstreamer.LightstreamerConsumer` | Lightstreamer Consumer |
+| `message-generator.jar` | `com.lightstreamer.MessageGenerator` | Message Generator |
 
 ## Usage Examples
 
@@ -57,18 +57,18 @@ java -jar target/jmh-benchmarks.jar
 
 ### Lightstreamer Consumer
 ```bash
-java -jar target/kafkaconnector-tools-ls-consumer.jar [arguments...]
+java -jar target/ls-consumer.jar [arguments...]
 ```
 
 ### Message Generator
 ```bash
-java -jar target/kafkaconnector-tools-message-generator.jar \
+java -jar target/message-generator.jar \
   <bootstrap-servers> <topic> <num-producers> <pause-millis> <msg-size> <key-or-not>
 ```
 
 Example:
 ```bash
-java -jar target/kafkaconnector-tools-message-generator.jar \
+java -jar target/message-generator.jar \
   localhost:9092 test-topic 1 1000 1024 key
 ```
 

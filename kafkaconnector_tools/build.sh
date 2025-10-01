@@ -5,8 +5,8 @@
 #
 # This script builds all specialized JAR files for the Kafka connector tools:
 # - jmh-benchmarks.jar (JMH performance benchmarks)
-# - kafkaconnector-tools-ls-consumer.jar (Lightstreamer Consumer)
-# - kafkaconnector-tools-message-generator.jar (Message Generator)
+# - ls-consumer.jar (Lightstreamer Consumer)
+# - message-generator.jar (Message Generator)
 
 set -e  # Exit on any error
 
@@ -40,8 +40,8 @@ if [ $? -eq 0 ]; then
     echo
     echo "📋 Generated JAR files:"
     echo "├── target/jmh-benchmarks.jar"
-    echo "├── target/kafkaconnector-tools-ls-consumer.jar"
-    echo "└── target/kafkaconnector-tools-message-generator.jar"
+    echo "├── target/ls-consumer.jar"
+    echo "└── target/message-generator.jar"
     echo
     
     # Show file sizes
@@ -54,10 +54,10 @@ if [ $? -eq 0 ]; then
     echo "   java -jar target/jmh-benchmarks.jar"
     echo
     echo "   Lightstreamer Consumer:"
-    echo "   java -jar target/kafkaconnector-tools-ls-consumer.jar [args...]"
+    echo "   java -jar target/ls-consumer.jar [args...]"
     echo
     echo "   Message Generator:"
-    echo "   java -jar target/kafkaconnector-tools-message-generator.jar <bootstrap-servers> <topic> <num-producers> <pause-millis> <msg-size> <key-or-not>"
+    echo "   java -jar target/message-generator.jar <bootstrap-servers> <topic> <num-producers> <pause-millis> <msg-size> <key-or-not>"
     echo
 else
     echo

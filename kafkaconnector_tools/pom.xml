@@ -256,7 +256,7 @@
                                     <goal>shade</goal>
                                 </goals>
                                 <configuration>
-                                    <finalName>kafkaconnector-tools-ls-consumer</finalName>
+                                    <finalName>ls-consumer</finalName>
                                     <transformers>
                                         <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
                                             <mainClass>com.lightstreamer.LightstreamerConsumer</mainClass>
@@ -312,7 +312,7 @@
                                     <goal>shade</goal>
                                 </goals>
                                 <configuration>
-                                    <finalName>kafkaconnector-tools-message-generator</finalName>
+                                    <finalName>message-generator</finalName>
                                     <transformers>
                                         <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
                                             <mainClass>com.lightstreamer.MessageGenerator</mainClass>
@@ -396,7 +396,7 @@
                                     <goal>shade</goal>
                                 </goals>
                                 <configuration>
-                                    <finalName>kafkaconnector-tools-ls-consumer</finalName>
+                                    <finalName>ls-consumer</finalName>
                                     <transformers>
                                         <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
                                             <mainClass>com.lightstreamer.LightstreamerConsumer</mainClass>
@@ -423,7 +423,7 @@
                                     <goal>shade</goal>
                                 </goals>
                                 <configuration>
-                                    <finalName>kafkaconnector-tools-message-generator</finalName>
+                                    <finalName>message-generator</finalName>
                                     <transformers>
                                         <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
                                             <mainClass>com.lightstreamer.MessageGenerator</mainClass>
