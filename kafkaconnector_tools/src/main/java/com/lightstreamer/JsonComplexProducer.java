@@ -136,7 +136,7 @@ public class JsonComplexProducer extends BaseProducer {
             for (Map.Entry<String, TestComplexObj> entry : messages.entrySet()) {
                 TestComplexObj message = entry.getValue();
                 futurek = producer
-                        .send(new ProducerRecord<String, TestComplexObj>(ktopicname, message.id, message));
+                        .send(new ProducerRecord<String, TestComplexObj>(topicName, message.id, message));
 
                 logger.debug("Sent message : {}", message.id);
 
@@ -169,7 +169,7 @@ public class JsonComplexProducer extends BaseProducer {
                     message.setTimestamp(generateMillisTS());
 
                     futurek = producer
-                            .send(new ProducerRecord<String, TestComplexObj>(ktopicname, message.id, message));
+                            .send(new ProducerRecord<String, TestComplexObj>(topicName, message.id, message));
                 }
                 logger.debug("Sent message : {}", futurek.isDone());
 

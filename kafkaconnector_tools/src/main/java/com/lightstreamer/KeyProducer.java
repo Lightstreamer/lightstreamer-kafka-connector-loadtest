@@ -102,7 +102,7 @@ public class KeyProducer extends BaseProducer {
 
                 logger.debug("New Message : " + message + ", key: " + key);
 
-                futurek = producer.send(new ProducerRecord<String, String>(ktopicname, key, message));
+                futurek = producer.send(new ProducerRecord<String, String>(topicName, key, message));
                 messageCount++;
 
                 long currentTime = System.currentTimeMillis();

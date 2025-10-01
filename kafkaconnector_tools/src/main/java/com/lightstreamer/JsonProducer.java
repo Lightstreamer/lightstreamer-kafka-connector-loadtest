@@ -137,7 +137,7 @@ public class JsonProducer extends BaseProducer {
                 logger.debug("New message for : " + message.sndValue);
 
                 try {
-                    Future<RecordMetadata> future = producer.send(new ProducerRecord<>(ktopicname, sndV, message));
+                    Future<RecordMetadata> future = producer.send(new ProducerRecord<>(topicName, sndV, message));
                     logger.debug("Sent message : {}", future.isDone());
                 } catch (Exception e) {
                     logger.error("Error during sending message : " + e.getMessage());

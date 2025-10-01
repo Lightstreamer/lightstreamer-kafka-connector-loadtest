@@ -135,7 +135,7 @@ public class JsonProducer2 extends BaseProducer {
             TestObj message = new TestObj(prefix + generateMillisTS(), generateRandomString(512), sndV, generateRndInt());
             logger.debug("ProducerId - {}, New message for :{}",producerId, message.sndValue);
             try {
-                producer.send(new ProducerRecord<>(ktopicname, sndV, message),
+                producer.send(new ProducerRecord<>(topicName, sndV, message),
                         (metadata, exception) -> {
                             if (exception != null) {
                                 logger.error("Error while producing message to topic : " + metadata.topic(),

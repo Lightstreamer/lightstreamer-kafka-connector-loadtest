@@ -152,7 +152,7 @@ public class JsonVeryComplexProducerWithJsonKey extends BaseProducer {
                     message.firstnumber,
                     stringids
                 );
-                Future<RecordMetadata> futurek = producer.send(new ProducerRecord<>(ktopicname, key, message));
+                Future<RecordMetadata> futurek = producer.send(new ProducerRecord<>(topicName, key, message));
                 logger.debug("Sent message : {}", message.id);
                 futurek.get();
             }
@@ -199,7 +199,7 @@ public class JsonVeryComplexProducerWithJsonKey extends BaseProducer {
                             stringids
                         );
 
-                        Future<RecordMetadata> futurek = producer.send(new ProducerRecord<>(ktopicname, key, message));
+                        Future<RecordMetadata> futurek = producer.send(new ProducerRecord<>(topicName, key, message));
                         logger.debug("Sent message : {}", futurek.isDone());
                     }
                 } catch (Exception e) {
