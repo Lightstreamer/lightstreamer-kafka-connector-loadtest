@@ -38,7 +38,7 @@ public class BaseProducer extends Thread {
 
     protected String producerid;
 
-    protected String ktopicname;
+    protected String topicName;
 
     protected int millisp;
 
@@ -77,7 +77,7 @@ public class BaseProducer extends Thread {
     public BaseProducer(String kafka_bootstrap_string, String pid, String topicname, int pause, int msgsize) {
         this.kafkabootstrapstring = kafka_bootstrap_string;
         this.producerid = pid;
-        this.ktopicname = topicname;
+        this.topicName = topicname;
         this.goproduce = true;
         this.millisp = pause;
         this.msg_size = msgsize;
@@ -107,7 +107,7 @@ public class BaseProducer extends Thread {
                 logger.debug("New Message : " + message);
 
                 futurek = producer
-                        .send(new ProducerRecord<String, String>(ktopicname, message));
+                        .send(new ProducerRecord<String, String>(topicName, message));
 
                 // rmtdta = futurek.get();
 
