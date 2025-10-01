@@ -37,6 +37,7 @@ public class LightstreamerConsumer {
             System.exit(1);
         }
         String serverAddress = args[0];
+        int numberOfKeys = Integer.parseInt(args.length > 1 ? args[1] : "40");
 
         LightstreamerClient client = new LightstreamerClient(serverAddress, "KafkaConnector");
         client.addListener(new MyClientListener());
@@ -50,7 +51,7 @@ public class LightstreamerConsumer {
          * 
          * @return String array containing formatted item names for load testing
          */
-        String[] items = IntStream.range(0, 40)
+        String[] items = IntStream.range(0, numberOfKeys)
                 .mapToObj(i -> String.format("ltest-[key=META250801P00680%03d]", i))
                 .toArray(String[]::new);
         String[] fields = { "volume", "high", "partition", "last", "offset", "low", "sym", "ask", "bid", "tradetime",
