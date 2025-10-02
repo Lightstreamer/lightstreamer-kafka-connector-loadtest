@@ -233,13 +233,26 @@
                     <groupId>io.confluent</groupId>
                     <artifactId>kafka-json-serializer</artifactId>
                     <version>7.7.0</version>
-                    <scope>compile</scope>
+                    <scope>provided</scope> <!-- Exclude from ls-consumer JAR -->
                 </dependency>
                 <dependency>
                     <groupId>io.confluent</groupId>
                     <artifactId>kafka-protobuf-serializer</artifactId>
                     <version>7.7.0</version>
-                    <scope>compile</scope>
+                    <scope>provided</scope> <!-- Exclude from ls-consumer JAR -->
+                </dependency>
+                <!-- Exclude JMH dependencies for ls-consumer -->
+                <dependency>
+                    <groupId>org.openjdk.jmh</groupId>
+                    <artifactId>jmh-core</artifactId>
+                    <version>1.36</version>
+                    <scope>provided</scope>
+                </dependency>
+                <dependency>
+                    <groupId>org.openjdk.jmh</groupId>
+                    <artifactId>jmh-generator-annprocess</artifactId>
+                    <version>1.36</version>
+                    <scope>provided</scope>
                 </dependency>
             </dependencies>
             <build>
@@ -297,6 +310,33 @@
                     <version>7.7.0</version>
                     <scope>compile</scope>
                 </dependency>
+                <!-- Exclude Lightstreamer client for message-generator -->
+                <dependency>
+                    <groupId>com.lightstreamer</groupId>
+                    <artifactId>ls-javase-client</artifactId>
+                    <version>5.1.0</version>
+                    <scope>provided</scope>
+                </dependency>
+                <!-- Exclude HdrHistogram for message-generator -->
+                <dependency>
+                    <groupId>org.hdrhistogram</groupId>
+                    <artifactId>HdrHistogram</artifactId>
+                    <version>2.1.12</version>
+                    <scope>provided</scope>
+                </dependency>
+                <!-- Exclude JMH dependencies for message-generator -->
+                <dependency>
+                    <groupId>org.openjdk.jmh</groupId>
+                    <artifactId>jmh-core</artifactId>
+                    <version>1.36</version>
+                    <scope>provided</scope>
+                </dependency>
+                <dependency>
+                    <groupId>org.openjdk.jmh</groupId>
+                    <artifactId>jmh-generator-annprocess</artifactId>
+                    <version>1.36</version>
+                    <scope>provided</scope>
+                </dependency>
             </dependencies>
             <build>
                 <plugins>
@@ -326,25 +366,6 @@
                                                 <exclude>META-INF/*.SF</exclude>
                                                 <exclude>META-INF/*.DSA</exclude>
                                                 <exclude>META-INF/*.RSA</exclude>
-                                            </excludes>
-                                        </filter>
-                                        <!-- Exclude unnecessary dependencies -->
-                                        <filter>
-                                            <artifact>com.lightstreamer:*</artifact>
-                                            <excludes>
-                                                <exclude>**</exclude>
-                                            </excludes>
-                                        </filter>
-                                        <filter>
-                                            <artifact>org.hdrhistogram:*</artifact>
-                                            <excludes>
-                                                <exclude>**</exclude>
-                                            </excludes>
-                                        </filter>
-                                        <filter>
-                                            <artifact>org.openjdk.jmh:*</artifact>
-                                            <excludes>
-                                                <exclude>**</exclude>
                                             </excludes>
                                         </filter>
                                     </filters>
