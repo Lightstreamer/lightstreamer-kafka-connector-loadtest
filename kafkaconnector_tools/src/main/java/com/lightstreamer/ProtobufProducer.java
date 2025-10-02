@@ -34,12 +34,16 @@ public class ProtobufProducer extends RateLimitedKafkaProducer<PriceInfo> {
     PriceInfo makePayload(Random rnd, String key) {
         return com.lightstreamer.proto.PriceInfo.newBuilder()
                 .setSymbol(key)
-                .setHigh(rnd.nextFloat() * 100.0f)
-                .setLS(rnd.nextFloat() * 100.0f)
-                .setLow(rnd.nextFloat() * 100.0f)
-                .setAsk(rnd.nextFloat() * 100.0f)
-                .setBid(rnd.nextFloat() * 100.0f)
-                .setCurrTime(String.valueOf(System.nanoTime()))
+                .setLS(0.1f)
+                .setLSSize(10)
+                .setBid(0.1f)
+                .setBidSize(10)
+                .setAsk(0.1f)
+                .setAskSize(10)
+                .setCurrTime("1")
+                .setHigh(0.1f)
+                .setLow(0.1f)
+                .setVol(10)
                 .build();
     }
 
