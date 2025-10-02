@@ -33,15 +33,12 @@ public abstract class RateLimitedKafkaProducer<T> extends BaseProducer {
     static final Logger logger = LoggerFactory.getLogger(RateLimitedKafkaProducer.class);
 
     private final Class<?> valueSerializeClass;
-    private final String[] keys;
 
     public RateLimitedKafkaProducer(String kafka_bootstrap_string, String pid,
             String topicName, Class<?> valueSerializeClass) {
         super(kafka_bootstrap_string, pid, topicName, 0, 0);
         this.valueSerializeClass = valueSerializeClass;
-        this.keys = IntStream.range(0, 40)
-                .mapToObj(i -> String.format("META250801P00680%03d", i))
-                .toArray(String[]::new);
+
         logger.info("Producer {}", pid);
     }
 
@@ -62,7 +59,9 @@ public abstract class RateLimitedKafkaProducer<T> extends BaseProducer {
 
         try {
             Producer<String, T> producer = new KafkaProducer<>(props);
-            publishMessages(producer, Integer.parseInt(props.getProperty("rate", "100000")));
+            int numberOfKeys = Integer.parseInt(props.getProperty("keys", "40"));
+            int targetRate = Integer.parseInt(props.getProperty("rate", "100000"));
+            publishMessages(producer, targetRate, numberOfKeys);
         } catch (Exception e) {
             logger.error("Error occurred while publishing messages: ", e);
         }
@@ -70,7 +69,11 @@ public abstract class RateLimitedKafkaProducer<T> extends BaseProducer {
 
     abstract T makePayload(Random rnd, String key);
 
-    final protected void publishMessages(Producer<String, T> producer, int targetRate) {
+    final protected void publishMessages(Producer<String, T> producer, int targetRate, int numberOfKeys) {
+        String[] keys = IntStream.range(0, numberOfKeys)
+                .mapToObj(i -> String.format("META250801P00680%03d", i))
+                .toArray(String[]::new);
+        logger.info("Using {} distinct keys", keys.length);
         long nanosPerMessage = 1_000_000_000L / targetRate;
         long nextSendTime = System.nanoTime();
         long start = System.nanoTime();
