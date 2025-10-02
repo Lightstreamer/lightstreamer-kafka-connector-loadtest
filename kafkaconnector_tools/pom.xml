@@ -328,6 +328,25 @@
                                                 <exclude>META-INF/*.RSA</exclude>
                                             </excludes>
                                         </filter>
+                                        <!-- Exclude unnecessary dependencies -->
+                                        <filter>
+                                            <artifact>com.lightstreamer:*</artifact>
+                                            <excludes>
+                                                <exclude>**</exclude>
+                                            </excludes>
+                                        </filter>
+                                        <filter>
+                                            <artifact>org.hdrhistogram:*</artifact>
+                                            <excludes>
+                                                <exclude>**</exclude>
+                                            </excludes>
+                                        </filter>
+                                        <filter>
+                                            <artifact>org.openjdk.jmh:*</artifact>
+                                            <excludes>
+                                                <exclude>**</exclude>
+                                            </excludes>
+                                        </filter>
                                     </filters>
                                 </configuration>
                             </execution>
