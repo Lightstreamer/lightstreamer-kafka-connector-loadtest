@@ -63,6 +63,7 @@ public class LightstreamerConsumer {
         sub.addListener(new LatencyDumper());
         sub.setRequestedMaxFrequency("unfiltered");
         client.subscribe(sub);
+        logger.info("Subscribed to {} items", items.length);
     }
 
     private static class LatencyDumper implements SubscriptionListener {
