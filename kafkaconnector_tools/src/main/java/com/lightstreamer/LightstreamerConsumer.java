@@ -110,7 +110,7 @@ public class LightstreamerConsumer {
                 // long latency = System.nanoTime() - Long.parseLong(update.getValue("tradetime"));
                 long receivedTimestamp = Long.parseLong(update.getValue("route-latency"));
                 long latency = currentTimestamp - receivedTimestamp;
-                histogram.recordValue(receivedTimestamp/1_000_000);
+                histogram.recordValue(receivedTimestamp);
 
                 intervalMessageCounter++;
                 if (intervalMessageCounter == REPORT_INTERVAL_MESSAGE_COUNT) {
