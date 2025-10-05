@@ -70,11 +70,13 @@ public class LightstreamerConsumer {
 
         private static final int REPORT_INTERVAL_MESSAGE_COUNT = 10_000;
 
-        private final Histogram histogram;
+        private final Histogram clientLatencyHdr;
+        private final Histogram serverLatencyHdr;
         private int intervalMessageCounter = 0;
 
         public LatencyDumper() {
-            this.histogram = new Histogram(3_600_000_000_000L, 3); // up to 1h, 3 digits
+            this.clientLatencyHdr = new Histogram(3_600_000_000_000L, 3); // up to 1h, 3 digits
+            this.serverLatencyHdr = new Histogram(3_600_000_000_000L, 3); // up to 1h, 3 digits
         }
 
         @Override
@@ -107,14 +109,15 @@ public class LightstreamerConsumer {
             try {
                 logger.debug("Msg received: {}", update);
                 long currentTimestamp = System.currentTimeMillis();
-                // long latency = System.nanoTime() - Long.parseLong(update.getValue("tradetime"));
-                long receivedTimestamp = Long.parseLong(update.getValue("route-latency"));
+                long receivedTimestamp = Long.parseLong(update.getValue("timestamp"));
                 long latency = currentTimestamp - receivedTimestamp;
-                histogram.recordValue(receivedTimestamp);
+                clientLatencyHdr.recordValue(latency);
+                serverLatencyHdr.recordValue(Long.parseLong(update.getValue("route-latency")));
 
                 intervalMessageCounter++;
                 if (intervalMessageCounter == REPORT_INTERVAL_MESSAGE_COUNT) {
-                    latencyReport();
+                    printClientLatencyReport();
+                    printServerLatencyReport();
                     intervalMessageCounter = 0;
                 }
             } catch (Exception e) {
@@ -122,23 +125,33 @@ public class LightstreamerConsumer {
             }
         }
 
-        private void latencyReport() {
-            logger.info("---- Latency report ----");
-            logger.info("Number of samples: {}", histogram.getTotalCount());
-            printLatency(50);
-            printLatency(95);
-            printLatency(98);
-            printLatency(99);
-            printLatencyMax();
+        private void printClientLatencyReport() {
+            logger.info("---- ClientLatency report ----");
+            logger.info("Number of samples: {}", clientLatencyHdr.getTotalCount());
+            printLatency(clientLatencyHdr, 50);
+            printLatency(clientLatencyHdr, 95);
+            printLatency(clientLatencyHdr, 98);
+            printLatency(clientLatencyHdr, 99);
+            printLatencyMax(clientLatencyHdr);
         }
 
-        private void printLatency(int percentile) {
+        private void printServerLatencyReport() {
+            logger.info("---- ServerLatency report ----");
+            logger.info("Number of samples: {}", serverLatencyHdr.getTotalCount());
+            printLatency(serverLatencyHdr, 50);
+            printLatency(serverLatencyHdr, 95);
+            printLatency(serverLatencyHdr, 98);
+            printLatency(serverLatencyHdr, 99);
+            printLatencyMax(serverLatencyHdr);
+        }
+
+        private void printLatency(Histogram histogram, int percentile) {
             logger.info("Latency p{}: {} ms",
                     percentile,
                     String.format("%d", histogram.getValueAtPercentile(percentile)));
         }
 
-        private void printLatencyMax() {
+        private void printLatencyMax(Histogram histogram ) {
             logger.info("Latency max: {} ms\n",
                     String.format("%d", histogram.getMaxValue()));
         }
