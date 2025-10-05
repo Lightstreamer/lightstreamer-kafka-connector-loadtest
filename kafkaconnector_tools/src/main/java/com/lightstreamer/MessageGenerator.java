@@ -101,7 +101,7 @@ public class MessageGenerator {
             AtomicInteger threadId = new AtomicInteger(0);
             ExecutorService pool = Executors.newFixedThreadPool(num_producers, r -> {
                 Thread t = new Thread(r);
-                t.setName("Protobuf Publisher thread - " + threadId.incrementAndGet());
+                t.setName("Protobuf Producer thread - " + threadId.incrementAndGet());
                 return t;
             });
 
@@ -114,7 +114,7 @@ public class MessageGenerator {
             AtomicInteger threadId = new AtomicInteger(0);
             ExecutorService pool = Executors.newFixedThreadPool(num_producers, r -> {
                 Thread t = new Thread(r);
-                t.setName("Protobuf Simple thread - " + threadId.incrementAndGet());
+                t.setName("Simple Producer thread - " + threadId.incrementAndGet());
                 return t;
             });
 
