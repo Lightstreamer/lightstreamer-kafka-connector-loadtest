@@ -55,7 +55,7 @@ public class LightstreamerConsumer {
                 .mapToObj(i -> String.format("ltest-[key=META250801P00680%03d]", i))
                 .toArray(String[]::new);
         String[] fields = { "volume", "high", "partition", "last", "offset", "low", "sym", "ask", "bid", "tradetime",
-                "timestamp" };
+                "timestamp", "route-latency" };
 
         Subscription sub = new Subscription("DISTINCT", items, fields);
         sub.setDataAdapter("QuickStart");
@@ -108,7 +108,7 @@ public class LightstreamerConsumer {
                 logger.debug("Msg received: {}", update);
                 long currentTimestamp = System.currentTimeMillis();
                 // long latency = System.nanoTime() - Long.parseLong(update.getValue("tradetime"));
-                long receivedTimestamp = Long.parseLong(update.getValue("timestamp"));
+                long receivedTimestamp = Long.parseLong(update.getValue("route-latency"));
                 long latency = currentTimestamp - receivedTimestamp;
                 histogram.recordValue(latency);
 
