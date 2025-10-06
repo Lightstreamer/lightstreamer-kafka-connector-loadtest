@@ -376,6 +376,82 @@
                 </plugins>
             </build>
         </profile>
+
+        <profile>
+            <id>consumer</id>
+            <dependencies>
+                <!-- Override scope for message-generator profile to include in shaded jar -->
+                <dependency>
+                    <groupId>io.confluent</groupId>
+                    <artifactId>kafka-json-serializer</artifactId>
+                    <version>7.7.0</version>
+                    <scope>compile</scope>
+                </dependency>
+                <dependency>
+                    <groupId>io.confluent</groupId>
+                    <artifactId>kafka-protobuf-serializer</artifactId>
+                    <version>7.7.0</version>
+                    <scope>compile</scope>
+                </dependency>
+                <!-- Exclude Lightstreamer client for message-generator -->
+                <dependency>
+                    <groupId>com.lightstreamer</groupId>
+                    <artifactId>ls-javase-client</artifactId>
+                    <version>5.1.0</version>
+                    <scope>provided</scope>
+                </dependency>
+                <!-- Exclude JMH dependencies for message-generator -->
+                <dependency>
+                    <groupId>org.openjdk.jmh</groupId>
+                    <artifactId>jmh-core</artifactId>
+                    <version>1.36</version>
+                    <scope>provided</scope>
+                </dependency>
+                <dependency>
+                    <groupId>org.openjdk.jmh</groupId>
+                    <artifactId>jmh-generator-annprocess</artifactId>
+                    <version>1.36</version>
+                    <scope>provided</scope>
+                </dependency>
+            </dependencies>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-shade-plugin</artifactId>
+                        <version>3.5.0</version>
+                        <executions>
+                            <execution>
+                                <id>shade-all</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>shade</goal>
+                                </goals>
+                                <configuration>
+                                    <finalName>consumer</finalName>
+                                    <transformers>
+                                        <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                                            <mainClass>com.lightstreamer.Main</mainClass>
+                                        </transformer>
+                                        <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
+                                    </transformers>
+                                    <filters>
+                                        <filter>
+                                            <artifact>*:*</artifact>
+                                            <excludes>
+                                                <exclude>META-INF/*.SF</exclude>
+                                                <exclude>META-INF/*.DSA</exclude>
+                                                <exclude>META-INF/*.RSA</exclude>
+                                            </excludes>
+                                        </filter>
+                                    </filters>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>        
         
         <profile>
             <id>build-all</id>
@@ -467,6 +543,33 @@
                                     <transformers>
                                         <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
                                             <mainClass>com.lightstreamer.MessageGenerator</mainClass>
+                                        </transformer>
+                                        <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
+                                    </transformers>
+                                    <filters>
+                                        <filter>
+                                            <artifact>*:*</artifact>
+                                            <excludes>
+                                                <exclude>META-INF/*.SF</exclude>
+                                                <exclude>META-INF/*.DSA</exclude>
+                                                <exclude>META-INF/*.RSA</exclude>
+                                            </excludes>
+                                        </filter>
+                                    </filters>
+                                </configuration>
+                            </execution>
+                            <!-- Kafka Consumer jar -->
+                            <execution>
+                                <id>consumer</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>shade</goal>
+                                </goals>
+                                <configuration>
+                                    <finalName>consumer</finalName>
+                                    <transformers>
+                                        <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                                            <mainClass>com.lightstreamer.Main</mainClass>
                                         </transformer>
                                         <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
                                     </transformers>
