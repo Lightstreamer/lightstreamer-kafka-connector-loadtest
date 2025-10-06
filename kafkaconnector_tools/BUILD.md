@@ -36,6 +36,9 @@ mvn clean package -Pls-consumer
 
 # Message Generator
 mvn clean package -Pmessage-generator
+
+# Kafka Consumer
+mvn clean package -Pconsumer
 ```
 
 ## Generated JAR Files
@@ -47,6 +50,7 @@ After building, you'll find these JAR files in the `target/` directory:
 | `jmh-benchmarks.jar` | `org.openjdk.jmh.Main` | JMH performance benchmarks |
 | `ls-consumer.jar` | `com.lightstreamer.LightstreamerConsumer` | Lightstreamer Consumer |
 | `message-generator.jar` | `com.lightstreamer.MessageGenerator` | Message Generator |
+| `consumer.jar` | `com.lightstreamer.Main` | Kafka Consumer |
 
 ## Usage Examples
 
@@ -66,10 +70,22 @@ java -jar target/message-generator.jar \
   <bootstrap-servers> <topic> <num-producers> <pause-millis> <msg-size> <key-or-not>
 ```
 
+### Kafka Consumer
+```bash
+java -jar target/consumer.jar \
+  <bootstrap-servers> <topic> <consumers> <consumer-group-id> <boolean-flag>
+```
+
 Example:
 ```bash
-java -jar target/message-generator.jar \
-  localhost:9092 test-topic 1 1000 1024 key
+java -jar target/consumer.jar \
+  localhost:9092 test-topic 1 my-group true
+```
+
+Or use the helper script:
+```bash
+./run-consumer.sh
+./run-consumer.sh localhost:9092 test-topic 1 my-group true
 ```
 
 ## Maven Profiles
@@ -78,6 +94,7 @@ java -jar target/message-generator.jar \
 - **`jmh`**: Builds only the JMH benchmarks JAR
 - **`ls-consumer`**: Builds only the Lightstreamer Consumer JAR  
 - **`message-generator`**: Builds only the Message Generator JAR
+- **`consumer`**: Builds only the Kafka Consumer JAR
 
 ## Development Notes
 
