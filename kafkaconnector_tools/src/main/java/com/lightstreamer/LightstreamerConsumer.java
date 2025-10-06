@@ -16,6 +16,8 @@
 
 package com.lightstreamer;
 
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.stream.IntStream;
 
 import org.HdrHistogram.Histogram;
@@ -42,13 +44,13 @@ public class LightstreamerConsumer {
                 "--server" }, description = "Lightstreamer server URL (e.g., http://localhost:8080)", required = true)
         public String serverAddress;
 
-        @Parameter(names = { "-f",
-                "--from-key" }, description = "Starting key number for item subscription range", required = true)
-        public Integer fromKey;
+        @Parameter(names = { "-c",
+                "--clients" }, description = "Number of clients to launch", required = true)
+        public Integer clients;
 
-        @Parameter(names = { "-t",
-                "--to-key" }, description = "Ending key number for item subscription range", required = true)
-        public Integer toKey;
+        @Parameter(names = { "-f",
+                "--keys" }, description = "Number of unique keys to subscribe to", required = true)
+        public Integer keys;
 
         @Parameter(names = { "-h", "--help" }, description = "Show this help message", help = true)
         public boolean help = false;
@@ -57,15 +59,8 @@ public class LightstreamerConsumer {
          * Validates the parsed arguments
          */
         public void validate() {
-            if (fromKey < 0) {
-                throw new ParameterException("from-key must be >= 0, got: " + fromKey);
-            }
-            if (toKey < 0) {
-                throw new ParameterException("to-key must be >= 0, got: " + toKey);
-            }
-            if (fromKey > toKey) {
-                throw new ParameterException(
-                        "from-key must be <= to-key, got: from-key=" + fromKey + ", to-key=" + toKey);
+            if (keys < 0) {
+                throw new ParameterException("from-key must be >= 0, got: " + keys);
             }
         }
     }
@@ -152,30 +147,58 @@ public class LightstreamerConsumer {
 
         logger.info("Starting Lightstreamer Consumer");
         logger.info("Server: {}", cliArgs.serverAddress);
-        logger.info("Key range: from {} to {} ({} items)", cliArgs.fromKey, cliArgs.toKey,
-                (cliArgs.toKey - cliArgs.fromKey + 1));
 
-        LightstreamerClient client = new LightstreamerClient(cliArgs.serverAddress, "KafkaConnector");
-        client.addListener(new MyClientListener());
-        client.connect();
+        int keysPerClient = (cliArgs.keys) / cliArgs.clients;
+        ExecutorService threadPool = Executors.newFixedThreadPool(cliArgs.clients);
+        for (int i = 0; i < cliArgs.clients; i++) {
+            threadPool.submit(new ClientWrapper(cliArgs.serverAddress, i * keysPerClient,
+                    (i + 1) * keysPerClient - 1));
+        }
+    }
 
-        // Prepare item names based on provided key range
-        String[] items = IntStream.range(cliArgs.fromKey, cliArgs.toKey + 1)
-                .mapToObj(i -> String.format("ltest-[key=META250801P00680%03d]", i))
-                .toArray(String[]::new);
-        logger.info("Subscribing from item {} to item {}", items[0], items[items.length - 1]);
+    static class ClientWrapper implements Runnable {
 
-        // Define the fields to subscribe to
-        String[] fields = { "volume", "high", "partition", "last", "offset", "low", "sym", "ask", "bid", "tradetime",
-                "timestamp", "route-latency" };
+        private final String serverAddress;
+        private final int fromKey;
+        private final int toKey;
 
-        Subscription sub = new Subscription("DISTINCT", items, fields);
-        sub.setDataAdapter("QuickStart");
-        sub.setRequestedSnapshot("no");
-        sub.addListener(new LatencyDumper());
-        sub.setRequestedMaxFrequency("unfiltered");
-        client.subscribe(sub);
-        logger.info("Subscribed to {} items", items.length);
+        ClientWrapper(String serverAddress, int fromKey, int toKey) {
+            this.serverAddress = serverAddress;
+            this.fromKey = fromKey;
+            this.toKey = toKey;
+        }
+
+        @Override
+        public void run() {
+            logger.info("Starting Lightstreamer Consumer");
+            logger.info("Server: {}", serverAddress);
+            logger.info("Key range: from {} to {} ({} items)", fromKey, toKey,
+                    (toKey - fromKey + 1));
+
+            LightstreamerClient client = new LightstreamerClient(serverAddress, "KafkaConnector");
+            client.addListener(new MyClientListener());
+            client.connect();
+
+            // Prepare item names based on provided key range
+            String[] items = IntStream.range(fromKey, toKey + 1)
+                    .mapToObj(i -> String.format("ltest-[key=META250801P00680%03d]", i))
+                    .toArray(String[]::new);
+            logger.info("Subscribing from item {} to item {}", items[0], items[items.length - 1]);
+
+            // Define the fields to subscribe to
+            String[] fields = { "volume", "high", "partition", "last", "offset", "low", "sym", "ask", "bid",
+                    "tradetime",
+                    "timestamp", "route-latency" };
+
+            Subscription sub = new Subscription("DISTINCT", items, fields);
+            sub.setDataAdapter("QuickStart");
+            sub.setRequestedSnapshot("no");
+            sub.addListener(new LatencyDumper());
+            sub.setRequestedMaxFrequency("unfiltered");
+            client.subscribe(sub);
+            logger.info("Subscribed to {} items", items.length);
+        }
+
     }
 
     private static class LatencyDumper implements SubscriptionListener {
