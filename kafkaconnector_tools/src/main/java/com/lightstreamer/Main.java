@@ -163,21 +163,15 @@ public class Main {
 
             for (int j = 0; j < num_consumers; j++)
                 consumers[j].stopconsuming();
-        } else if (kconsumergroupid.startsWith("simple")) {
-            SimpleConsumer[] consumers;
-            consumers = new SimpleConsumer[num_consumers];
+        } else if (kconsumergroupid.startsWith("protobuf")) {
+            ProtobufConsumer[] consumers;
+            consumers = new ProtobufConsumer[num_consumers];
 
             for (int k = 0; k < num_consumers; k++) {
-                consumers[k] = new SimpleConsumer(kconnstring, kconsumergroupid + k, ktopicname, flag, statsManager);
+                consumers[k] = new ProtobufConsumer(kconnstring, kconsumergroupid + k, ktopicname, flag, statsManager);
                 consumers[k].start();
 
-                logger.info("Simple consumer n. {} started.", k);
-
-                try {
-                    Thread.sleep(5);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
+                logger.info("ProtobufConsumer consumer n. {} started.", k);
             }
 
             String input = System.console().readLine();
