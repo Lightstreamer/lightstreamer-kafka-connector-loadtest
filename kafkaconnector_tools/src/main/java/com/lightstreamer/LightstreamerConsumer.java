@@ -38,16 +38,19 @@ public class LightstreamerConsumer {
      * Command line arguments configuration using JCommander
      */
     public static class Args {
-        @Parameter(names = {"-s", "--server"}, description = "Lightstreamer server URL (e.g., http://localhost:8080)", required = true)
+        @Parameter(names = { "-s",
+                "--server" }, description = "Lightstreamer server URL (e.g., http://localhost:8080)", required = true)
         public String serverAddress;
 
-        @Parameter(names = {"-f", "--from-key"}, description = "Starting key number for item subscription range", required = true)
+        @Parameter(names = { "-f",
+                "--from-key" }, description = "Starting key number for item subscription range", required = true)
         public Integer fromKey;
 
-        @Parameter(names = {"-t", "--to-key"}, description = "Ending key number for item subscription range", required = true)
+        @Parameter(names = { "-t",
+                "--to-key" }, description = "Ending key number for item subscription range", required = true)
         public Integer toKey;
 
-        @Parameter(names = {"-h", "--help"}, description = "Show this help message", help = true)
+        @Parameter(names = { "-h", "--help" }, description = "Show this help message", help = true)
         public boolean help = false;
 
         /**
@@ -61,7 +64,8 @@ public class LightstreamerConsumer {
                 throw new ParameterException("to-key must be >= 0, got: " + toKey);
             }
             if (fromKey > toKey) {
-                throw new ParameterException("from-key must be <= to-key, got: from-key=" + fromKey + ", to-key=" + toKey);
+                throw new ParameterException(
+                        "from-key must be <= to-key, got: from-key=" + fromKey + ", to-key=" + toKey);
             }
         }
     }
@@ -71,29 +75,29 @@ public class LightstreamerConsumer {
      */
     private static void printUsage(JCommander commander) {
         String header = """
-                
+
                 Lightstreamer Consumer - Kafka Connector Load Test
                 ================================================
-                
+
                 DESCRIPTION:
                   Connects to a Lightstreamer server and subscribes to a range of items
                   to measure latency and performance metrics. Displays real-time latency
                   reports including client-side and server-side latency statistics.
                 """;
-        
+
         String examples = """
-                
+
                 EXAMPLES:
                   # Named parameters (recommended)
                   java -jar ls-consumer.jar --server http://localhost:8080 --from-key 0 --to-key 99
                   java -jar ls-consumer.jar -s http://myserver:8080 -f 0 -t 999
-                
+
                   # Positional parameters (legacy compatibility)
                   java -jar ls-consumer.jar http://localhost:8080 0 99
                 """;
-        
+
         String behavior = """
-                
+
                 BEHAVIOR:
                   - Subscribes to items with pattern: ltest-[key=META250801P00680XXX]
                   - Where XXX is a 3-digit zero-padded number from <from-key> to <to-key>
@@ -103,10 +107,10 @@ public class LightstreamerConsumer {
                 """;
 
         System.out.print(header);
-        
+
         // Use JCommander's built-in usage formatting
         commander.usage();
-        
+
         System.out.print(examples);
         System.out.println(behavior);
     }
@@ -123,9 +127,9 @@ public class LightstreamerConsumer {
             if (args.length == 3 && !args[0].startsWith("-")) {
                 // Convert positional args to named args
                 String[] namedArgs = {
-                    "--server", args[0],
-                    "--from-key", args[1],
-                    "--to-key", args[2]
+                        "--server", args[0],
+                        "--from-key", args[1],
+                        "--to-key", args[2]
                 };
                 commander.parse(namedArgs);
             } else {
@@ -145,20 +149,23 @@ public class LightstreamerConsumer {
             printUsage(commander);
             System.exit(1);
         }
-        
+
         logger.info("Starting Lightstreamer Consumer");
         logger.info("Server: {}", cliArgs.serverAddress);
-        logger.info("Key range: from {} to {} ({} items)", cliArgs.fromKey, cliArgs.toKey, (cliArgs.toKey - cliArgs.fromKey + 1));
+        logger.info("Key range: from {} to {} ({} items)", cliArgs.fromKey, cliArgs.toKey,
+                (cliArgs.toKey - cliArgs.fromKey + 1));
 
         LightstreamerClient client = new LightstreamerClient(cliArgs.serverAddress, "KafkaConnector");
         client.addListener(new MyClientListener());
         client.connect();
 
+        // Prepare item names based on provided key range
         String[] items = IntStream.range(cliArgs.fromKey, cliArgs.toKey + 1)
                 .mapToObj(i -> String.format("ltest-[key=META250801P00680%03d]", i))
                 .toArray(String[]::new);
         logger.info("Subscribing from item {} to item {}", items[0], items[items.length - 1]);
 
+        // Define the fields to subscribe to
         String[] fields = { "volume", "high", "partition", "last", "offset", "low", "sym", "ask", "bid", "tradetime",
                 "timestamp", "route-latency" };
 
@@ -176,12 +183,10 @@ public class LightstreamerConsumer {
         private static final int REPORT_INTERVAL_MESSAGE_COUNT = 10_000;
 
         private final Histogram clientLatencyHdr;
-        private final Histogram serverLatencyHdr;
         private int intervalMessageCounter = 0;
 
         public LatencyDumper() {
             this.clientLatencyHdr = new Histogram(3_600_000_000_000L, 3); // up to 1h, 3 digits
-            this.serverLatencyHdr = new Histogram(3_600_000_000_000L, 3); // up to 1h, 3 digits
         }
 
         @Override
@@ -217,12 +222,10 @@ public class LightstreamerConsumer {
                 long receivedTimestamp = Long.parseLong(update.getValue("timestamp"));
                 long latency = currentTimestamp - receivedTimestamp;
                 clientLatencyHdr.recordValue(latency);
-                serverLatencyHdr.recordValue(Long.parseLong(update.getValue("route-latency")));
 
                 intervalMessageCounter++;
                 if (intervalMessageCounter == REPORT_INTERVAL_MESSAGE_COUNT) {
-                    printClientLatencyReport();
-                    printServerLatencyReport();
+                    printLatencyReport(clientLatencyHdr);
                     intervalMessageCounter = 0;
                 }
             } catch (Exception e) {
@@ -230,7 +233,7 @@ public class LightstreamerConsumer {
             }
         }
 
-        private void printClientLatencyReport() {
+        private void printLatencyReport(Histogram histogram) {
             logger.info("---- ClientLatency report ----");
             logger.info("Number of samples: {}", clientLatencyHdr.getTotalCount());
             printLatency(clientLatencyHdr, 50);
@@ -238,16 +241,6 @@ public class LightstreamerConsumer {
             printLatency(clientLatencyHdr, 98);
             printLatency(clientLatencyHdr, 99);
             printLatencyMax(clientLatencyHdr);
-        }
-
-        private void printServerLatencyReport() {
-            logger.info("---- ServerLatency report ----");
-            logger.info("Number of samples: {}", serverLatencyHdr.getTotalCount());
-            printLatency(serverLatencyHdr, 50);
-            printLatency(serverLatencyHdr, 95);
-            printLatency(serverLatencyHdr, 98);
-            printLatency(serverLatencyHdr, 99);
-            printLatencyMax(serverLatencyHdr);
         }
 
         private void printLatency(Histogram histogram, int percentile) {
