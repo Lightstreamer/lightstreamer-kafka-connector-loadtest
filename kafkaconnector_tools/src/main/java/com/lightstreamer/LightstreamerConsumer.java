@@ -22,6 +22,9 @@ import org.HdrHistogram.Histogram;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.beust.jcommander.JCommander;
+import com.beust.jcommander.Parameter;
+import com.beust.jcommander.ParameterException;
 import com.lightstreamer.client.ItemUpdate;
 import com.lightstreamer.client.LightstreamerClient;
 import com.lightstreamer.client.Subscription;
@@ -31,29 +34,131 @@ public class LightstreamerConsumer {
 
     private static final Logger logger = LoggerFactory.getLogger(LightstreamerConsumer.class);
 
+    /**
+     * Command line arguments configuration using JCommander
+     */
+    public static class Args {
+        @Parameter(names = {"-s", "--server"}, description = "Lightstreamer server URL (e.g., http://localhost:8080)", required = true)
+        public String serverAddress;
+
+        @Parameter(names = {"-f", "--from-key"}, description = "Starting key number for item subscription range", required = true)
+        public Integer fromKey;
+
+        @Parameter(names = {"-t", "--to-key"}, description = "Ending key number for item subscription range", required = true)
+        public Integer toKey;
+
+        @Parameter(names = {"-h", "--help"}, description = "Show this help message", help = true)
+        public boolean help = false;
+
+        /**
+         * Validates the parsed arguments
+         */
+        public void validate() {
+            if (fromKey < 0) {
+                throw new ParameterException("from-key must be >= 0, got: " + fromKey);
+            }
+            if (toKey < 0) {
+                throw new ParameterException("to-key must be >= 0, got: " + toKey);
+            }
+            if (fromKey > toKey) {
+                throw new ParameterException("from-key must be <= to-key, got: from-key=" + fromKey + ", to-key=" + toKey);
+            }
+        }
+    }
+
+    /**
+     * Prints comprehensive usage information with JCommander support
+     */
+    private static void printUsage(JCommander commander) {
+        String header = """
+                
+                Lightstreamer Consumer - Kafka Connector Load Test
+                ================================================
+                
+                DESCRIPTION:
+                  Connects to a Lightstreamer server and subscribes to a range of items
+                  to measure latency and performance metrics. Displays real-time latency
+                  reports including client-side and server-side latency statistics.
+                """;
+        
+        String examples = """
+                
+                EXAMPLES:
+                  # Named parameters (recommended)
+                  java -jar ls-consumer.jar --server http://localhost:8080 --from-key 0 --to-key 99
+                  java -jar ls-consumer.jar -s http://myserver:8080 -f 0 -t 999
+                
+                  # Positional parameters (legacy compatibility)
+                  java -jar ls-consumer.jar http://localhost:8080 0 99
+                """;
+        
+        String behavior = """
+                
+                BEHAVIOR:
+                  - Subscribes to items with pattern: ltest-[key=META250801P00680XXX]
+                  - Where XXX is a 3-digit zero-padded number from <from-key> to <to-key>
+                  - Reports latency statistics every 10,000 messages
+                  - Tracks both client-side and latency metrics
+                  - Uses percentiles: 50th, 95th, 98th, 99th, and maximum latency
+                """;
+
+        System.out.print(header);
+        
+        // Use JCommander's built-in usage formatting
+        commander.usage();
+        
+        System.out.print(examples);
+        System.out.println(behavior);
+    }
+
     public static void main(String[] args) {
-        if (args.length == 0) {
-            logger.error("Server hostname is required as first argument");
+        Args cliArgs = new Args();
+        JCommander commander = JCommander.newBuilder()
+                .addObject(cliArgs)
+                .programName("ls-consumer")
+                .build();
+
+        try {
+            // Handle legacy positional arguments for backward compatibility
+            if (args.length == 3 && !args[0].startsWith("-")) {
+                // Convert positional args to named args
+                String[] namedArgs = {
+                    "--server", args[0],
+                    "--from-key", args[1],
+                    "--to-key", args[2]
+                };
+                commander.parse(namedArgs);
+            } else {
+                commander.parse(args);
+            }
+
+            if (cliArgs.help) {
+                printUsage(commander);
+                System.exit(0);
+            }
+
+            cliArgs.validate();
+
+        } catch (ParameterException e) {
+            System.err.println("❌ Error: " + e.getMessage());
+            System.err.println();
+            printUsage(commander);
             System.exit(1);
         }
-        String serverAddress = args[0];
-        int numberOfKeys = Integer.parseInt(args.length > 1 ? args[1] : "40");
+        
+        logger.info("Starting Lightstreamer Consumer");
+        logger.info("Server: {}", cliArgs.serverAddress);
+        logger.info("Key range: from {} to {} ({} items)", cliArgs.fromKey, cliArgs.toKey, (cliArgs.toKey - cliArgs.fromKey + 1));
 
-        LightstreamerClient client = new LightstreamerClient(serverAddress, "KafkaConnector");
+        LightstreamerClient client = new LightstreamerClient(cliArgs.serverAddress, "KafkaConnector");
         client.addListener(new MyClientListener());
         client.connect();
 
-        /**
-         * Creates an array of 40 item names for testing purposes.
-         * Each item follows the pattern "ltest-[key=META250801P00680XXX]" where XXX is
-         * a
-         * zero-padded 3-digit number starting from 000 to 039.
-         * 
-         * @return String array containing formatted item names for load testing
-         */
-        String[] items = IntStream.range(0, numberOfKeys)
+        String[] items = IntStream.range(cliArgs.fromKey, cliArgs.toKey + 1)
                 .mapToObj(i -> String.format("ltest-[key=META250801P00680%03d]", i))
                 .toArray(String[]::new);
+        logger.info("Subscribing from item {} to item {}", items[0], items[items.length - 1]);
+
         String[] fields = { "volume", "high", "partition", "last", "offset", "low", "sym", "ask", "bid", "tradetime",
                 "timestamp", "route-latency" };
 
@@ -151,7 +256,7 @@ public class LightstreamerConsumer {
                     String.format("%d", histogram.getValueAtPercentile(percentile)));
         }
 
-        private void printLatencyMax(Histogram histogram ) {
+        private void printLatencyMax(Histogram histogram) {
             logger.info("Latency max: {} ms\n",
                     String.format("%d", histogram.getMaxValue()));
         }
