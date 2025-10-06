@@ -7,6 +7,7 @@
 # - jmh-benchmarks.jar (JMH performance benchmarks)
 # - ls-consumer.jar (Lightstreamer Consumer)
 # - message-generator.jar (Message Generator)
+# - consumer.jar (Kafka Consumer)
 
 set -e  # Exit on any error
 
@@ -41,12 +42,13 @@ if [ $? -eq 0 ]; then
     echo "📋 Generated JAR files:"
     echo "├── target/jmh-benchmarks.jar"
     echo "├── target/ls-consumer.jar"
-    echo "└── target/message-generator.jar"
+    echo "├── target/message-generator.jar"
+    echo "└── target/consumer.jar"
     echo
     
     # Show file sizes
     echo "📊 JAR file sizes:"
-    ls -lh target/*.jar | grep -E "(jmh-benchmarks|kafkaconnector-tools-)" | awk '{print "├── " $9 " (" $5 ")"}'
+    ls -lh target/*.jar | grep -E "(jmh-benchmarks|kafkaconnector-tools-|consumer\.jar)" | awk '{print "├── " $9 " (" $5 ")"}'
     echo
     
     echo "🚀 Usage examples:"
@@ -58,6 +60,9 @@ if [ $? -eq 0 ]; then
     echo
     echo "   Message Generator:"
     echo "   java -jar target/message-generator.jar <bootstrap-servers> <topic> <num-producers> <pause-millis> <msg-size> <key-or-not>"
+    echo
+    echo "   Kafka Consumer:"
+    echo "   java -jar target/consumer.jar <bootstrap-servers> <topic> <consumers> <consumer-group-id> <boolean-flag>"
     echo
 else
     echo
