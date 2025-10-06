@@ -149,7 +149,7 @@ public class LightstreamerConsumer {
         logger.info("Server: {}", cliArgs.serverAddress);
 
         int keysPerClient = (cliArgs.keys) / cliArgs.clients;
-        ExecutorService threadPool = Executors.newFixedThreadPool(cliArgs.clients);
+        ExecutorService threadPool = Executors.newCachedThreadPool();
         for (int i = 0; i < cliArgs.clients; i++) {
             threadPool.submit(new ClientWrapper(cliArgs.serverAddress, i * keysPerClient,
                     (i + 1) * keysPerClient - 1));
