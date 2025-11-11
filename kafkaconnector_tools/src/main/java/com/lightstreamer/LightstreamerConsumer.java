@@ -184,6 +184,7 @@ public class LightstreamerConsumer {
 
         private final Histogram clientLatencyHdr;
         private int intervalMessageCounter = 0;
+        private long offsetCounter = 0;
 
         public LatencyDumper() {
             this.clientLatencyHdr = new Histogram(3_600_000_000_000L, 3); // up to 1h, 3 digits
@@ -217,6 +218,14 @@ public class LightstreamerConsumer {
         @Override
         public void onItemUpdate(ItemUpdate update) {
             try {
+                long receivedOffset = Long.parseLong(update.getValue("offset"));
+                if (offsetCounter == 0) {
+                    offsetCounter = receivedOffset;
+                }
+                if (receivedOffset != offsetCounter) {
+                    logger.warn("Offset gap detected! Expected: {}, Received: {}", offsetCounter, receivedOffset);
+                    offsetCounter = receivedOffset;
+                }
                 logger.debug("Msg received: {}", update);
                 long currentTimestamp = System.currentTimeMillis();
                 long receivedTimestamp = Long.parseLong(update.getValue("timestamp"));
