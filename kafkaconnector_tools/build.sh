@@ -48,7 +48,8 @@ if [ $? -eq 0 ]; then
     
     # Show file sizes
     echo "📊 JAR file sizes:"
-    ls -lh target/*.jar | grep -E "(jmh-benchmarks|kafkaconnector-tools-|consumer\.jar)" | awk '{print "├── " $9 " (" $5 ")"}'
+    ls -lh target/*.jar | grep -E "(jmh-benchmarks|ls-consumer|message-generator)\.jar" | awk '{print "├── " $9 " (" $5 ")"}'
+    ls -lh target/consumer.jar | awk '{print "└── " $9 " (" $5 ")"}'
     echo
     
     echo "🚀 Usage examples:"
@@ -56,7 +57,8 @@ if [ $? -eq 0 ]; then
     echo "   java -jar target/jmh-benchmarks.jar"
     echo
     echo "   Lightstreamer Consumer:"
-    echo "   java -jar target/ls-consumer.jar [args...]"
+    echo "   java -jar target/ls-consumer.jar --server http://localhost:8080 --from-key 0 --to-key 99"
+    echo "   ./ls-consumer.sh 0 99  # Using helper script"
     echo
     echo "   Message Generator:"
     echo "   java -jar target/message-generator.jar <bootstrap-servers> <topic> <num-producers> <pause-millis> <msg-size> <key-or-not>"
