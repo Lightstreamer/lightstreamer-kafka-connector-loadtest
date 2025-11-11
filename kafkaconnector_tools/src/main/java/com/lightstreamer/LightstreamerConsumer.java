@@ -16,6 +16,12 @@
 
 package com.lightstreamer;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 import java.util.stream.IntStream;
 
 import org.HdrHistogram.Histogram;
@@ -185,9 +191,17 @@ public class LightstreamerConsumer {
         private final Histogram clientLatencyHdr;
         private int intervalMessageCounter = 0;
         private long expectedOffset = -1;
+        private PrintWriter out;
+
+        Executor executor = Executors.newSingleThreadExecutor();
 
         public LatencyDumper() {
             this.clientLatencyHdr = new Histogram(3_600_000_000_000L, 3); // up to 1h, 3 digits
+            try {
+                this.out = new PrintWriter(new BufferedWriter(new FileWriter("offsets_received.txt", true)));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
 
         @Override
@@ -215,18 +229,26 @@ public class LightstreamerConsumer {
             logger.info("{} lostUpdates messages were lost", lostUpdates);
         }
 
+        private void appendOffsetToFile(ItemUpdate update) {
+            long receivedOffset = Long.parseLong(update.getValue("offset"));
+            out.println(receivedOffset);
+            out.flush();
+        }
+
         @Override
         public void onItemUpdate(ItemUpdate update) {
             try {
-                long receivedOffset = Long.parseLong(update.getValue("offset"));
-                logger.info("Offset: {}", receivedOffset);
-                if (expectedOffset == -1) {
-                    expectedOffset = receivedOffset;
-                }
-                if (receivedOffset != expectedOffset) {
-                    logger.warn("Offset gap detected! Expected: {}, Received: {}", expectedOffset, receivedOffset);
-                }
-                expectedOffset = receivedOffset + 1;
+                // long receivedOffset = Long.parseLong(update.getValue("offset"));
+                // logger.info("Offset: {}", receivedOffset);
+                // if (expectedOffset == -1) {
+                // expectedOffset = receivedOffset;
+                // }
+                // if (receivedOffset != expectedOffset) {
+                // logger.warn("Offset gap detected! Expected: {}, Received: {}",
+                // expectedOffset, receivedOffset);
+                // }
+                // expectedOffset = receivedOffset + 1;
+                executor.execute(() -> this.appendOffsetToFile(update));
                 logger.debug("Msg received: {}", update);
                 long currentTimestamp = System.currentTimeMillis();
                 long receivedTimestamp = Long.parseLong(update.getValue("timestamp"));
