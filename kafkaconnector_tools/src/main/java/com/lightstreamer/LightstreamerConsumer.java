@@ -199,6 +199,11 @@ public class LightstreamerConsumer {
             this.clientLatencyHdr = new Histogram(3_600_000_000_000L, 3); // up to 1h, 3 digits
             try {
                 this.out = new PrintWriter(new BufferedWriter(new FileWriter("offsets_received.txt", true)));
+                Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+                    if (out != null) {
+                        out.close();
+                    }
+                }));
             } catch (IOException e) {
                 e.printStackTrace();
             }
