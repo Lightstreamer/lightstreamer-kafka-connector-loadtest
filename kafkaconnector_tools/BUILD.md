@@ -61,7 +61,29 @@ java -jar target/jmh-benchmarks.jar
 
 ### Lightstreamer Consumer
 ```bash
-java -jar target/ls-consumer.jar [arguments...]
+# Named parameters (recommended)
+java -jar target/ls-consumer.jar --server <server-url> --from-key <start> --to-key <end>
+
+# Positional parameters (legacy compatibility)
+java -jar target/ls-consumer.jar <server-address> <from-key> <to-key>
+```
+
+Examples:
+```bash
+# Show usage help
+java -jar target/ls-consumer.jar --help
+
+# Named parameters with short options
+java -jar target/ls-consumer.jar -s http://localhost:8080 -f 0 -t 99 --verbose
+
+# Named parameters with long options
+java -jar target/ls-consumer.jar --server http://localhost:8080 --from-key 0 --to-key 99
+
+# Legacy positional parameters (backward compatible)
+java -jar target/ls-consumer.jar http://localhost:8080 0 99
+
+# Using the helper script
+./ls-consumer.sh 0 99
 ```
 
 ### Message Generator
