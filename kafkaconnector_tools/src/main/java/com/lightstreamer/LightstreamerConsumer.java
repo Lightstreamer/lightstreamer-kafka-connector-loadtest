@@ -219,13 +219,14 @@ public class LightstreamerConsumer {
         public void onItemUpdate(ItemUpdate update) {
             try {
                 long receivedOffset = Long.parseLong(update.getValue("offset"));
-                if (expectedOffset == -1) {
-                    expectedOffset = receivedOffset;
-                }
-                if (receivedOffset != expectedOffset) {
-                    logger.warn("Offset gap detected! Expected: {}, Received: {}", expectedOffset, receivedOffset);
-                }
-                expectedOffset = receivedOffset + 1;
+                logger.info("Offset: {}", receivedOffset);
+                // if (expectedOffset == -1) {
+                //     expectedOffset = receivedOffset;
+                // }
+                // if (receivedOffset != expectedOffset) {
+                //     logger.warn("Offset gap detected! Expected: {}, Received: {}", expectedOffset, receivedOffset);
+                // }
+                // expectedOffset = receivedOffset + 1;
                 logger.debug("Msg received: {}", update);
                 long currentTimestamp = System.currentTimeMillis();
                 long receivedTimestamp = Long.parseLong(update.getValue("timestamp"));
