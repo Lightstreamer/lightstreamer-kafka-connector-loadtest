@@ -239,9 +239,14 @@ public class LightstreamerConsumer {
         }
 
         private void appendOffsetToFile(ItemUpdate update) {
-            long receivedOffset = Long.parseLong(update.getValue("offset"));
-            out.println(receivedOffset);
+            String offset = update.getValue("offset");
+            try {
+                out.println(Long.parseLong(offset));
             out.flush();
+            } catch (NumberFormatException e) {
+                logger.error("Invalid offset format", e);
+                return;
+            }
         }
 
         @Override
