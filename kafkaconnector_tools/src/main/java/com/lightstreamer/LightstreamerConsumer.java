@@ -35,8 +35,6 @@ import com.lightstreamer.client.ItemUpdate;
 import com.lightstreamer.client.LightstreamerClient;
 import com.lightstreamer.client.Subscription;
 import com.lightstreamer.client.SubscriptionListener;
-import com.lightstreamer.log.ConsoleLogLevel;
-import com.lightstreamer.log.ConsoleLoggerProvider;
 
 public class LightstreamerConsumer {
 
@@ -163,11 +161,11 @@ public class LightstreamerConsumer {
         logger.info("Key range: from {} to {} ({} items)", cliArgs.fromKey, cliArgs.toKey,
                 (cliArgs.toKey - cliArgs.fromKey + 1));
 
-        // LightstreamerClient.setLoggerProvider(new ConsoleLoggerProvider(ConsoleLogLevel.DEBUG));
+        // LightstreamerClient.setLoggerProvider(new
+        // ConsoleLoggerProvider(ConsoleLogLevel.DEBUG));
         LightstreamerClient client = new LightstreamerClient(cliArgs.serverAddress, "KafkaConnector");
         client.addListener(new MyClientListener());
         client.connect();
-        
 
         // Prepare item names based on provided key range
         String[] items = IntStream.range(cliArgs.fromKey, cliArgs.toKey + 1)
@@ -238,44 +236,44 @@ public class LightstreamerConsumer {
             logger.info("{} lostUpdates messages were lost", lostUpdates);
         }
 
-        private void appendOffsetToFile(ItemUpdate update) {
-            String offset = update.getValue("offset");
-            try {
-                out.println(Long.parseLong(offset));
+        private void appendOffsetToFile(long offset) {
+            out.println(offset);
             out.flush();
-            } catch (NumberFormatException e) {
-                logger.error("Invalid offset format", e);
-                return;
-            }
         }
 
         @Override
         public void onItemUpdate(ItemUpdate update) {
-            try {
-                long receivedOffset = Long.parseLong(update.getValue("offset"));
-                logger.info("Offset: {}", receivedOffset);
-                if (expectedOffset == -1) {
-                    expectedOffset = receivedOffset;
-                }
-                if (receivedOffset != expectedOffset) {
-                    logger.warn("Offset gap detected! Expected: {}, Received: {}",
-                            expectedOffset, receivedOffset);
-                }
-                expectedOffset = receivedOffset + 1;
-                executor.execute(() -> this.appendOffsetToFile(update));
-                logger.debug("Msg received: {}", update);
-                long currentTimestamp = System.currentTimeMillis();
-                long receivedTimestamp = Long.parseLong(update.getValue("timestamp"));
-                long latency = currentTimestamp - receivedTimestamp;
-                clientLatencyHdr.recordValue(latency);
+            logger.debug("Msg received: {}", update);
+            long currentTimestamp = System.currentTimeMillis();
+            long receivedTimestamp = Long.parseLong(update.getValue("timestamp"));
+            long latency = currentTimestamp - receivedTimestamp;
+            clientLatencyHdr.recordValue(latency);
 
-                intervalMessageCounter++;
-                if (intervalMessageCounter == REPORT_INTERVAL_MESSAGE_COUNT) {
-                    printLatencyReport(clientLatencyHdr);
-                    intervalMessageCounter = 0;
+            intervalMessageCounter++;
+            if (intervalMessageCounter == REPORT_INTERVAL_MESSAGE_COUNT) {
+                printLatencyReport(clientLatencyHdr);
+                intervalMessageCounter = 0;
+            }
+            try {
+                String offset = update.getValue("offset");
+                try {
+                    long receivedOffset = Long.parseLong(update.getValue("offset"));
+                    logger.info("Offset: {}", receivedOffset);
+                    if (expectedOffset == -1) {
+                        expectedOffset = receivedOffset;
+                    }
+                    if (receivedOffset != expectedOffset) {
+                        logger.warn("Offset gap detected! Expected: {}, Received: {}",
+                                expectedOffset, receivedOffset);
+                    }
+                    expectedOffset = receivedOffset + 1;
+                    executor.execute(() -> this.appendOffsetToFile(receivedOffset));
+
+                } catch (NumberFormatException nfe) {
+                    logger.error("Invalid offset format: {}", offset);
                 }
-            } catch (Exception e) {
-                logger.error("Error in onItemUpdate", e);
+            } catch (IllegalArgumentException iae) {
+                logger.error("Offset field is missing in the update: {}", update);
             }
         }
 
