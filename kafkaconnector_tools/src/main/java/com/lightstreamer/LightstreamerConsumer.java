@@ -35,6 +35,8 @@ import com.lightstreamer.client.ItemUpdate;
 import com.lightstreamer.client.LightstreamerClient;
 import com.lightstreamer.client.Subscription;
 import com.lightstreamer.client.SubscriptionListener;
+import com.lightstreamer.log.ConsoleLogLevel;
+import com.lightstreamer.log.ConsoleLoggerProvider;
 
 public class LightstreamerConsumer {
 
@@ -161,9 +163,11 @@ public class LightstreamerConsumer {
         logger.info("Key range: from {} to {} ({} items)", cliArgs.fromKey, cliArgs.toKey,
                 (cliArgs.toKey - cliArgs.fromKey + 1));
 
+        LightstreamerClient.setLoggerProvider(new ConsoleLoggerProvider(ConsoleLogLevel.DEBUG));
         LightstreamerClient client = new LightstreamerClient(cliArgs.serverAddress, "KafkaConnector");
         client.addListener(new MyClientListener());
         client.connect();
+        
 
         // Prepare item names based on provided key range
         String[] items = IntStream.range(cliArgs.fromKey, cliArgs.toKey + 1)
