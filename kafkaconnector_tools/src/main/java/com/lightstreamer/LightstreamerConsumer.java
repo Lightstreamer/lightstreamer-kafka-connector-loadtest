@@ -163,7 +163,7 @@ public class LightstreamerConsumer {
         logger.info("Key range: from {} to {} ({} items)", cliArgs.fromKey, cliArgs.toKey,
                 (cliArgs.toKey - cliArgs.fromKey + 1));
 
-        LightstreamerClient.setLoggerProvider(new ConsoleLoggerProvider(ConsoleLogLevel.DEBUG));
+        // LightstreamerClient.setLoggerProvider(new ConsoleLoggerProvider(ConsoleLogLevel.DEBUG));
         LightstreamerClient client = new LightstreamerClient(cliArgs.serverAddress, "KafkaConnector");
         client.addListener(new MyClientListener());
         client.connect();
