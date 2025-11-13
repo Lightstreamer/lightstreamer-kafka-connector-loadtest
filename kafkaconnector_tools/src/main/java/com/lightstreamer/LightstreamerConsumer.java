@@ -192,7 +192,6 @@ public class LightstreamerConsumer {
 
         private final Histogram clientLatencyHdr;
         private int intervalMessageCounter = 0;
-        private long expectedOffset = -1;
         private PrintWriter out;
 
         Executor executor = Executors.newSingleThreadExecutor();
@@ -258,15 +257,6 @@ public class LightstreamerConsumer {
                 String offset = update.getValue("offset");
                 try {
                     long receivedOffset = Long.parseLong(update.getValue("offset"));
-                    logger.info("Offset: {}", receivedOffset);
-                    if (expectedOffset == -1) {
-                        expectedOffset = receivedOffset;
-                    }
-                    if (receivedOffset != expectedOffset) {
-                        logger.warn("Offset gap detected! Expected: {}, Received: {}",
-                                expectedOffset, receivedOffset);
-                    }
-                    expectedOffset = receivedOffset + 1;
                     executor.execute(() -> this.appendOffsetToFile(receivedOffset));
 
                 } catch (NumberFormatException nfe) {
