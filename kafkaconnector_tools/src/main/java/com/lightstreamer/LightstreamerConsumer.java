@@ -192,22 +192,9 @@ public class LightstreamerConsumer {
 
         private final Histogram clientLatencyHdr;
         private int intervalMessageCounter = 0;
-        private PrintWriter out;
-
-        Executor executor = Executors.newSingleThreadExecutor();
 
         public LatencyDumper() {
             this.clientLatencyHdr = new Histogram(3_600_000_000_000L, 3); // up to 1h, 3 digits
-            try {
-                this.out = new PrintWriter(new BufferedWriter(new FileWriter("offsets_received.txt", true)));
-                Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-                    if (out != null) {
-                        out.close();
-                    }
-                }));
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
         }
 
         @Override
@@ -235,11 +222,6 @@ public class LightstreamerConsumer {
             logger.info("{} lostUpdates messages were lost", lostUpdates);
         }
 
-        private void appendOffsetToFile(long offset) {
-            out.println(offset);
-            out.flush();
-        }
-
         @Override
         public void onItemUpdate(ItemUpdate update) {
             logger.debug("Msg received: {}", update);
@@ -252,18 +234,6 @@ public class LightstreamerConsumer {
             if (intervalMessageCounter == REPORT_INTERVAL_MESSAGE_COUNT) {
                 printLatencyReport(clientLatencyHdr);
                 intervalMessageCounter = 0;
-            }
-            try {
-                String offset = update.getValue("offset");
-                try {
-                    long receivedOffset = Long.parseLong(update.getValue("offset"));
-                    executor.execute(() -> this.appendOffsetToFile(receivedOffset));
-
-                } catch (NumberFormatException nfe) {
-                    logger.error("Invalid offset format: {}", offset);
-                }
-            } catch (IllegalArgumentException iae) {
-                logger.error("Offset field is missing in the update: {}", update);
             }
         }
 
