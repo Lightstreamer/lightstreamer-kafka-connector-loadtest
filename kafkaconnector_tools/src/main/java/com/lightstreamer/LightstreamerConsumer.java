@@ -16,12 +16,6 @@
 
 package com.lightstreamer;
 
-import java.io.BufferedWriter;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
 import java.util.stream.IntStream;
 
 import org.HdrHistogram.Histogram;
@@ -177,7 +171,7 @@ public class LightstreamerConsumer {
         String[] fields = { "volume", "high", "partition", "last", "offset", "low", "sym", "ask", "bid", "tradetime",
                 "timestamp", "route-latency" };
 
-        Subscription sub = new Subscription("DISTINCT", items, fields);
+        Subscription sub = new Subscription("MERGE", items, fields);
         sub.setDataAdapter("QuickStart");
         sub.setRequestedSnapshot("no");
         sub.addListener(new LatencyDumper());
