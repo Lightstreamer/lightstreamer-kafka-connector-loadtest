@@ -69,47 +69,6 @@ public abstract class RateLimitedKafkaProducer<T> extends BaseProducer {
 
     abstract T makePayload(Random rnd, String key);
 
-    final protected void publishMessages2(Producer<String, T> producer, int targetRate, int numberOfKeys) {
-        String[] keys = IntStream.range(0, numberOfKeys)
-                .mapToObj(i -> String.format("META250801P00680%03d", i))
-                .toArray(String[]::new);
-        logger.info("Using {} distinct keys", keys.length);
-        long nanosPerMessage = 1_000_000_000L / targetRate;
-        long nextSendTime = System.nanoTime();
-        long start = System.nanoTime();
-        long sentMessages = 0;
-        Random rnd = new Random();
-        while (true) {
-            // Select a random key from the predefined list
-            String key = keys[rnd.nextInt(keys.length)];
-
-            // Build and send the message
-            logger.debug("Producing message with key: {}", key);
-            producer.send(new ProducerRecord<>(topicName, key, makePayload(rnd, key)));
-            sentMessages++;
-
-            // Determines when the next message should be sent
-            nextSendTime += nanosPerMessage;
-            long sleepTime = nextSendTime - System.nanoTime();
-            if (sleepTime > 0) {
-                try {
-                    Thread.sleep(sleepTime / 1_000_000, (int) (sleepTime % 1_000_000));
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-
-            // Every 5 seconds, print the achieved rate
-            if (sentMessages % (targetRate * 5) == 0) {
-                long now = System.nanoTime();
-                double elapsedSec = (now - start) / 1e9;
-                double achievedRate = sentMessages / elapsedSec;
-                System.out.printf("Sent %,d messages in %.2f s (target=%d msg/s, got=%.2f msg/s)%n",
-                        sentMessages, elapsedSec, targetRate, achievedRate);
-            }
-        }
-    }
-
     final protected void publishMessages(Producer<String, T> producer, int targetRate, int numberOfKeys) {
         String[] keys = IntStream.range(0, numberOfKeys)
                 .mapToObj(i -> String.format("META250801P00680%03d", i))
